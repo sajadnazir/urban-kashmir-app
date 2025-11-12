@@ -4,3 +4,4 @@
 
 export { HomeScreen } from './HomeScreen';
 export { EcommerceHomeScreen } from './EcommerceHomeScreen';
+export { ProductDetailsScreen } from './ProductDetailsScreen';

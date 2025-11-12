@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Header,
   Banner,
@@ -12,7 +13,13 @@ import {
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
 
-export const EcommerceHomeScreen: React.FC = () => {
+interface EcommerceHomeScreenProps {
+  onProductPress?: (product: Product) => void;
+}
+
+export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
+  onProductPress,
+}) => {
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,6 +94,7 @@ export const EcommerceHomeScreen: React.FC = () => {
 
   const handleProductPress = (product: Product) => {
     console.log('Product pressed:', product);
+    onProductPress?.(product);
   };
 
   const handleFavoritePress = (product: Product) => {
