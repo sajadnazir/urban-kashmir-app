@@ -213,13 +213,9 @@ const styles = StyleSheet.create({
   },
   productsGrid: {
     flexDirection: 'row',
-    // flexWrap: 'wrap',
-    flex: 1,
-    justifyContent: 'center',
-    marginHorizontal: SPACING.md,
-    backgroundColor: COLORS.background,
-    // paddingHorizontal: SPACING.xl,
-    // justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    paddingHorizontal: SPACING.md,
+    justifyContent: 'space-between',
   },
   bottomSpacer: {
     height: 20,

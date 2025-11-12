@@ -106,7 +106,6 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width * 0.45,
     backgroundColor: COLORS.background,
     borderRadius: 16,
-    marginRight: SPACING.md,
     marginBottom: SPACING.md,
     overflow: 'hidden',
     borderWidth: 1,
