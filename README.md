@@ -1,21 +1,65 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Urban Kashmir React Native
 
-# Getting Started
+A clean and scalable React Native application with TypeScript, Zustand state management, and a well-organized architecture.
+
+## ✨ Features
+
+- 🎯 **TypeScript** - Full type safety
+- 🔄 **Zustand** - Lightweight state management
+- 🌐 **Axios** - HTTP client with interceptors
+- 📁 **Clean Architecture** - Organized folder structure
+- 🎨 **Custom Components** - Reusable UI components
+- 🪝 **Custom Hooks** - Reusable logic patterns
+- 🔌 **Standalone API Services** - Modular API functions
+- 📱 **React Native 0.82** - Latest stable version
+
+## 📁 Project Structure
+
+```
+src/
+├── api/          # API client, endpoints, and services
+├── components/   # Reusable UI components
+├── screens/      # Screen components
+├── store/        # Zustand state stores
+├── hooks/        # Custom React hooks
+├── types/        # TypeScript type definitions
+├── utils/        # Utility functions
+├── constants/    # App constants (colors, spacing, etc.)
+└── assets/       # Images, fonts, etc.
+```
+
+See [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) for detailed documentation.
+
+## 🚀 Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
-## Step 1: Start Metro
+### Prerequisites
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Node.js 22+ (managed via nvm)
+- React Native development environment set up
+- iOS: Xcode and CocoaPods
+- Android: Android Studio and SDK
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Installation
 
-```sh
-# Using npm
+1. **Install dependencies**:
+
+```bash
+# Using Node 22
+nvm use 22
+
+# Install npm packages
+npm install
+
+# For iOS, install CocoaPods
+cd ios && bundle install && bundle exec pod install && cd ..
+```
+
+2. **Start Metro**:
+
+```bash
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
 ## Step 2: Build and run your app
