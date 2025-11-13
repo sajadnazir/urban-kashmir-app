@@ -46,6 +46,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
       price: 45,
       rating: 5,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
     },
     {
       id: '2',
@@ -53,6 +54,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
       price: 55,
       rating: 5,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
     },
     {
       id: '3',
@@ -60,6 +62,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
       price: 55,
       rating: 5,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400',
     },
     {
       id: '4',
@@ -67,6 +70,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
       price: 78,
       rating: 5,
       isFavorite: true,
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
     },
     {
       id: '5',
@@ -74,6 +78,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
       price: 65,
       rating: 5,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
     },
     {
       id: '6',
@@ -81,6 +86,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
       price: 120,
       rating: 4,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
     },
   ];
 

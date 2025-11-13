@@ -66,6 +66,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       price: 120,
       rating: 5,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
     },
     {
       id: '2',
@@ -73,6 +74,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       price: 40,
       rating: 5,
       isFavorite: true,
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
     },
     {
       id: '3',
@@ -80,6 +82,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       price: 180,
       rating: 4,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
     },
     {
       id: '4',
@@ -87,6 +90,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       price: 65,
       rating: 5,
       isFavorite: false,
+      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
     },
   ];
 
@@ -114,7 +118,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   };
 
   return (
-    <View style={styles.wrapper}>
+    <SafeAreaView style={styles.wrapper}>
       <StatusBar
         barStyle="light-content"
         backgroundColor={COLORS.darkGray}
@@ -181,7 +185,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         {/* Bottom Navigation */}
         <BottomNavigation activeTab={activeTab} onTabPress={handleTabPress} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

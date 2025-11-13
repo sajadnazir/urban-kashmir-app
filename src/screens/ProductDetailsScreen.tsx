@@ -65,10 +65,10 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
   ];
 
   const images = [
-    'https://via.placeholder.com/400x400/000000/FFFFFF?text=Product+1',
-    'https://via.placeholder.com/400x400/000000/FFFFFF?text=Product+2',
-    'https://via.placeholder.com/400x400/000000/FFFFFF?text=Product+3',
-    'https://via.placeholder.com/400x400/000000/FFFFFF?text=Product+4',
+    'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
+    'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
+    'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400',
+    'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
   ];
 
   const handleBuyNow = () => {
@@ -137,9 +137,16 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
 
             {/* Main Product Image */}
             <View style={styles.imageContainer}>
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imagePlaceholderText}>👕</Text>
-              </View>
+              {images[activeImageIndex] ? (
+                <Image
+                  source={{ uri: images[activeImageIndex] }}
+                  style={styles.productImage}
+                />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Text style={styles.imagePlaceholderText}>👕</Text>
+                </View>
+              )}
 
               {/* Favorite Button */}
               <TouchableOpacity
@@ -231,7 +238,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: SPACING.xl,
+    paddingBottom: 120, // Space for bottom buy button
   },
   imageSection: {
     position: 'relative',
@@ -270,6 +277,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.lightGray,
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   imagePlaceholder: {
     width: '100%',

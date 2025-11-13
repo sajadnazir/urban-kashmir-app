@@ -38,6 +38,10 @@ export const BuyButton: React.FC<BuyButtonProps> = ({
 
 const styles = StyleSheet.create({
   wrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     backgroundColor: COLORS.background,

@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingHorizontal: SPACING.md,
-    paddingTop: SPACING.md,
+    paddingTop: SPACING.xs,
     paddingBottom: 70,
     backgroundColor: COLORS.darkGray,
     borderBottomLeftRadius: 24,
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   profileImageContainer: {
     marginRight: SPACING.sm,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   iconButton: {
     width: 44,
