@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface HeaderTwoProps {
   title?: string;
@@ -97,13 +97,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: FONT_SIZES.xs,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
     textAlign: 'center',
     marginTop: SPACING.xs,

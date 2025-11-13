@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface ProfileHeaderProps {
   name: string;
@@ -93,18 +93,18 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: FONT_SIZES.xxl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   name: {
     fontSize: FONT_SIZES.xl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   email: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
   },
 });

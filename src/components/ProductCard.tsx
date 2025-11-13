@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 export interface Product {
   id: string;
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
     minHeight: 36,
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   cartButton: {

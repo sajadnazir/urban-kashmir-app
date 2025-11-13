@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface SizeOption {
   id: string;
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.sm,
   },
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   sizeText: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.textSecondary,
   },
   selectedSizeText: {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface BuyButtonProps {
   price: number;
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: FONT_SIZES.xl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   button: {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
 });

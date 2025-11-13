@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface PromoCodeInputProps {
   value: string;
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     paddingHorizontal: SPACING.lg,
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.text,
   },
   applyButton: {
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   },
   applyText: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
 });

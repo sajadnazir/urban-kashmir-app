@@ -10,7 +10,7 @@ import {
   NativeScrollEvent,
   Image,
 } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 const { width } = Dimensions.get('window');
 const BANNER_WIDTH = width - SPACING.md * 2;
@@ -149,13 +149,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.darkGray,
     marginBottom: SPACING.xs,
   },
   title: {
     fontSize: FONT_SIZES.xl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.md,
     lineHeight: 28,
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
   pagination: {

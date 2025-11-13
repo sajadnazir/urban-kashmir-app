@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   TouchableOpacityProps,
 } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
   },
   primaryText: {
     color: COLORS.background,

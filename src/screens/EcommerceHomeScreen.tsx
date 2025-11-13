@@ -11,7 +11,7 @@ import {
   Product,
   TabName,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
@@ -223,12 +223,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   seeAll: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.medium,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textSecondary,
   },
   productsGrid: {

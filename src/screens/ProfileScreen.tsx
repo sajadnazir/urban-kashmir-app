@@ -17,7 +17,7 @@ import {
   TabName,
   HeaderTwo,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface ProfileScreenProps {
   onBack?: () => void;
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: FONT_SIZES.xl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.background,
   },
   scrollView: {

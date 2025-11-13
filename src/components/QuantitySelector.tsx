@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface QuantitySelectorProps {
   quantity: number;
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   quantity: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginHorizontal: SPACING.md,
     minWidth: 24,

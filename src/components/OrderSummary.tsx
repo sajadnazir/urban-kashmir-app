@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface OrderSummaryProps {
   subtotal: number;
@@ -57,12 +57,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.text,
   },
   value: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   divider: {
@@ -83,17 +83,17 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.light,
+    fontWeight: FONT_WEIGHTS.light,
     color: COLORS.text,
   },
   itemCount: {
     fontSize: FONT_SIZES.xs,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
   },
   totalValue: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
 });

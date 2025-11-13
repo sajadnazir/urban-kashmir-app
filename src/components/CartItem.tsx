@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 const { width } = Dimensions.get('window');
 
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   rightSection: {
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   size: {
     fontSize: FONT_SIZES.xs,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
   },
   quantityContainer: {
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   quantity: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     minWidth: 20,
     textAlign: 'center',

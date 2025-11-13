@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { HeaderTwo } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface EditProfileScreenProps {
   onBack?: () => void;
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: FONT_SIZES.xxxl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   cameraButton: {
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   changePhotoText: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.medium,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textSecondary,
   },
   formSection: {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.text,
   },
   saveButton: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
 });

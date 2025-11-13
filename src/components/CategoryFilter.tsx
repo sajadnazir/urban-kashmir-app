@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface Category {
   id: string;
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.medium,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.text,
   },
   categoryTextActive: {

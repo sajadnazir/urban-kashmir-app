@@ -45,9 +45,17 @@ export const FONT_SIZES = {
 } as const;
 
 export const FONTS = {
-  regular: 'SofiaPro-Regular',
-  medium: 'SofiaPro-Medium',
-  semiBold: 'SofiaPro-SemiBold',
-  bold: 'SofiaPro-Bold',
-  light: 'SofiaPro-Light',
+  regular: 'System',
+  medium: 'System',
+  semiBold: 'System',
+  bold: 'System',
+  light: 'System',
+} as const;
+
+export const FONT_WEIGHTS = {
+  light: '300' as const,
+  regular: '400' as const,
+  medium: '500' as const,
+  semiBold: '600' as const,
+  bold: '700' as const,
 } as const;

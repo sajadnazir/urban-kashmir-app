@@ -18,7 +18,7 @@ import {
   QuantitySelector,
   BuyButton,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 const { width } = Dimensions.get('window');
 
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   colorTitle: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: FONT_SIZES.xs,
-    fontFamily: FONTS.medium,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.background,
   },
   productInfo: {
@@ -369,18 +369,18 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   productSubtitle: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
   },
   stockStatus: {
     fontSize: FONT_SIZES.xs,
-    fontFamily: FONTS.medium,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.success,
     marginBottom: SPACING.md,
   },
@@ -389,13 +389,13 @@ const styles = StyleSheet.create({
   },
   descriptionTitle: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   descriptionText: {
     fontSize: FONT_SIZES.xs,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
     lineHeight: 18,
   },

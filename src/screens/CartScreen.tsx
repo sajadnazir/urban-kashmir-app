@@ -18,7 +18,7 @@ import {
   BottomNavigation,
   TabName,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface CartScreenProps {
   onBack?: () => void;
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   checkoutText: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.semiBold,
+    fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
   bottomSpacer: {

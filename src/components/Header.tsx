@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface HeaderProps {
   userName: string;
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   profilePlaceholderText: {
     fontSize: FONT_SIZES.xl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
   },
   welcomeTextContainer: {
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.background,
     marginBottom: 2,
   },
   welcomeText: {
     fontSize: FONT_SIZES.sm,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.gray,
   },
   actionsContainer: {

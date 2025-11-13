@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { Button } from '../components';
 import { useAuthStore } from '../store';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 export const HomeScreen: React.FC = () => {
   const { user, logout } = useAuthStore();
@@ -61,14 +61,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FONT_SIZES.xxl,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     textAlign: 'center',
     marginBottom: SPACING.sm,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
@@ -81,13 +81,13 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: FONT_SIZES.lg,
-    fontFamily: FONTS.bold,
+    fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.md,
   },
   infoText: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.regular,
+    fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.darkGray,
     marginBottom: SPACING.sm,
   },
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.medium,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.text,
     marginBottom: SPACING.md,
     textAlign: 'center',
