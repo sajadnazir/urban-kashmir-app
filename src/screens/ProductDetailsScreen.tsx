@@ -301,6 +301,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: SPACING.md,
+    position: 'absolute',
+    bottom: SPACING.xl,
+    left: 0,
+    right: 0,
   },
   dot: {
     width: 8,

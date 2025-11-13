@@ -86,6 +86,8 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 20,
   },
   centerContent: {
     flex: 1,

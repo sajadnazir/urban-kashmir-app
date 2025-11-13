@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  Header,
-  Banner,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  TouchableOpacity,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Feather';
+import {
   SearchBar,
   CategoryFilter,
   ProductCard,
@@ -13,86 +19,70 @@ import {
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
 
-interface EcommerceHomeScreenProps {
+interface ShopScreenProps {
   onProductPress?: (product: Product) => void;
   onTabPress?: (tab: TabName) => void;
 }
 
-export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
+export const ShopScreen: React.FC<ShopScreenProps> = ({
   onProductPress,
   onTabPress,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabName>('home');
-  const [selectedCategory, setSelectedCategory] = useState('popular');
+  const [activeTab, setActiveTab] = useState<TabName>('search');
+  const [selectedCategory, setSelectedCategory] = useState('apparel');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Sample data
-  const bannerItems = [
-    {
-      id: '1',
-      title: 'Top Trending Hoodies',
-      subtitle: 'Introducing',
-      buttonText: 'Shop Now',
-      backgroundColor: '#F3F4F6',
-    },
-    {
-      id: '2',
-      title: 'Summer Collection',
-      subtitle: 'New Arrivals',
-      buttonText: 'Explore',
-      backgroundColor: '#FFF5E1',
-    },
-    {
-      id: '3',
-      title: 'Special Offers',
-      subtitle: 'Limited Time',
-      buttonText: 'Get Deal',
-      backgroundColor: '#E8F5E9',
-    },
-  ];
-
   const categories = [
-    { id: 'popular', name: 'Popular', icon: 'trending-up' },
-    { id: 'shoes', name: 'Shoes', icon: 'shopping-bag' },
-    { id: 'clothing', name: 'Clothing', icon: 'shopping-cart' },
-    { id: 'accessories', name: 'Accessories', icon: 'watch' },
+    { id: 'apparel', name: 'Apparel', icon: 'shopping-bag' },
+    { id: 'shoes', name: 'Shoes', icon: 'shopping-cart' },
     { id: 'sports', name: 'Sports', icon: 'activity' },
+    { id: 'gaming', name: 'Gaming', icon: 'monitor' },
   ];
 
   const products: Product[] = [
     {
       id: '1',
-      name: 'Nike Kobe 5 Protro',
-      price: 120,
+      name: 'Essentials Hoodie',
+      price: 45,
       rating: 5,
       isFavorite: false,
     },
     {
       id: '2',
-      name: 'Nick Hoops Elite',
-      price: 40,
+      name: 'Chest Logo Hoodie',
+      price: 55,
       rating: 5,
-      isFavorite: true,
+      isFavorite: false,
     },
     {
       id: '3',
-      name: 'Air Jordan Retro',
-      price: 180,
-      rating: 4,
+      name: 'Pullover Hoodie',
+      price: 55,
+      rating: 5,
       isFavorite: false,
     },
     {
       id: '4',
+      name: 'Nike Sportswear',
+      price: 78,
+      rating: 5,
+      isFavorite: true,
+    },
+    {
+      id: '5',
       name: 'Classic Backpack',
       price: 65,
       rating: 5,
       isFavorite: false,
     },
+    {
+      id: '6',
+      name: 'Running Shoes',
+      price: 120,
+      rating: 4,
+      isFavorite: false,
+    },
   ];
-
-  const handleBannerPress = (item: any) => {
-    console.log('Banner pressed:', item);
-  };
 
   const handleProductPress = (product: Product) => {
     console.log('Product pressed:', product);
@@ -113,21 +103,47 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     onTabPress?.(tab);
   };
 
+  const handleFilterPress = () => {
+    console.log('Filter pressed');
+  };
+
+  const handleSortPress = () => {
+    console.log('Sort pressed');
+  };
+
   return (
-    <View style={styles.wrapper}>
+    <SafeAreaView style={styles.wrapper}>
       <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.darkGray}
+        barStyle="dark-content"
+        backgroundColor={COLORS.background}
         translucent={false}
       />
       <View style={styles.container}>
-        {/* Header */}
-        <Header
-          userName="Sajad Nazir"
-          onProfilePress={() => console.log('Profile pressed')}
-          onWishlistPress={() => console.log('Wishlist pressed')}
-          onNotificationPress={() => console.log('Notification pressed')}
-        />
+        {/* Search and Filter Header */}
+        <View style={styles.header}>
+          <View style={styles.searchContainer}>
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFilterPress={handleFilterPress}
+              placeholder="Search..."
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={handleFilterPress}
+            activeOpacity={0.7}
+          >
+            <Icon name="sliders" size={20} color={COLORS.background} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={handleSortPress}
+            activeOpacity={0.7}
+          >
+            <Icon name="grid" size={20} color={COLORS.text} />
+          </TouchableOpacity>
+        </View>
 
         {/* Scrollable Content */}
         <ScrollView
@@ -135,19 +151,6 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Banner/Carousel - Overlapping header */}
-          <View style={styles.bannerContainer}>
-            <Banner items={bannerItems} onBannerPress={handleBannerPress} />
-          </View>
-
-          {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFilterPress={() => console.log('Filter pressed')}
-            placeholder="Search..."
-          />
-
           {/* Category Filter */}
           <CategoryFilter
             categories={categories}
@@ -181,28 +184,50 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         {/* Bottom Navigation */}
         <BottomNavigation activeTab={activeTab} onTabPress={handleTabPress} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: COLORS.darkGray,
+    backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  searchContainer: {
+    flex: 1,
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.darkGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sortButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollView: {
     flex: 1,
-    marginTop: -50, // Pull content up to overlap header
   },
   scrollContent: {
-    paddingBottom: 100, // Space for bottom navigation
-  },
-  bannerContainer: {
-    marginTop: SPACING.sm,
+    paddingBottom: 100,
   },
   sectionHeader: {
     flexDirection: 'row',

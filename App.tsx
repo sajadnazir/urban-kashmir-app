@@ -8,10 +8,14 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { EcommerceHomeScreen, ProductDetailsScreen } from './src/screens';
-import { Product } from './src/components';
+import {
+  EcommerceHomeScreen,
+  ProductDetailsScreen,
+  ShopScreen,
+} from './src/screens';
+import { Product, TabName } from './src/components';
 
-type Screen = 'home' | 'productDetails';
+type Screen = 'home' | 'shop' | 'productDetails';
 
 function App(): React.JSX.Element {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -23,18 +27,65 @@ function App(): React.JSX.Element {
   };
 
   const handleBack = () => {
-    setCurrentScreen('home');
+    // Determine which screen to go back to
+    if (currentScreen === 'productDetails') {
+      // Go back to the previous screen (could be home or shop)
+      setCurrentScreen('home'); // Default to home for now
+    }
     setSelectedProduct(null);
+  };
+
+  const handleTabPress = (tab: TabName) => {
+    console.log('Tab pressed:', tab);
+    if (tab === 'home') {
+      setCurrentScreen('home');
+    } else if (tab === 'search') {
+      setCurrentScreen('shop');
+    }
+    // Add other tab handlers as needed
+  };
+
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'home':
+        return (
+          <EcommerceHomeScreen
+            onProductPress={handleProductPress}
+            onTabPress={handleTabPress}
+          />
+        );
+      case 'shop':
+        return (
+          <ShopScreen
+            onProductPress={handleProductPress}
+            onTabPress={handleTabPress}
+          />
+        );
+      case 'productDetails':
+        return (
+          <ProductDetailsScreen
+            onBack={handleBack}
+            onShare={() => console.log('Share')}
+          />
+        );
+      default:
+        return (
+          <EcommerceHomeScreen
+            onProductPress={handleProductPress}
+            onTabPress={handleTabPress}
+          />
+        );
+    }
   };
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      {currentScreen === 'home' ? (
-        <EcommerceHomeScreen onProductPress={handleProductPress} />
-      ) : (
-        <ProductDetailsScreen onBack={handleBack} onShare={() => console.log('Share')} />
-      )}
+      <StatusBar
+        barStyle="light-content"
+        translucent
+        backgroundColor="transparent"
+      />
+      {renderScreen()}
     </SafeAreaProvider>
   );
 }
