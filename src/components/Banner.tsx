@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Image,
 } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../constants';
 
@@ -20,6 +21,7 @@ interface BannerItem {
   subtitle: string;
   buttonText: string;
   backgroundColor?: string;
+  image?: string;
 }
 
 interface BannerProps {
@@ -66,7 +68,8 @@ export const Banner: React.FC<BannerProps> = ({ items, onBannerPress }) => {
               <View style={styles.imageContainer}>
                 <View style={styles.imagePlaceholder}>
                   {/* Product image would go here */}
-                  <Text style={styles.imagePlaceholderText}>👕</Text>
+                  {/* <Text style={styles.imagePlaceholderText}>👕</Text> */}
+                  <Image source={{ uri: item.image }} style={styles.image} />
                 </View>
               </View>
 
@@ -188,5 +191,12 @@ const styles = StyleSheet.create({
   inactiveDot: {
     backgroundColor: COLORS.gray,
     opacity: 0.3,
+  },
+  image: {
+    width: 120,
+    height: 140,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

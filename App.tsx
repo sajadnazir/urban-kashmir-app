@@ -13,10 +13,12 @@ import {
   ProductDetailsScreen,
   ShopScreen,
   CartScreen,
+  ProfileScreen,
+  EditProfileScreen,
 } from './src/screens';
 import { Product, TabName } from './src/components';
 
-type Screen = 'home' | 'shop' | 'cart' | 'productDetails';
+type Screen = 'home' | 'shop' | 'cart' | 'profile' | 'editProfile' | 'productDetails';
 
 function App(): React.JSX.Element {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -30,8 +32,11 @@ function App(): React.JSX.Element {
   const handleBack = () => {
     // Determine which screen to go back to
     if (currentScreen === 'productDetails' || currentScreen === 'cart') {
-      // Go back to the previous screen (could be home or shop)
-      setCurrentScreen('home'); // Default to home for now
+      setCurrentScreen('home');
+    } else if (currentScreen === 'editProfile') {
+      setCurrentScreen('profile');
+    } else if (currentScreen === 'profile') {
+      setCurrentScreen('home');
     }
     setSelectedProduct(null);
   };
@@ -44,8 +49,14 @@ function App(): React.JSX.Element {
       setCurrentScreen('shop');
     } else if (tab === 'cart') {
       setCurrentScreen('cart');
+    } else if (tab === 'profile') {
+      setCurrentScreen('profile');
     }
     // Add other tab handlers as needed
+  };
+
+  const handleEditProfile = () => {
+    setCurrentScreen('editProfile');
   };
 
   const renderScreen = () => {
@@ -68,6 +79,16 @@ function App(): React.JSX.Element {
         return (
           <CartScreen onBack={handleBack} onTabPress={handleTabPress} />
         );
+      case 'profile':
+        return (
+          <ProfileScreen
+            onBack={handleBack}
+            onTabPress={handleTabPress}
+            onEditProfile={handleEditProfile}
+          />
+        );
+      case 'editProfile':
+        return <EditProfileScreen onBack={handleBack} />;
       case 'productDetails':
         return (
           <ProductDetailsScreen

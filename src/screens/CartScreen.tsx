@@ -119,7 +119,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <HeaderTwo
-          title="Chart"
+          title="Cart"
           leftIcon="chevron-left"
           rightIcon="home"
           onLeftPress={onBack}

@@ -30,10 +30,12 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const bannerItems = [
     {
       id: '1',
-      title: 'Top Trending Hoodies',
+      title: 'Top Trending Sneakers',
       subtitle: 'Introducing',
       buttonText: 'Shop Now',
       backgroundColor: '#F3F4F6',
+      image:
+        'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
     },
     {
       id: '2',
@@ -41,6 +43,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       subtitle: 'New Arrivals',
       buttonText: 'Explore',
       backgroundColor: '#FFF5E1',
+      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
     },
     {
       id: '3',
@@ -48,6 +51,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       subtitle: 'Limited Time',
       buttonText: 'Get Deal',
       backgroundColor: '#E8F5E9',
+      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
     },
   ];
 
@@ -82,7 +86,8 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       price: 180,
       rating: 4,
       isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
+      image:
+        'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
     },
     {
       id: '4',

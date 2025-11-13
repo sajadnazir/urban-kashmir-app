@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   productName: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontFamily: FONTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     marginRight: 2,
   },
   price: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.sm,
     fontFamily: FONTS.bold,
     color: COLORS.text,
   },
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkGray,
   },
   quantity: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontFamily: FONTS.semiBold,
     color: COLORS.text,
     minWidth: 20,

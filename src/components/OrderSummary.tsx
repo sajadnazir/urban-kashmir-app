@@ -35,7 +35,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       {/* Total Payment */}
       <View style={styles.totalRow}>
         <View style={styles.totalLeft}>
-          <Text style={styles.totalLabel}>Total Payment</Text>
+          <Text style={styles.totalLabel}>Total</Text>
           <Text style={styles.itemCount}>({itemCount} Items)</Text>
         </View>
         <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   value: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.md,
     fontFamily: FONTS.bold,
     color: COLORS.text,
   },
@@ -83,16 +83,16 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: FONT_SIZES.md,
-    fontFamily: FONTS.bold,
+    fontFamily: FONTS.light,
     color: COLORS.text,
   },
   itemCount: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontFamily: FONTS.regular,
     color: COLORS.textSecondary,
   },
   totalValue: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.md,
     fontFamily: FONTS.bold,
     color: COLORS.text,
   },

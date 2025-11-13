@@ -48,16 +48,16 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 56,
+    height: 40,
     backgroundColor: COLORS.background,
     borderRadius: 28,
     paddingHorizontal: SPACING.lg,
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontFamily: FONTS.regular,
     color: COLORS.text,
   },
   applyButton: {
-    height: 56,
+    height: 40,
     paddingHorizontal: SPACING.xl,
     backgroundColor: COLORS.darkGray,
     borderRadius: 28,
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   applyText: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontFamily: FONTS.semiBold,
     color: COLORS.background,
   },

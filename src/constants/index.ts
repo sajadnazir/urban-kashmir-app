@@ -5,12 +5,12 @@
 export const APP_NAME = 'Urban Kashmir';
 
 export const COLORS = {
-  primary: '#ED7745',      // Orange/Coral
-  black: '#000000',        // Pure Black
-  darkGray: '#0E0F10',     // Almost Black
-  gray: '#606060',         // Medium Gray
-  lightGray: '#F3F4F6',    // Light Gray Background
-  
+  primary: '#ED7745', // Orange/Coral
+  black: '#000000', // Pure Black
+  darkGray: '#0E0F10', // Almost Black
+  gray: '#606060', // Medium Gray
+  lightGray: '#F3F4F6', // Light Gray Background
+
   // Semantic colors
   background: '#FFFFFF',
   backgroundSecondary: '#F3F4F6',
@@ -18,7 +18,7 @@ export const COLORS = {
   textSecondary: '#606060',
   textLight: '#0E0F10',
   border: '#F3F4F6',
-  
+
   // Status colors
   success: '#34C759',
   warning: '#FF9500',
