@@ -15,23 +15,40 @@ import {
   CartScreen,
   ProfileScreen,
   EditProfileScreen,
+  StoreHomeScreen,
+  ReelsPlayerScreen,
 } from './src/screens';
-import { Product, TabName } from './src/components';
+import { Product, Store, TabName } from './src/components';
 
-type Screen = 'home' | 'shop' | 'cart' | 'profile' | 'editProfile' | 'productDetails';
+type Screen = 'home' | 'shop' | 'cart' | 'profile' | 'editProfile' | 'storeHome' | 'reelsPlayer' | 'productDetails';
 
 function App(): React.JSX.Element {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
   const handleProductPress = (product: Product) => {
     setSelectedProduct(product);
     setCurrentScreen('productDetails');
   };
 
+  const handleStorePress = (store: Store) => {
+    setSelectedStore(store);
+    setCurrentScreen('storeHome');
+  };
+
+  const handleReelPress = () => {
+    setCurrentScreen('reelsPlayer');
+  };
+
   const handleBack = () => {
     // Determine which screen to go back to
     if (currentScreen === 'productDetails' || currentScreen === 'cart') {
+      setCurrentScreen('home');
+    } else if (currentScreen === 'storeHome') {
+      setCurrentScreen('home');
+    } else if (currentScreen === 'reelsPlayer') {
+      // Go back to previous screen (could be home or storeHome)
       setCurrentScreen('home');
     } else if (currentScreen === 'editProfile') {
       setCurrentScreen('profile');
@@ -39,6 +56,7 @@ function App(): React.JSX.Element {
       setCurrentScreen('home');
     }
     setSelectedProduct(null);
+    setSelectedStore(null);
   };
 
   const handleTabPress = (tab: TabName) => {
@@ -65,6 +83,7 @@ function App(): React.JSX.Element {
         return (
           <EcommerceHomeScreen
             onProductPress={handleProductPress}
+            onStorePress={handleStorePress}
             onTabPress={handleTabPress}
           />
         );
@@ -89,6 +108,19 @@ function App(): React.JSX.Element {
         );
       case 'editProfile':
         return <EditProfileScreen onBack={handleBack} />;
+      case 'storeHome':
+        return (
+          <StoreHomeScreen
+            storeName={selectedStore?.name || 'Store'}
+            storeImage={selectedStore?.image}
+            onBack={handleBack}
+            onProductPress={handleProductPress}
+            onReelPress={handleReelPress}
+            onTabPress={handleTabPress}
+          />
+        );
+      case 'reelsPlayer':
+        return <ReelsPlayerScreen onBack={handleBack} />;
       case 'productDetails':
         return (
           <ProductDetailsScreen

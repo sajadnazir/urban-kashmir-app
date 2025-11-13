@@ -9,3 +9,5 @@ export { ShopScreen } from './ShopScreen';
 export { CartScreen } from './CartScreen';
 export { ProfileScreen } from './ProfileScreen';
 export { EditProfileScreen } from './EditProfileScreen';
+export { StoreHomeScreen } from './StoreHomeScreen';
+export { ReelsPlayerScreen } from './ReelsPlayerScreen';

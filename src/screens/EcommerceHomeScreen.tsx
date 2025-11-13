@@ -7,19 +7,23 @@ import {
   SearchBar,
   CategoryFilter,
   ProductCard,
+  StoreCard,
   BottomNavigation,
   Product,
+  Store,
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
+  onStorePress?: (store: Store) => void;
   onTabPress?: (tab: TabName) => void;
 }
 
 export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   onProductPress,
+  onStorePress,
   onTabPress,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('home');
@@ -61,6 +65,41 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     { id: 'clothing', name: 'Clothing', icon: 'shopping-cart' },
     { id: 'accessories', name: 'Accessories', icon: 'watch' },
     { id: 'sports', name: 'Sports', icon: 'activity' },
+  ];
+
+  const stores: Store[] = [
+    {
+      id: '1',
+      name: 'Nike Official Store',
+      description: 'Premium athletic wear & footwear',
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
+      rating: 4.8,
+      productsCount: 250,
+    },
+    {
+      id: '2',
+      name: 'Adidas Originals',
+      description: 'Sports & lifestyle collection',
+      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
+      rating: 4.7,
+      productsCount: 180,
+    },
+    {
+      id: '3',
+      name: 'Urban Fashion Hub',
+      description: 'Trendy streetwear & accessories',
+      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
+      rating: 4.9,
+      productsCount: 320,
+    },
+    {
+      id: '4',
+      name: 'Sneaker Paradise',
+      description: 'Limited edition sneakers',
+      image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400',
+      rating: 4.6,
+      productsCount: 150,
+    },
   ];
 
   const products: Product[] = [
@@ -116,6 +155,11 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     console.log('Add to cart:', product);
   };
 
+  const handleStorePress = (store: Store) => {
+    console.log('Store pressed:', store);
+    onStorePress?.(store);
+  };
+
   const handleTabPress = (tab: TabName) => {
     setActiveTab(tab);
     console.log('Tab pressed:', tab);
@@ -163,6 +207,21 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
+
+          {/* Stores Section */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Stores</Text>
+            <Text style={styles.seeAll}>See All</Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.storesContainer}
+          >
+            {stores.map(store => (
+              <StoreCard key={store.id} store={store} onPress={handleStorePress} />
+            ))}
+          </ScrollView>
 
           {/* Section Header */}
           <View style={styles.sectionHeader}>
@@ -230,6 +289,10 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textSecondary,
+  },
+  storesContainer: {
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   productsGrid: {
     flexDirection: 'row',
