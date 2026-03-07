@@ -1,22 +1,26 @@
 import { create } from 'zustand';
 import { authService } from '../api';
+import { tokenStorage } from '../api/tokenStorage';
 import type { User, LoginCredentials, RegisterData } from '../types';
 
 /**
  * Authentication Store
- * Manages authentication state using Zustand
+ *
+ * Orchestrates auth state via Zustand.
+ * Token persistence is handled by `authService` + `tokenStorage`; this store
+ * only keeps the in-memory representation for the UI layer.
  */
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  loginWithOtp: (phone: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: User) => void;
   clearError: () => void;
@@ -24,7 +28,6 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
@@ -33,13 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authService.login(credentials);
-      set({
-        user: response.user,
-        token: response.token,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      // Store token securely (e.g., AsyncStorage, SecureStore)
+      set({ user: response.user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Login failed',
@@ -53,16 +50,25 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authService.register(data);
-      set({
-        user: response.user,
-        token: response.token,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      // Store token securely
+      set({ user: response.user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Registration failed',
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  /** Verify OTP and transition to authenticated state. */
+  loginWithOtp: async (phone: string, otp: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await authService.verifyOtp(phone, otp);
+      set({ user: response.user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'OTP verification failed',
         isLoading: false,
       });
       throw error;
@@ -73,25 +79,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
     try {
       await authService.logout();
-      set({
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      });
-      // Clear stored token
-    } catch (error) {
-      set({ isLoading: false });
-      throw error;
+      set({ user: null, isAuthenticated: false, isLoading: false, error: null });
+    } catch {
+      // Tokens are already cleared by authService; reset UI state regardless.
+      await tokenStorage.clearTokens();
+      set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
 
-  setUser: (user) => {
-    set({ user });
-  },
-
-  clearError: () => {
-    set({ error: null });
-  },
+  setUser: (user) => set({ user }),
+  clearError: () => set({ error: null }),
 }));

@@ -17,15 +17,34 @@ import {
   EditProfileScreen,
   StoreHomeScreen,
   ReelsPlayerScreen,
+  LoginScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
+import { useAuthStore } from './src/store/authStore';
 
-type Screen = 'home' | 'shop' | 'cart' | 'profile' | 'editProfile' | 'storeHome' | 'reelsPlayer' | 'productDetails';
+type Screen =
+  | 'login'
+  | 'home'
+  | 'shop'
+  | 'cart'
+  | 'profile'
+  | 'editProfile'
+  | 'storeHome'
+  | 'reelsPlayer'
+  | 'productDetails';
 
 function App(): React.JSX.Element {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const { isAuthenticated } = useAuthStore();
+
+  const [currentScreen, setCurrentScreen] = useState<Screen>(
+    isAuthenticated ? 'home' : 'login',
+  );
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+
+  const handleLoginSuccess = () => {
+    setCurrentScreen('home');
+  };
 
   const handleProductPress = (product: Product) => {
     setSelectedProduct(product);
@@ -42,13 +61,11 @@ function App(): React.JSX.Element {
   };
 
   const handleBack = () => {
-    // Determine which screen to go back to
     if (currentScreen === 'productDetails' || currentScreen === 'cart') {
       setCurrentScreen('home');
     } else if (currentScreen === 'storeHome') {
       setCurrentScreen('home');
     } else if (currentScreen === 'reelsPlayer') {
-      // Go back to previous screen (could be home or storeHome)
       setCurrentScreen('home');
     } else if (currentScreen === 'editProfile') {
       setCurrentScreen('profile');
@@ -60,7 +77,6 @@ function App(): React.JSX.Element {
   };
 
   const handleTabPress = (tab: TabName) => {
-    console.log('Tab pressed:', tab);
     if (tab === 'home') {
       setCurrentScreen('home');
     } else if (tab === 'search') {
@@ -70,7 +86,6 @@ function App(): React.JSX.Element {
     } else if (tab === 'profile') {
       setCurrentScreen('profile');
     }
-    // Add other tab handlers as needed
   };
 
   const handleEditProfile = () => {
@@ -78,7 +93,15 @@ function App(): React.JSX.Element {
   };
 
   const renderScreen = () => {
+    // Gate: show login if not authenticated
+    if (!isAuthenticated && currentScreen !== 'login') {
+      return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+    }
+
     switch (currentScreen) {
+      case 'login':
+        return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+
       case 'home':
         return (
           <EcommerceHomeScreen
@@ -95,9 +118,7 @@ function App(): React.JSX.Element {
           />
         );
       case 'cart':
-        return (
-          <CartScreen onBack={handleBack} onTabPress={handleTabPress} />
-        );
+        return <CartScreen onBack={handleBack} onTabPress={handleTabPress} />;
       case 'profile':
         return (
           <ProfileScreen

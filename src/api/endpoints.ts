@@ -10,16 +10,18 @@ export const ENDPOINTS = {
     REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
     REFRESH_TOKEN: '/auth/refresh',
+    SEND_OTP: '/auth/send-otp',
+    VERIFY_OTP: '/auth/verify-otp',
   },
-  
+
   // User endpoints
   USER: {
     PROFILE: '/user/profile',
     UPDATE_PROFILE: '/user/profile',
     CHANGE_PASSWORD: '/user/change-password',
   },
-  
-  // Example: Posts endpoints
+
+  // Posts endpoints
   POSTS: {
     LIST: '/posts',
     DETAIL: (id: string) => `/posts/${id}`,

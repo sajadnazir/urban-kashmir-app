@@ -20,3 +20,25 @@ export interface AuthResponse {
   token: string;
   refreshToken: string;
 }
+
+// ─── Phone / OTP Auth ─────────────────────────────────────────────────────────
+
+export interface SendOtpPayload {
+  phone_number: string; // E.164 format: "+919876543210"
+}
+
+export interface SendOtpResponse {
+  message: string;
+  expiresInSeconds: number;
+}
+
+export interface VerifyOtpPayload {
+  phone_number: string;
+  otp: string;
+}
+
+export interface VerifyOtpResponse {
+  user: User;
+  token: string;
+  refreshToken: string;
+}

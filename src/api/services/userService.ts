@@ -1,42 +1,38 @@
-import apiClient from '../client';
+import { apiService } from '../apiService';
 import { ENDPOINTS } from '../endpoints';
 import type { User, UpdateProfileData } from '../../types/user';
 
 /**
  * User Service
- * Standalone functions for user-related API calls
+ *
+ * Uses the generic `apiService` — the Bearer token is attached automatically
+ * via the axios interceptor, so no manual token handling is needed here.
  */
-
 export const userService = {
   /**
-   * Get user profile
+   * Fetch the authenticated user's profile.
    */
   getProfile: async (): Promise<User> => {
-    const response = await apiClient.get<User>(ENDPOINTS.USER.PROFILE);
-    return response.data;
+    return apiService.get<User>(ENDPOINTS.USER.PROFILE);
   },
 
   /**
-   * Update user profile
+   * Update the authenticated user's profile.
    */
   updateProfile: async (data: UpdateProfileData): Promise<User> => {
-    const response = await apiClient.put<User>(
-      ENDPOINTS.USER.UPDATE_PROFILE,
-      data
-    );
-    return response.data;
+    return apiService.put<User, UpdateProfileData>(ENDPOINTS.USER.UPDATE_PROFILE, data);
   },
 
   /**
-   * Change password
+   * Change the authenticated user's password.
    */
   changePassword: async (
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<void> => {
-    await apiClient.post(ENDPOINTS.USER.CHANGE_PASSWORD, {
-      currentPassword,
-      newPassword,
-    });
+    return apiService.post<void, { currentPassword: string; newPassword: string }>(
+      ENDPOINTS.USER.CHANGE_PASSWORD,
+      { currentPassword, newPassword },
+    );
   },
 };
