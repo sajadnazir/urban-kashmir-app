@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, StatusBar, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Header,
@@ -14,6 +14,8 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { productService } from '../api';
+import { useUserStore } from '../store/userStore';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
@@ -29,8 +31,50 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('popular');
   const [searchQuery, setSearchQuery] = useState('');
+  const { profile } = useUserStore();
 
-  // Sample data
+  // Pagination State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  // Initial Fetch
+  useEffect(() => {
+    fetchProducts(1);
+  }, []);
+
+  const fetchProducts = async (pageNumber: number) => {
+    if (pageNumber === 1) setIsLoading(true);
+    else setIsFetchingMore(true);
+
+    try {
+      const response = await productService.getProducts(pageNumber, 10);
+      
+      setProducts(prev => 
+        pageNumber === 1 
+          ? response.data 
+          : [...prev, ...response.data]
+      );
+      
+      setPage(response.pagination.current_page);
+      setHasMore(response.pagination.current_page < response.pagination.last_page);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setIsLoading(false);
+      setIsFetchingMore(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!isFetchingMore && hasMore && !isLoading && products.length > 0) {
+      fetchProducts(page + 1);
+    }
+  };
+
+  // Sample data (Banners / Stores)
   const bannerItems = [
     {
       id: '1',
@@ -38,8 +82,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       subtitle: 'Introducing',
       buttonText: 'Shop Now',
       backgroundColor: '#F3F4F6',
-      image:
-        'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
+      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
     },
     {
       id: '2',
@@ -92,79 +135,50 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       rating: 4.9,
       productsCount: 320,
     },
-    {
-      id: '4',
-      name: 'Sneaker Paradise',
-      description: 'Limited edition sneakers',
-      image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400',
-      rating: 4.6,
-      productsCount: 150,
-    },
   ];
 
-  const products: Product[] = [
-    {
-      id: '1',
-      name: 'Nike Kobe 5 Protro',
-      price: 120,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-    },
-    {
-      id: '2',
-      name: 'Nick Hoops Elite',
-      price: 40,
-      rating: 5,
-      isFavorite: true,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-    },
-    {
-      id: '3',
-      name: 'Air Jordan Retro',
-      price: 180,
-      rating: 4,
-      isFavorite: false,
-      image:
-        'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
-    },
-    {
-      id: '4',
-      name: 'Classic Backpack',
-      price: 65,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
-    },
-  ];
+  /* 
+   * Extract header into ListHeaderComponent so FlatList takes over memory-efficient
+   * scrolling for the dynamic products grid.
+   */
+  const renderHeader = useCallback(() => (
+    <View style={styles.headerBlock}>
+      <View style={styles.bannerContainer}>
+        <Banner items={bannerItems} onBannerPress={(item) => console.log('Banner pressed', item)} />
+      </View>
 
-  const handleBannerPress = (item: any) => {
-    console.log('Banner pressed:', item);
-  };
+      <SearchBar
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onFilterPress={() => console.log('Filter pressed')}
+        placeholder="Search..."
+      />
 
-  const handleProductPress = (product: Product) => {
-    console.log('Product pressed:', product);
-    onProductPress?.(product);
-  };
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
-  const handleFavoritePress = (product: Product) => {
-    console.log('Favorite pressed:', product);
-  };
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Featured Stores</Text>
+        <Text style={styles.seeAll}>See All</Text>
+      </View>
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.storesContainer}
+        data={stores}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => <StoreCard store={item} onPress={(store) => onStorePress?.(store)} />}
+      />
 
-  const handleAddToCart = (product: Product) => {
-    console.log('Add to cart:', product);
-  };
-
-  const handleStorePress = (store: Store) => {
-    console.log('Store pressed:', store);
-    onStorePress?.(store);
-  };
-
-  const handleTabPress = (tab: TabName) => {
-    setActiveTab(tab);
-    console.log('Tab pressed:', tab);
-    onTabPress?.(tab);
-  };
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
+        <Text style={styles.seeAll}>See All</Text>
+      </View>
+    </View>
+  ), [searchQuery, selectedCategory]);
 
   return (
     <SafeAreaView style={styles.wrapper}>
@@ -174,80 +188,54 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         translucent={false}
       />
       <View style={styles.container}>
-        {/* Header */}
         <Header
-          userName="Sajad Nazir"
+          userName={profile?.name || "User"}
           onProfilePress={() => console.log('Profile pressed')}
           onWishlistPress={() => console.log('Wishlist pressed')}
           onNotificationPress={() => console.log('Notification pressed')}
         />
 
-        {/* Scrollable Content */}
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Banner/Carousel - Overlapping header */}
-          <View style={styles.bannerContainer}>
-            <Banner items={bannerItems} onBannerPress={handleBannerPress} />
+        {isLoading && page === 1 ? (
+          <View style={[styles.listWrapper, styles.centerAll]}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
           </View>
-
-          {/* Search Bar */}
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFilterPress={() => console.log('Filter pressed')}
-            placeholder="Search..."
-          />
-
-          {/* Category Filter */}
-          <CategoryFilter
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
-
-          {/* Stores Section */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Featured Stores</Text>
-            <Text style={styles.seeAll}>See All</Text>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.storesContainer}
-          >
-            {stores.map(store => (
-              <StoreCard key={store.id} store={store} onPress={handleStorePress} />
-            ))}
-          </ScrollView>
-
-          {/* Section Header */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
-            <Text style={styles.seeAll}>See All</Text>
-          </View>
-
-          {/* Products Grid */}
-          <View style={styles.productsGrid}>
-            {products.map(product => (
+        ) : (
+          <FlatList
+            style={styles.listWrapper}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            data={products}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapper}
+            ListHeaderComponent={renderHeader}
+            renderItem={({ item }) => (
               <ProductCard
-                key={product.id}
-                product={product}
-                onPress={handleProductPress}
-                onFavoritePress={handleFavoritePress}
-                onAddToCart={handleAddToCart}
+                product={item}
+                onPress={onProductPress}
+                onFavoritePress={(p) => console.log('Fav', p)}
+                onAddToCart={(p) => console.log('Cart', p)}
               />
-            ))}
-          </View>
+            )}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isFetchingMore ? (
+                <View style={styles.footerLoader}>
+                  <ActivityIndicator size="small" color={COLORS.primary} />
+                </View>
+              ) : <View style={styles.bottomSpacer} />
+            }
+          />
+        )}
 
-          {/* Bottom spacing for navigation */}
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation activeTab={activeTab} onTabPress={handleTabPress} />
+        <BottomNavigation 
+          activeTab={activeTab} 
+          onTabPress={(tab) => {
+            setActiveTab(tab);
+            onTabPress?.(tab);
+          }} 
+        />
       </View>
     </SafeAreaView>
   );
@@ -261,46 +249,59 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
   },
-  scrollView: {
+  listWrapper: {
     flex: 1,
-    marginTop: -50, // Pull content up to overlap header
+    backgroundColor: COLORS.lightGray,
   },
-  scrollContent: {
-    paddingBottom: 100, // Space for bottom navigation
+  listContent: {
+    paddingBottom: 100, // Space for BottomNavigation
+  },
+  centerAll: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerBlock: {
+    // Top padding handled by contentContainer, but we add space before grid begins
+    paddingBottom: SPACING.md,
   },
   bannerContainer: {
-    marginTop: SPACING.sm,
+    marginTop: -SPACING.md,
+    marginBottom: SPACING.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    marginTop: SPACING.md,
-    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    marginTop: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   seeAll: {
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.medium,
-    color: COLORS.textSecondary,
+    color: COLORS.primary,
   },
   storesContainer: {
     paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.lg,
   },
-  productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.md,
+  columnWrapper: {
     justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+  },
+  footerLoader: {
+    paddingVertical: SPACING.lg,
+    alignItems: 'center',
   },
   bottomSpacer: {
-    height: 20,
+    height: 40,
   },
 });

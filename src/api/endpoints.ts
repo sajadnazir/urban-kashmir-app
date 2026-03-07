@@ -21,6 +21,12 @@ export const ENDPOINTS = {
     CHANGE_PASSWORD: '/user/change-password',
   },
 
+  // Products endpoints
+  PRODUCTS: {
+    LIST: '/products',
+    DETAIL: (id: string) => `/products/${id}`,
+  },
+
   // Posts endpoints
   POSTS: {
     LIST: '/posts',

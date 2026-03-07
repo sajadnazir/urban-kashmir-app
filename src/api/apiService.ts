@@ -11,6 +11,21 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   success: boolean;
+  pagination?: PaginationMeta;
+}
+
+export interface PaginationMeta {
+  current_page: number;
+  per_page: number;
+  total: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T;
+  pagination: PaginationMeta;
 }
 
 // ─── Request option types ──────────────────────────────────────────────────────
@@ -64,6 +79,25 @@ export const apiService = {
       ...options,
     });
     return response.data.data;
+  },
+
+  /**
+   * HTTP GET (Paginated)
+   * Returns both the data array and the pagination metadata.
+   */
+  getPaginated: async <TResponse>(
+    url: string,
+    params?: Record<string, unknown>,
+    options?: RequestOptions,
+  ): Promise<PaginatedResponse<TResponse>> => {
+    const response = await apiClient.get<ApiResponse<TResponse>>(url, {
+      params,
+      ...options,
+    });
+    return {
+      data: response.data.data,
+      pagination: response.data.pagination!,
+    };
   },
 
   /**
