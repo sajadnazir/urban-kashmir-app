@@ -87,7 +87,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Price and Cart */}
         <View style={styles.footer}>
-          <Text style={styles.price}>${product.price}</Text>
+          <Text style={styles.price}>₹ {product.price}</Text>
           <TouchableOpacity
             style={styles.cartButton}
             onPress={() => onAddToCart?.(product)}
