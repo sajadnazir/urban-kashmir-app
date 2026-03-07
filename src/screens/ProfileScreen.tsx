@@ -18,6 +18,9 @@ import {
   HeaderTwo,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
+import { ActivityIndicator, Alert } from 'react-native';
 
 interface ProfileScreenProps {
   onBack?: () => void;
@@ -31,6 +34,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onEditProfile,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('profile');
+  const { profile, fetchProfile, isLoading } = useUserStore();
+  const { logout, isLoading: isLoggingOut } = useAuthStore();
+
+  React.useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   const menuItems: ProfileMenuItemData[] = [
     {
@@ -89,6 +98,27 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     onTabPress?.(tab);
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Logout', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+            } catch (error) {
+              console.error('Logout failed:', error);
+            }
+          }
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.wrapper}>
       <StatusBar
@@ -107,18 +137,23 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         /> */}
 
         {/* Scrollable Content */}
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Profile Header */}
-          <ProfileHeader
-            name="Sajad Nazir"
-            email="sajadnazir@gmail.com"
-            avatarUrl="https://i.pravatar.cc/150?img=12"
-            onEditPress={onEditProfile}
-          />
+        {isLoading && !profile ? (
+          <View style={[styles.scrollView, { justifyContent: 'center', alignItems: 'center' }]}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          </View>
+        ) : (
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* Profile Header */}
+            <ProfileHeader
+              name={profile?.name || 'User'}
+              email={profile?.email || profile?.mobile || ''}
+              avatarUrl={profile?.avatar || "https://i.pravatar.cc/150?img=12"}
+              onEditPress={onEditProfile}
+            />
 
           {/* Main Menu Items */}
           <View style={styles.menuSection}>
@@ -142,9 +177,26 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             ))}
           </View>
 
-          {/* Bottom spacing */}
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
+          {/* Logout Button */}
+          <TouchableOpacity 
+            style={styles.logoutButton} 
+            onPress={handleLogout}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? (
+              <ActivityIndicator color={COLORS.error} size="small" />
+            ) : (
+              <>
+                <Icon name="log-out" size={20} color={COLORS.error} />
+                <Text style={styles.logoutText}>Log Out</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+            {/* Bottom spacing */}
+            <View style={styles.bottomSpacer} />
+          </ScrollView>
+        )}
 
         {/* Bottom Navigation */}
         <BottomNavigation activeTab={activeTab} onTabPress={handleTabPress} />
@@ -196,5 +248,22 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 20,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.background,
+    paddingVertical: SPACING.md,
+    borderRadius: 16,
+    marginTop: SPACING.md,
+    gap: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 59, 48, 0.1)',
+  },
+  logoutText: {
+    color: COLORS.error,
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.semiBold,
   },
 });

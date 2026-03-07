@@ -16,7 +16,7 @@ export const ENDPOINTS = {
 
   // User endpoints
   USER: {
-    PROFILE: '/user/profile',
+    PROFILE: '/auth/me',
     UPDATE_PROFILE: '/user/profile',
     CHANGE_PASSWORD: '/user/change-password',
   },
