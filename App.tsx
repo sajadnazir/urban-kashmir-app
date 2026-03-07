@@ -36,14 +36,15 @@ type Screen =
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
 
-  const [currentScreen, setCurrentScreen] = useState<Screen>(
-    isAuthenticated ? 'home' : 'login',
-  );
+  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [intendedScreen, setIntendedScreen] = useState<Screen | null>(null);
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
   const handleLoginSuccess = () => {
-    setCurrentScreen('home');
+    setCurrentScreen(intendedScreen || 'home');
+    setIntendedScreen(null);
   };
 
   const handleProductPress = (product: Product) => {
@@ -82,22 +83,32 @@ function App(): React.JSX.Element {
     } else if (tab === 'search') {
       setCurrentScreen('shop');
     } else if (tab === 'cart') {
-      setCurrentScreen('cart');
+      if (!isAuthenticated) {
+        setIntendedScreen('cart');
+        setCurrentScreen('login');
+      } else {
+        setCurrentScreen('cart');
+      }
     } else if (tab === 'profile') {
-      setCurrentScreen('profile');
+      if (!isAuthenticated) {
+        setIntendedScreen('profile');
+        setCurrentScreen('login');
+      } else {
+        setCurrentScreen('profile');
+      }
     }
   };
 
   const handleEditProfile = () => {
+    if (!isAuthenticated) {
+      setIntendedScreen('editProfile');
+      setCurrentScreen('login');
+      return;
+    }
     setCurrentScreen('editProfile');
   };
 
   const renderScreen = () => {
-    // Gate: show login if not authenticated
-    if (!isAuthenticated && currentScreen !== 'login') {
-      return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
-    }
-
     switch (currentScreen) {
       case 'login':
         return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
