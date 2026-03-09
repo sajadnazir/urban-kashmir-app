@@ -15,4 +15,5 @@ export * from './services/userService';
 export * from './services/productService';
 export * from './services/categoryService';
 export * from './services/cartService';
+export * from './services/vendorService';
 export type { ApiResponse, RequestOptions } from './apiService';

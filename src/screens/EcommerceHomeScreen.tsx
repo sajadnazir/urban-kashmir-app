@@ -14,7 +14,8 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
-import { productService, categoryService, cartService } from '../api';
+import { productService, categoryService, cartService, vendorService } from '../api';
+import type { ApiVendor } from '../api/services/vendorService';
 import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
@@ -44,18 +45,22 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [isLoadingStores, setIsLoadingStores] = useState(false);
 
   // Initial Fetch
   useEffect(() => {
     fetchProducts(1);
     fetchCategories();
+    fetchVendors();
   }, []);
 
   const fetchCategories = async () => {
     try {
       console.log('Fetching categories from API...');
       const apiCats = await categoryService.getCategories();
-      console.log('Fetched categories:', apiCats?.length);
+      console.log('Categories API response:', JSON.stringify(apiCats, null, 2));
+      console.log('Fetched categories count:', apiCats?.length);
       
       setCategories([
         { id: 'all', name: 'All', icon: 'grid' },
@@ -68,6 +73,39 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     } catch (error: any) {
       console.error('Failed to fetch categories:', error);
       Alert.alert('Fetch Error', String(error?.message || JSON.stringify(error)));
+    }
+  };
+
+  const fetchVendors = async () => {
+    setIsLoadingStores(true);
+    try {
+      const response = await vendorService.getVendors(1, 10);
+      console.log('Vendors API response:', JSON.stringify(response, null, 2));
+      const vendorArray = response.data || [];
+      console.log('Vendor array count:', vendorArray.length);
+      
+      const organicFallbacks = [
+        'https://images.unsplash.com/photo-1584362917165-526a968579e8?w=400', // Honey
+        'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400', // Perfume
+        'https://images.unsplash.com/photo-1589135303604-b936d1ffbc90?w=400', // Pickles/Jars
+        'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400', // Organic Food
+        'https://images.unsplash.com/photo-1596040033229-a9821ebd05ed?w=400', // Spices
+      ];
+      
+      const mappedStores: Store[] = vendorArray.map((vendor: ApiVendor, index: number) => ({
+        id: String(vendor.id),
+        name: vendor.display_name || vendor.name,
+        slug: vendor.slug,
+        description: vendor.description || 'No description available',
+        image: vendor.banner_url || vendor.logo_url || organicFallbacks[index % organicFallbacks.length],
+        rating: Number(vendor.statistics?.avg_rating || 0),
+        productsCount: vendor.statistics?.total_products || 0,
+      }));
+      setStores(mappedStores);
+    } catch (error) {
+      console.error('Failed to fetch vendors:', error);
+    } finally {
+      setIsLoadingStores(false);
     }
   };
 
@@ -150,33 +188,6 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     { id: 'all', name: 'All', icon: 'grid' }
   ]);
 
-  const stores: Store[] = [
-    {
-      id: '1',
-      name: 'Nike Official Store',
-      description: 'Premium athletic wear & footwear',
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-      rating: 4.8,
-      productsCount: 250,
-    },
-    {
-      id: '2',
-      name: 'Adidas Originals',
-      description: 'Sports & lifestyle collection',
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-      rating: 4.7,
-      productsCount: 180,
-    },
-    {
-      id: '3',
-      name: 'Urban Fashion Hub',
-      description: 'Trendy streetwear & accessories',
-      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
-      rating: 4.9,
-      productsCount: 320,
-    },
-  ];
-
   /* 
    * Extract header into ListHeaderComponent so FlatList takes over memory-efficient
    * scrolling for the dynamic products grid.
@@ -211,6 +222,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         data={stores}
         keyExtractor={item => item.id}
         renderItem={({ item }) => <StoreCard store={item} onPress={(store) => onStorePress?.(store)} />}
+        ListEmptyComponent={isLoadingStores ? <ActivityIndicator size="small" color={COLORS.primary} /> : null}
       />
 
       <View style={styles.sectionHeader}>
@@ -218,7 +230,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         <Text style={styles.seeAll}>See All</Text>
       </View>
     </View>
-  ), [searchQuery, selectedCategory]);
+  ), [searchQuery, selectedCategory, categories, stores, isLoadingStores]);
 
   return (
     <SafeAreaView style={styles.wrapper}>

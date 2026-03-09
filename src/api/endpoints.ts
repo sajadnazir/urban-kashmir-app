@@ -50,4 +50,10 @@ export const ENDPOINTS = {
     UPDATE: (id: string) => `/posts/${id}`,
     DELETE: (id: string) => `/posts/${id}`,
   },
+  
+  // Vendors (Stores) endpoints
+  VENDORS: {
+    LIST: '/vendors',
+    DETAIL: (slug: string) => `/vendors/${slug}`,
+  },
 } as const;

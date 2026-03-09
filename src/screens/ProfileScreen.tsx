@@ -55,18 +55,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       title: 'Address',
       subtitle: 'Manage your delivery addresses',
     },
-    {
-      id: 'favorites',
-      icon: 'heart',
-      title: 'Favorites',
-      subtitle: 'Items and Lists You,ve Saved',
-    },
-    {
-      id: 'portfolio',
-      icon: 'briefcase',
-      title: 'Portfolio',
-      subtitle: 'See The Value of Your Items',
-    },
+    // {
+    //   id: 'favorites',
+    //   icon: 'heart',
+    //   title: 'Favorites',
+    //   subtitle: 'Items and Lists You,ve Saved',
+    // },
+    // {
+    //   id: 'portfolio',
+    //   icon: 'briefcase',
+    //   title: 'Portfolio',
+    //   subtitle: 'See The Value of Your Items',
+    // },
   ];
 
  

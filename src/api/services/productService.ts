@@ -48,11 +48,15 @@ export const productService = {
   getProducts: async (
     page: number = 1,
     perPage: number = 20,
-    categoryId?: string
+    categoryId?: string,
+    vendorId?: number | string
   ): Promise<PaginatedResponse<Product[]>> => {
     const params: Record<string, any> = { page, per_page: perPage };
     if (categoryId && categoryId !== 'all') {
       params.category_id = categoryId;
+    }
+    if (vendorId) {
+      params.vendor_id = vendorId;
     }
 
     const response = await apiService.getPaginated<ApiProduct[]>(

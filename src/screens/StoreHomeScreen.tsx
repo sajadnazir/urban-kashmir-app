@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   StatusBar,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
@@ -14,121 +16,84 @@ import {
   HeaderTwo,
   CategoryFilter,
   ProductCard,
-  ReelCard,
   Product,
-  Reel,
   BottomNavigation,
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { vendorService, productService, cartService } from '../api';
+import type { ApiVendor } from '../api/services/vendorService';
+import { useAuthStore } from '../store/authStore';
 
 interface StoreHomeScreenProps {
-  storeName: string;
-  storeImage?: string;
+  vendorSlug: string;
   onBack?: () => void;
   onProductPress?: (product: Product) => void;
-  onReelPress?: (reel: Reel) => void;
   onTabPress?: (tab: TabName) => void;
+  onRequireAuth?: () => void;
 }
 
 export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
-  storeName,
-  storeImage,
+  vendorSlug,
   onBack,
   onProductPress,
-  onReelPress,
   onTabPress,
+  onRequireAuth,
 }) => {
+  const { isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [vendor, setVendor] = useState<ApiVendor | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (vendorSlug) {
+      fetchVendorDetails();
+    }
+  }, [vendorSlug]);
+
+  useEffect(() => {
+    if (vendor?.id) {
+      fetchProducts();
+    }
+  }, [vendor?.id, selectedCategory]);
+
+  const fetchVendorDetails = async () => {
+    try {
+      if (!vendor) setIsLoading(true);
+      const data = await vendorService.getVendorBySlug(vendorSlug);
+      setVendor(data);
+    } catch (error) {
+      console.error('Failed to fetch vendor details:', error);
+    } finally {
+      if (!vendor?.id) setIsLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const productsResponse = await productService.getProducts(
+        1, 
+        20, 
+        selectedCategory === 'all' ? undefined : selectedCategory, 
+        vendor?.id
+      );
+      setProducts(productsResponse.data);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const categories = [
     { id: 'all', name: 'All', icon: 'grid' },
-    { id: 'shoes', name: 'Shoes', icon: 'shopping-bag' },
-    { id: 'clothing', name: 'Clothing', icon: 'shopping-cart' },
-    { id: 'accessories', name: 'Accessories', icon: 'watch' },
-  ];
-
-  const reels: Reel[] = [
-    {
-      id: '1',
-      thumbnail: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-      title: 'New Sneaker Collection 2024',
-      views: '12K',
-      duration: '0:45',
-    },
-    {
-      id: '2',
-      thumbnail: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-      title: 'How to Style Your Kicks',
-      views: '8.5K',
-      duration: '1:20',
-    },
-    {
-      id: '3',
-      thumbnail: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
-      title: 'Unboxing Limited Edition',
-      views: '15K',
-      duration: '2:10',
-    },
-    {
-      id: '4',
-      thumbnail: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400',
-      title: 'Best Sneakers of 2024',
-      views: '20K',
-      duration: '1:45',
-    },
-  ];
-
-  const products: Product[] = [
-    {
-      id: '1',
-      name: 'Nike Air Max 270',
-      price: 150,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-    },
-    {
-      id: '2',
-      name: 'Adidas Ultraboost',
-      price: 180,
-      rating: 5,
-      isFavorite: true,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-    },
-    {
-      id: '3',
-      name: 'Jordan Retro 1',
-      price: 200,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
-    },
-    {
-      id: '4',
-      name: 'Puma RS-X',
-      price: 120,
-      rating: 4,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400',
-    },
-    {
-      id: '5',
-      name: 'New Balance 574',
-      price: 90,
-      rating: 4,
-      isFavorite: true,
-      image: 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=400',
-    },
-    {
-      id: '6',
-      name: 'Vans Old Skool',
-      price: 70,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400',
-    },
+    ...(vendor?.categories?.map(cat => ({
+      id: String(cat.id),
+      name: cat.name,
+      icon: 'tag'
+    })) || [])
   ];
 
   const handleTabPress = (tab: TabName) => {
@@ -136,9 +101,22 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
     onTabPress?.(tab);
   };
 
-  const handleReelPress = (reel: Reel) => {
-    console.log('Reel pressed:', reel.title);
-    onReelPress?.(reel);
+  const handleAddToCart = async (product: Product) => {
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return;
+    }
+    if (!product.variantId) {
+      Alert.alert('Error', 'Product variant not found');
+      return;
+    }
+    try {
+      await cartService.addToCart(Number(product.id), product.variantId, 1);
+      Alert.alert('Success', `${product.name} added to cart!`);
+    } catch (error: any) {
+      console.error('Add to cart failed:', error);
+      Alert.alert('Error', error?.message || 'Failed to add to cart');
+    }
   };
 
   return (
@@ -151,92 +129,85 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <HeaderTwo
-          title={storeName}
+          title={vendor?.name || 'Store'}
           leftIcon="chevron-left"
           rightIcon="share-2"
           onLeftPress={onBack}
           onRightPress={() => console.log('Share store')}
         />
 
-        {/* Scrollable Content */}
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Store Banner */}
-          {storeImage && (
+        {isLoading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          </View>
+        ) : (
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
             <View style={styles.storeBanner}>
-              <Image source={{ uri: storeImage }} style={styles.bannerImage} />
+              <Image 
+                source={{ uri: vendor?.cover_url || vendor?.banner_url || vendor?.logo_url || 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400' }} 
+                style={styles.bannerImage} 
+              />
               <View style={styles.bannerOverlay}>
                 <View style={styles.storeInfo}>
-                  <Text style={styles.storeName}>{storeName}</Text>
+                  <Text style={styles.storeName}>{vendor?.display_name || vendor?.name}</Text>
                   <View style={styles.storeStats}>
                     <View style={styles.statItem}>
                       <Icon name="star" size={16} color={COLORS.primary} />
-                      <Text style={styles.statText}>4.8</Text>
+                      <Text style={styles.statText}>{Number(vendor?.statistics?.avg_rating || 0).toFixed(1)}</Text>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                       <Icon name="package" size={16} color={COLORS.background} />
-                      <Text style={styles.statText}>250+ Products</Text>
+                      <Text style={styles.statText}>{vendor?.statistics?.total_products || 0} Products</Text>
                     </View>
                   </View>
                 </View>
               </View>
             </View>
-          )}
 
-          {/* Reels Section */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Reels</Text>
-              <TouchableOpacity onPress={() => console.log('View all reels')}>
-                <Text style={styles.viewAll}>View All</Text>
-              </TouchableOpacity>
+            {/* Categories */}
+            <View style={styles.categoriesSection}>
+              <CategoryFilter
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+              />
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.reelsContainer}
-            >
-              {reels.map(reel => (
-                <ReelCard key={reel.id} reel={reel} onPress={handleReelPress} />
-              ))}
-            </ScrollView>
-          </View>
 
-          {/* Categories */}
-          <View style={styles.categoriesSection}>
-            <CategoryFilter
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-            />
-          </View>
-
-          {/* Products Section */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Products</Text>
-              <TouchableOpacity onPress={() => console.log('View all products')}>
-                <Text style={styles.viewAll}>View All</Text>
-              </TouchableOpacity>
+            {/* Products Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Products</Text>
+                <TouchableOpacity onPress={() => console.log('View all products')}>
+                  <Text style={styles.viewAll}>View All</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.productsGrid}>
+                {products.length > 0 ? (
+                  products.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onPress={() => onProductPress?.(product)}
+                      onAddToCart={handleAddToCart}
+                    />
+                  ))
+                ) : (
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>No products found for this vendor.</Text>
+                  </View>
+                )}
+              </View>
             </View>
-            <View style={styles.productsGrid}>
-              {products.map(product => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onPress={() => onProductPress?.(product)}
-                />
-              ))}
-            </View>
-          </View>
 
-          {/* Bottom spacing */}
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
+            {/* Bottom spacing */}
+            <View style={styles.bottomSpacer} />
+          </ScrollView>
+        )}
 
         {/* Bottom Navigation */}
         <BottomNavigation activeTab={activeTab} onTabPress={handleTabPress} />
@@ -253,6 +224,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.lightGray,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
@@ -327,9 +303,6 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.primary,
   },
-  reelsContainer: {
-    paddingHorizontal: SPACING.lg,
-  },
   categoriesSection: {
     marginBottom: SPACING.md,
   },
@@ -338,6 +311,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: SPACING.md,
     justifyContent: 'center',
+  },
+  emptyContainer: {
+    padding: SPACING.xl,
+    alignItems: 'center',
+    width: '100%',
+  },
+  emptyText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.gray,
   },
   bottomSpacer: {
     height: 20,

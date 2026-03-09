@@ -15,6 +15,7 @@ const { width } = Dimensions.get('window');
 export interface Store {
   id: string;
   name: string;
+  slug: string;
   description: string;
   image: string;
   rating: number;

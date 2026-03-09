@@ -150,12 +150,11 @@ function App(): React.JSX.Element {
       case 'storeHome':
         return (
           <StoreHomeScreen
-            storeName={selectedStore?.name || 'Store'}
-            storeImage={selectedStore?.image}
+            vendorSlug={selectedStore?.slug || ''}
             onBack={handleBack}
             onProductPress={handleProductPress}
-            onReelPress={handleReelPress}
             onTabPress={handleTabPress}
+            onRequireAuth={handleRequireAuth}
           />
         );
       case 'reelsPlayer':
