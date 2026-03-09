@@ -14,7 +14,7 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
-import { productService, categoryService } from '../api';
+import { productService, categoryService, cartService } from '../api';
 import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
 
@@ -93,6 +93,20 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const handleLoadMore = () => {
     if (!isFetchingMore && hasMore && !isLoading && products.length > 0) {
       fetchProducts(page + 1);
+    }
+  };
+
+  const handleAddToCart = async (product: Product) => {
+    if (!product.variantId) {
+      Alert.alert('Error', 'Product variant not found');
+      return;
+    }
+    try {
+      await cartService.addToCart(Number(product.id), product.variantId, 1);
+      Alert.alert('Success', `${product.name} added to cart!`);
+    } catch (error: any) {
+      console.error('Add to cart failed:', error);
+      Alert.alert('Error', error?.message || 'Failed to add to cart');
     }
   };
 
@@ -232,7 +246,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
                 product={item}
                 onPress={onProductPress}
                 onFavoritePress={(p) => console.log('Fav', p)}
-                onAddToCart={(p) => console.log('Cart', p)}
+                onAddToCart={handleAddToCart}
               />
             )}
             onEndReached={handleLoadMore}

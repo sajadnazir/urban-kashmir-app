@@ -33,6 +33,15 @@ export const ENDPOINTS = {
     LIST: '/categories',
   },
 
+  // Cart endpoints
+  CART: {
+    LIST: '/cart',
+    ADD_ITEM: '/cart/items',
+    UPDATE_ITEM: (id: number) => `/cart/items/${id}`,
+    REMOVE_ITEM: (id: number) => `/cart/items/${id}`,
+    CLEAR: '/cart',
+  },
+
   // Posts endpoints
   POSTS: {
     LIST: '/posts',

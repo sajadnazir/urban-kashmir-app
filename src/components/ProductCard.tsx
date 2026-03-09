@@ -17,6 +17,7 @@ export interface Product {
   rating: number;
   image?: string;
   isFavorite?: boolean;
+  variantId?: number;
 }
 
 interface ProductCardProps {

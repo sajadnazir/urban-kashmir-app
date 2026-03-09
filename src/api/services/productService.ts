@@ -13,6 +13,7 @@ export interface ApiProduct {
   category_id: number;
   vendor_id: number;
   default_variant?: {
+    id: number;
     price: number;
     sale_price: number;
   };
@@ -63,6 +64,7 @@ export const productService = {
         rating: 5, // Default/Placeholder as API doesn't return rating
         isFavorite: false,
         image,
+        variantId: apiProduct.default_variant?.id,
       };
     });
 
@@ -102,6 +104,7 @@ export const productService = {
         rating: 5,
         isFavorite: false,
         image,
+        variantId: apiProduct.default_variant?.id,
       };
     });
 

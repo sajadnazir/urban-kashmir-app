@@ -7,6 +7,7 @@ import {
   StatusBar,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
@@ -19,7 +20,7 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
-import { productService, categoryService } from '../api';
+import { productService, categoryService, cartService } from '../api';
 import type { Category } from '../api/services/categoryService';
 
 interface ShopScreenProps {
@@ -111,6 +112,20 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
     }
   };
 
+  const handleAddToCart = async (product: Product) => {
+    if (!product.variantId) {
+      Alert.alert('Error', 'Product variant not found');
+      return;
+    }
+    try {
+      await cartService.addToCart(Number(product.id), product.variantId, 1);
+      Alert.alert('Success', `${product.name} added to cart!`);
+    } catch (error: any) {
+      console.error('Add to cart failed:', error);
+      Alert.alert('Error', error?.message || 'Failed to add to cart');
+    }
+  };
+
   const renderHeader = useCallback(() => (
     <View style={styles.headerBlock}>
       <CategoryFilter
@@ -169,7 +184,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
                 product={item}
                 onPress={onProductPress}
                 onFavoritePress={(p) => console.log('Fav', p)}
-                onAddToCart={(p) => console.log('Cart', p)}
+                onAddToCart={handleAddToCart}
               />
             )}
             onEndReached={handleLoadMore}

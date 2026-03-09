@@ -73,7 +73,7 @@ export const CartItem: React.FC<CartItemProps> = ({
           <View style={styles.ratingContainer}>{renderStars(item.rating)}</View>
 
           {/* Price */}
-          <Text style={styles.price}>${item.price}</Text>
+          <Text style={styles.price}>₹ {item.price}</Text>
         </View>
 
         {/* Right Section */}

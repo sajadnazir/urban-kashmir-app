@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   ScrollView,
   StatusBar,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
@@ -19,6 +21,7 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { cartService } from '../api';
 
 interface CartScreenProps {
   onBack?: () => void;
@@ -31,60 +34,102 @@ export const CartScreen: React.FC<CartScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('cart');
   const [promoCode, setPromoCode] = useState('');
-  const [cartItems, setCartItems] = useState<CartItemData[]>([
-    {
-      id: '1',
-      name: 'Top Picks Nearby',
-      price: 120,
-      size: 'XL',
-      quantity: 1,
-      rating: 5,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-    },
-    {
-      id: '2',
-      name: 'Top Picks Nearby',
-      price: 120,
-      size: 'XL',
-      quantity: 1,
-      rating: 5,
-      image:
-        'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
-    },
-    {
-      id: '3',
-      name: 'Top Picks Nearby',
-      price: 120,
-      size: 'XL',
-      quantity: 1,
-      rating: 5,
-      image:
-        'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400',
-    },
-  ]);
+  const [cartItems, setCartItems] = useState<CartItemData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totals, setTotals] = useState({ subtotal: 0, tax: 0, itemCount: 0 });
   const [swipedItemId, setSwipedItemId] = useState<string | null>(null);
 
-  const handleIncrease = (id: string) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-      ),
-    );
+  const fetchCart = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await cartService.getCart();
+      
+      const mappedItems: CartItemData[] = data.items.map(apiItem => ({
+        id: String(apiItem.id),
+        name: apiItem.product?.title || 'Product',
+        price: apiItem.variant?.sale_price || apiItem.variant?.price || 0,
+        size: 'XL', // Default as API might not provide it yet
+        quantity: apiItem.quantity,
+        rating: 5,
+        image: apiItem.product?.images?.[0]?.url,
+      }));
+
+      setCartItems(mappedItems);
+      setTotals({
+        subtotal: data.total_price,
+        tax: data.total_price * 0.1, // Assuming 10% tax for now
+        itemCount: data.total_quantity,
+      });
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+      Alert.alert('Error', 'Failed to load cart items');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  const handleIncrease = async (id: string) => {
+    const item = cartItems.find(i => i.id === id);
+    if (!item) return;
+    
+    try {
+      await cartService.updateCartItem(Number(id), item.quantity + 1);
+      fetchCart(); // Refresh cart
+    } catch (error) {
+      console.error('Failed to increase quantity:', error);
+      Alert.alert('Error', 'Failed to update quantity');
+    }
   };
 
-  const handleDecrease = (id: string) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item,
-      ),
-    );
+  const handleDecrease = async (id: string) => {
+    const item = cartItems.find(i => i.id === id);
+    if (!item || item.quantity <= 1) return;
+    
+    try {
+      await cartService.updateCartItem(Number(id), item.quantity - 1);
+      fetchCart(); // Refresh cart
+    } catch (error) {
+      console.error('Failed to decrease quantity:', error);
+      Alert.alert('Error', 'Failed to update quantity');
+    }
   };
 
-  const handleRemove = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-    setSwipedItemId(null);
+  const handleRemove = async (id: string) => {
+    try {
+      await cartService.removeCartItem(Number(id));
+      setSwipedItemId(null);
+      fetchCart(); // Refresh cart
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+      Alert.alert('Error', 'Failed to remove item');
+    }
+  };
+
+  const handleClearCart = async () => {
+    Alert.alert(
+      'Clear Cart',
+      'Are you sure you want to remove all items from your cart?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Clear', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await cartService.clearCart();
+              fetchCart();
+            } catch (error) {
+              console.error('Failed to clear cart:', error);
+              Alert.alert('Error', 'Failed to clear cart');
+            }
+          }
+        },
+      ]
+    );
   };
 
   const handleApplyPromo = () => {
@@ -132,38 +177,67 @@ export const CartScreen: React.FC<CartScreenProps> = ({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Cart Items */}
-          <View style={styles.cartItemsContainer}>
-            {cartItems.map(item => (
-              <CartItem
-                key={item.id}
-                item={item}
-                onIncrease={handleIncrease}
-                onDecrease={handleDecrease}
-                onRemove={handleRemove}
-                showDelete={swipedItemId === item.id}
-              />
-            ))}
-          </View>
+          {isLoading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          ) : (
+            <>
+              {/* Cart Items */}
+              <View style={styles.cartItemsContainer}>
+                {cartItems.length > 0 ? (
+                  <>
+                    <View style={styles.listHeader}>
+                      <Text style={styles.itemCountText}>{totals.itemCount} Items in your cart</Text>
+                      <TouchableOpacity onPress={handleClearCart}>
+                        <Text style={styles.clearText}>Clear All</Text>
+                      </TouchableOpacity>
+                    </View>
+                    {cartItems.map(item => (
+                      <CartItem
+                        key={item.id}
+                        item={item}
+                        onIncrease={handleIncrease}
+                        onDecrease={handleDecrease}
+                        onRemove={handleRemove}
+                        showDelete={swipedItemId === item.id}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <View style={styles.emptyContainer}>
+                    <Icon name="shopping-cart" size={64} color={COLORS.gray} />
+                    <Text style={styles.emptyText}>Your cart is empty</Text>
+                  </View>
+                )}
+              </View>
 
-          {/* Promo Code */}
-          <PromoCodeInput
-            value={promoCode}
-            onChangeText={setPromoCode}
-            onApply={handleApplyPromo}
-          />
+              {cartItems.length > 0 && (
+                <>
+                  {/* Promo Code */}
+                  <PromoCodeInput
+                    value={promoCode}
+                    onChangeText={setPromoCode}
+                    onApply={handleApplyPromo}
+                  />
 
-          {/* Order Summary */}
-          <OrderSummary subtotal={subtotal} tax={tax} itemCount={itemCount} />
+                  {/* Order Summary */}
+                  <OrderSummary 
+                    subtotal={totals.subtotal} 
+                    tax={totals.tax} 
+                    itemCount={totals.itemCount} 
+                  />
 
-          {/* Checkout Button */}
-          <TouchableOpacity
-            style={styles.checkoutButton}
-            onPress={handleCheckout}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.checkoutText}>Proceed To Checkout</Text>
-          </TouchableOpacity>
+                  {/* Checkout Button */}
+                  <TouchableOpacity
+                    style={styles.checkoutButton}
+                    onPress={handleCheckout}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.checkoutText}>Proceed To Checkout</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </>
+          )}
 
           {/* Bottom spacing */}
           <View style={styles.bottomSpacer} />
@@ -211,5 +285,35 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 20,
+  },
+  loader: {
+    marginTop: SPACING.xl * 2,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.xl * 2,
+  },
+  emptyText: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.gray,
+    marginTop: SPACING.md,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  itemCountText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.text,
+  },
+  clearText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.primary,
   },
 });
