@@ -24,6 +24,7 @@ export const ENDPOINTS = {
   // Products endpoints
   PRODUCTS: {
     LIST: '/products',
+    SEARCH: '/search',
     DETAIL: (id: string) => `/products/${id}`,
   },
 

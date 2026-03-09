@@ -26,11 +26,17 @@ export interface ApiProduct {
 export const productService = {
   getProducts: async (
     page: number = 1,
-    perPage: number = 20
+    perPage: number = 20,
+    categoryId?: string
   ): Promise<PaginatedResponse<Product[]>> => {
+    const params: Record<string, any> = { page, per_page: perPage };
+    if (categoryId && categoryId !== 'all') {
+      params.category_id = categoryId;
+    }
+
     const response = await apiService.getPaginated<ApiProduct[]>(
       ENDPOINTS.PRODUCTS.LIST,
-      { page, per_page: perPage }
+      params
     );
 
     // Map ApiProduct -> UI Product
@@ -55,6 +61,45 @@ export const productService = {
         name: apiProduct.title,
         price,
         rating: 5, // Default/Placeholder as API doesn't return rating
+        isFavorite: false,
+        image,
+      };
+    });
+
+    return {
+      data: mappedProducts,
+      pagination: response.pagination,
+    };
+  },
+
+  searchProducts: async (
+    query: string,
+    page: number = 1,
+    perPage: number = 20
+  ): Promise<PaginatedResponse<Product[]>> => {
+    const response = await apiService.getPaginated<ApiProduct[]>(
+      ENDPOINTS.PRODUCTS.SEARCH,
+      { q: query, page, per_page: perPage }
+    );
+
+    // Map ApiProduct -> UI Product
+    const mappedProducts: Product[] = response.data.map(apiProduct => {
+      let price = 0;
+      if (apiProduct.default_variant?.sale_price) {
+        price = apiProduct.default_variant.sale_price;
+      } else if (apiProduct.price_range?.min) {
+        price = parseFloat(apiProduct.price_range.min);
+      }
+
+      const image = apiProduct.images && apiProduct.images.length > 0
+        ? apiProduct.images[0].url
+        : undefined;
+
+      return {
+        id: String(apiProduct.id),
+        name: apiProduct.title,
+        price,
+        rating: 5,
         isFavorite: false,
         image,
       };

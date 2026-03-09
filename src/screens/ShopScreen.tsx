@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   StatusBar,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
@@ -18,6 +19,8 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { productService, categoryService } from '../api';
+import type { Category } from '../api/services/categoryService';
 
 interface ShopScreenProps {
   onProductPress?: (product: Product) => void;
@@ -29,93 +32,98 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
   onTabPress,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('search');
-  const [selectedCategory, setSelectedCategory] = useState('apparel');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
-  const categories = [
-    { id: 'apparel', name: 'Apparel', icon: 'shopping-bag' },
-    { id: 'shoes', name: 'Shoes', icon: 'shopping-cart' },
-    { id: 'sports', name: 'Sports', icon: 'activity' },
-    { id: 'gaming', name: 'Gaming', icon: 'monitor' },
-  ];
+  // Pagination State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const products: Product[] = [
-    {
-      id: '1',
-      name: 'Essentials Hoodie',
-      price: 45,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-    },
-    {
-      id: '2',
-      name: 'Chest Logo Hoodie',
-      price: 55,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
-    },
-    {
-      id: '3',
-      name: 'Pullover Hoodie',
-      price: 55,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400',
-    },
-    {
-      id: '4',
-      name: 'Nike Sportswear',
-      price: 78,
-      rating: 5,
-      isFavorite: true,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-    },
-    {
-      id: '5',
-      name: 'Classic Backpack',
-      price: 65,
-      rating: 5,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
-    },
-    {
-      id: '6',
-      name: 'Running Shoes',
-      price: 120,
-      rating: 4,
-      isFavorite: false,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-    },
-  ];
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 'all', name: 'All', icon: 'grid' }
+  ]);
 
-  const handleProductPress = (product: Product) => {
-    console.log('Product pressed:', product);
-    onProductPress?.(product);
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Initial Fetch Categories
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Fetch products when query or category changes
+  useEffect(() => {
+    fetchProducts(1, debouncedQuery, selectedCategory);
+  }, [debouncedQuery, selectedCategory]);
+
+  const fetchCategories = async () => {
+    try {
+      const apiCats = await categoryService.getCategories();
+      setCategories([
+        { id: 'all', name: 'All', icon: 'grid' },
+        ...apiCats
+      ]);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
   };
 
-  const handleFavoritePress = (product: Product) => {
-    console.log('Favorite pressed:', product);
+  const fetchProducts = async (pageNumber: number, query: string = debouncedQuery, catId: string = selectedCategory) => {
+    if (pageNumber === 1) setIsLoading(true);
+    else setIsFetchingMore(true);
+
+    try {
+      let response;
+      if (query.trim()) {
+        response = await productService.searchProducts(query, pageNumber, 20);
+      } else {
+        response = await productService.getProducts(pageNumber, 20, catId);
+      }
+      
+      setProducts(prev => 
+        pageNumber === 1 
+          ? response.data 
+          : [...prev, ...response.data]
+      );
+      
+      setPage(response.pagination.current_page);
+      setHasMore(response.pagination.current_page < response.pagination.last_page);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setIsLoading(false);
+      setIsFetchingMore(false);
+    }
   };
 
-  const handleAddToCart = (product: Product) => {
-    console.log('Add to cart:', product);
+  const handleLoadMore = () => {
+    if (!isFetchingMore && hasMore && !isLoading && products.length > 0) {
+      fetchProducts(page + 1, debouncedQuery, selectedCategory);
+    }
   };
 
-  const handleTabPress = (tab: TabName) => {
-    setActiveTab(tab);
-    console.log('Tab pressed:', tab);
-    onTabPress?.(tab);
-  };
-
-  const handleFilterPress = () => {
-    console.log('Filter pressed');
-  };
-
-  const handleSortPress = () => {
-    console.log('Sort pressed');
-  };
+  const renderHeader = useCallback(() => (
+    <View style={styles.headerBlock}>
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
+        <Text style={styles.seeAll}>See All</Text>
+      </View>
+    </View>
+  ), [categories, selectedCategory]);
 
   return (
     <SafeAreaView style={styles.wrapper}>
@@ -125,70 +133,64 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
         translucent={false}
       />
       <View style={styles.container}>
-        {/* Search and Filter Header */}
         <View style={styles.header}>
           <View style={styles.searchContainer}>
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
-              onFilterPress={handleFilterPress}
+              onFilterPress={() => {}}
               placeholder="Search..."
             />
           </View>
           <TouchableOpacity
-            style={styles.filterButton}
-            onPress={handleFilterPress}
+            style={styles.actionButton}
+            onPress={() => {}}
             activeOpacity={0.7}
           >
             <Icon name="sliders" size={20} color={COLORS.background} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sortButton}
-            onPress={handleSortPress}
-            activeOpacity={0.7}
-          >
-            <Icon name="grid" size={20} color={COLORS.text} />
-          </TouchableOpacity>
         </View>
 
-        {/* Scrollable Content */}
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Category Filter */}
-          <CategoryFilter
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
-
-          {/* Section Header */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
-            <Text style={styles.seeAll}>See All</Text>
+        {isLoading && page === 1 ? (
+          <View style={styles.centerAll}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
           </View>
-
-          {/* Products Grid */}
-          <View style={styles.productsGrid}>
-            {products.map(product => (
+        ) : (
+          <FlatList
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            data={products}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapper}
+            ListHeaderComponent={renderHeader}
+            renderItem={({ item }) => (
               <ProductCard
-                key={product.id}
-                product={product}
-                onPress={handleProductPress}
-                onFavoritePress={handleFavoritePress}
-                onAddToCart={handleAddToCart}
+                product={item}
+                onPress={onProductPress}
+                onFavoritePress={(p) => console.log('Fav', p)}
+                onAddToCart={(p) => console.log('Cart', p)}
               />
-            ))}
-          </View>
+            )}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isFetchingMore ? (
+                <View style={styles.footerLoader}>
+                  <ActivityIndicator size="small" color={COLORS.primary} />
+                </View>
+              ) : <View style={styles.bottomSpacer} />
+            }
+          />
+        )}
 
-          {/* Bottom spacing for navigation */}
-          <View style={styles.bottomSpacer} />
-        </ScrollView>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation activeTab={activeTab} onTabPress={handleTabPress} />
+        <BottomNavigation 
+          activeTab={activeTab} 
+          onTabPress={(tab) => {
+            setActiveTab(tab);
+            onTabPress?.(tab);
+          }} 
+        />
       </View>
     </SafeAreaView>
   );
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flex: 1,
   },
-  filterButton: {
+  actionButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -221,19 +223,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sortButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.lightGray,
+  centerAll: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scrollView: {
+  list: {
     flex: 1,
   },
-  scrollContent: {
+  listContent: {
     paddingBottom: 100,
+  },
+  headerBlock: {
+    paddingBottom: SPACING.sm,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -253,11 +255,13 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textSecondary,
   },
-  productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.md,
+  columnWrapper: {
     justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+  },
+  footerLoader: {
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
   },
   bottomSpacer: {
     height: 20,
