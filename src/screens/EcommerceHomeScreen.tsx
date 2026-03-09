@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, StatusBar, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Header,
@@ -14,7 +14,8 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
-import { productService } from '../api';
+import { productService, categoryService } from '../api';
+import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
 
 interface EcommerceHomeScreenProps {
@@ -29,7 +30,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   onTabPress,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('home');
-  const [selectedCategory, setSelectedCategory] = useState('popular');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { profile } = useUserStore();
 
@@ -43,7 +44,28 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   // Initial Fetch
   useEffect(() => {
     fetchProducts(1);
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      console.log('Fetching categories from API...');
+      const apiCats = await categoryService.getCategories();
+      console.log('Fetched categories:', apiCats?.length);
+      
+      setCategories([
+        { id: 'all', name: 'All', icon: 'grid' },
+        ...(apiCats || [])
+      ]);
+      
+      if (!apiCats || apiCats.length === 0) {
+        Alert.alert('Categories Empty', 'No categories returned or array is empty');
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch categories:', error);
+      Alert.alert('Fetch Error', String(error?.message || JSON.stringify(error)));
+    }
+  };
 
   const fetchProducts = async (pageNumber: number) => {
     if (pageNumber === 1) setIsLoading(true);
@@ -102,13 +124,9 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     },
   ];
 
-  const categories = [
-    { id: 'popular', name: 'Popular', icon: 'trending-up' },
-    { id: 'shoes', name: 'Shoes', icon: 'shopping-bag' },
-    { id: 'clothing', name: 'Clothing', icon: 'shopping-cart' },
-    { id: 'accessories', name: 'Accessories', icon: 'watch' },
-    { id: 'sports', name: 'Sports', icon: 'activity' },
-  ];
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 'all', name: 'All', icon: 'grid' }
+  ]);
 
   const stores: Store[] = [
     {

@@ -27,6 +27,11 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/products/${id}`,
   },
 
+  // Categories endpoints
+  CATEGORIES: {
+    LIST: '/categories',
+  },
+
   // Posts endpoints
   POSTS: {
     LIST: '/posts',

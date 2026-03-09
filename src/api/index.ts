@@ -13,4 +13,5 @@ export { tokenStorage } from './tokenStorage';
 export * from './services/authService';
 export * from './services/userService';
 export * from './services/productService';
+export * from './services/categoryService';
 export type { ApiResponse, RequestOptions } from './apiService';
