@@ -69,7 +69,12 @@ export const Banner: React.FC<BannerProps> = ({ items, onBannerPress }) => {
                 <View style={styles.imagePlaceholder}>
                   {/* Product image would go here */}
                   {/* <Text style={styles.imagePlaceholderText}>👕</Text> */}
-                  <Image source={{ uri: item.image }} style={styles.image} />
+                  <Image 
+                    source={{ uri: item.image }} 
+                    style={styles.image} 
+                    resizeMode="cover"
+                    onError={(e) => console.log(`Banner Image Load Error (${item.title}):`, e.nativeEvent.error)}
+                  />
                 </View>
               </View>
 
@@ -134,10 +139,9 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: 120,
     height: 140,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    overflow: 'hidden',
   },
   imagePlaceholderText: {
     fontSize: 60,
@@ -193,10 +197,7 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   image: {
-    width: 120,
-    height: 140,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
 });

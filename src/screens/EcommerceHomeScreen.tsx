@@ -85,11 +85,11 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       console.log('Vendor array count:', vendorArray.length);
       
       const organicFallbacks = [
-        'https://images.unsplash.com/photo-1584362917165-526a968579e8?w=400', // Honey
-        'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400', // Perfume
-        'https://images.unsplash.com/photo-1589135303604-b936d1ffbc90?w=400', // Pickles/Jars
-        'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400', // Organic Food
-        'https://images.unsplash.com/photo-1596040033229-a9821ebd05ed?w=400', // Spices
+        'https://images.unsplash.com/photo-1584362917165-526a968579e8?q=80&w=400&auto=format&fit=crop', // Honey
+        'https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=400&auto=format&fit=crop', // Perfume
+        'https://images.unsplash.com/photo-1589135303604-b936d1ffbc90?q=80&w=400&auto=format&fit=crop', // Pickles/Jars
+        'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?q=80&w=400&auto=format&fit=crop', // Organic Food
+        'https://images.unsplash.com/photo-1596040033229-a9821ebd05ed?q=80&w=400&auto=format&fit=crop', // Spices
       ];
       
       const mappedStores: Store[] = vendorArray.map((vendor: ApiVendor, index: number) => ({
@@ -157,32 +157,40 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   };
 
   // Sample data (Banners / Stores)
-  const bannerItems = [
-    {
-      id: '1',
-      title: 'Top Trending Sneakers',
-      subtitle: 'Introducing',
-      buttonText: 'Shop Now',
-      backgroundColor: '#F3F4F6',
-      image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400',
-    },
-    {
-      id: '2',
-      title: 'Summer Collection',
-      subtitle: 'New Arrivals',
-      buttonText: 'Explore',
-      backgroundColor: '#FFF5E1',
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-    },
-    {
-      id: '3',
-      title: 'Special Offers',
-      subtitle: 'Limited Time',
-      buttonText: 'Get Deal',
-      backgroundColor: '#E8F5E9',
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-    },
-  ];
+const bannerItems = [
+  {
+    id: '1',
+    title: 'Authentic Kashmiri Saffron',
+    subtitle: 'Pure Pampore Kesar',
+    buttonText: 'Shop Now',
+    backgroundColor: '#FFF4E6',
+    image: 'https://images.unsplash.com/photo-1699365604604-KeoViDKy-zA?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: '2',
+    title: 'Handmade Pashmina Shawls',
+    subtitle: 'Luxury From Kashmir',
+    buttonText: 'Explore',
+    backgroundColor: '#F3F4F6',
+    image: 'https://images.unsplash.com/photo-1539345285273-G9ndSNnIqkk?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: '3',
+    title: 'Kashmiri Walnuts & Dry Fruits',
+    subtitle: 'Fresh From The Valley',
+    buttonText: 'Buy Now',
+    backgroundColor: '#E8F5E9',
+    image: 'https://images.unsplash.com/photo-1524656855800-59465ad9d27a?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: '4',
+    title: 'Walnut Wood Handicrafts',
+    subtitle: 'Traditional Kashmiri Art',
+    buttonText: 'View Collection',
+    backgroundColor: '#F5EFE6',
+    image: 'https://images.unsplash.com/photo-1677856219110-Odv0CwCz7gw?auto=format&fit=crop&w=1200&q=80',
+  },
+];
 
   const [categories, setCategories] = useState<Category[]>([
     { id: 'all', name: 'All', icon: 'grid' }

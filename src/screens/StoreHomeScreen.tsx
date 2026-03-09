@@ -148,8 +148,9 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
           >
             <View style={styles.storeBanner}>
               <Image 
-                source={{ uri: vendor?.cover_url || vendor?.banner_url || vendor?.logo_url || 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400' }} 
+                source={{ uri: vendor?.cover_url || vendor?.banner_url || vendor?.logo_url || 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop' }} 
                 style={styles.bannerImage} 
+                onError={(e) => console.log(`Store Banner Image Load Error (${vendor?.name}):`, e.nativeEvent.error)}
               />
               <View style={styles.bannerOverlay}>
                 <View style={styles.storeInfo}>

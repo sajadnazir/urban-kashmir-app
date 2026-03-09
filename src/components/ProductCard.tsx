@@ -67,7 +67,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Product Image */}
       <View style={styles.imageContainer}>
         {product.image ? (
-          <Image source={{ uri: product.image }} style={styles.image} />
+          <Image 
+            source={{ uri: product.image }} 
+            style={styles.image} 
+            onError={(e) => console.log(`Product Image Load Error (${product.name}):`, e.nativeEvent.error)}
+          />
         ) : (
           <View style={styles.imagePlaceholder}>
             <Text style={styles.imagePlaceholderText}>📦</Text>
