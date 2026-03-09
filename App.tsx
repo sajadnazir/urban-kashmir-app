@@ -108,6 +108,11 @@ function App(): React.JSX.Element {
     setCurrentScreen('editProfile');
   };
 
+  const handleRequireAuth = () => {
+    setIntendedScreen('cart');
+    setCurrentScreen('login');
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'login':
@@ -119,6 +124,7 @@ function App(): React.JSX.Element {
             onProductPress={handleProductPress}
             onStorePress={handleStorePress}
             onTabPress={handleTabPress}
+            onRequireAuth={handleRequireAuth}
           />
         );
       case 'shop':
@@ -126,6 +132,7 @@ function App(): React.JSX.Element {
           <ShopScreen
             onProductPress={handleProductPress}
             onTabPress={handleTabPress}
+            onRequireAuth={handleRequireAuth}
           />
         );
       case 'cart':
@@ -156,8 +163,10 @@ function App(): React.JSX.Element {
       case 'productDetails':
         return (
           <ProductDetailsScreen
+            productId={selectedProduct?.id || ''}
             onBack={handleBack}
             onShare={() => console.log('Share')}
+            onRequireAuth={handleRequireAuth}
           />
         );
       default:

@@ -22,20 +22,24 @@ import {
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { productService, categoryService, cartService } from '../api';
 import type { Category } from '../api/services/categoryService';
+import { useAuthStore } from '../store/authStore';
 
 interface ShopScreenProps {
   onProductPress?: (product: Product) => void;
   onTabPress?: (tab: TabName) => void;
+  onRequireAuth?: () => void;
 }
 
 export const ShopScreen: React.FC<ShopScreenProps> = ({
   onProductPress,
   onTabPress,
+  onRequireAuth,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('search');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const { isAuthenticated } = useAuthStore();
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -113,6 +117,10 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
   };
 
   const handleAddToCart = async (product: Product) => {
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return;
+    }
     if (!product.variantId) {
       Alert.alert('Error', 'Product variant not found');
       return;

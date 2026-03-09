@@ -22,7 +22,27 @@ export interface ApiProduct {
     min: string;
     max: string;
   };
+  variants?: Array<{
+    id: number;
+    title: string;
+    price: string;
+    sale_price: string;
+    stock: number;
+  }>;
 }
+
+export interface FullProduct extends Product {
+  description: string;
+  images: string[];
+  variants: Array<{
+    id: number;
+    name: string;
+    price: number;
+    stock: number;
+  }>;
+  category_id: number;
+}
+
 
 export const productService = {
   getProducts: async (
@@ -111,6 +131,45 @@ export const productService = {
     return {
       data: mappedProducts,
       pagination: response.pagination,
+    };
+  },
+
+  getProductById: async (id: string | number): Promise<FullProduct> => {
+    console.log(`Fetching product detail for ID: ${id}`);
+    const response = await apiService.get<any>(ENDPOINTS.PRODUCTS.DETAIL(id));
+    console.log('Raw API Product Response:', JSON.stringify(response, null, 2));
+    
+    // The API wraps the product in a 'product' field
+    const apiProduct = response.product;
+    
+    // Map to FullProduct
+    let price = 0;
+    if (apiProduct.default_variant?.sale_price) {
+      price = apiProduct.default_variant.sale_price;
+    } else if (apiProduct.price_range?.min) {
+      price = parseFloat(apiProduct.price_range.min);
+    }
+
+    const images = apiProduct.images?.map((img: any) => img.url) || [];
+    const variants = apiProduct.variants?.map((v: any) => ({
+      id: v.id,
+      name: v.title || 'Standard',
+      price: parseFloat(v.sale_price || v.price),
+      stock: v.inventory?.available_quantity || 0,
+    })) || [];
+
+    return {
+      id: String(apiProduct.id),
+      name: apiProduct.title,
+      price,
+      rating: 5,
+      isFavorite: false,
+      image: images[0],
+      variantId: apiProduct.default_variant?.id,
+      description: apiProduct.description,
+      images,
+      variants,
+      category_id: apiProduct.category_id,
     };
   },
 };

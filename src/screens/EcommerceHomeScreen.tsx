@@ -17,22 +17,26 @@ import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { productService, categoryService, cartService } from '../api';
 import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
   onStorePress?: (store: Store) => void;
   onTabPress?: (tab: TabName) => void;
+  onRequireAuth?: () => void;
 }
 
 export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   onProductPress,
   onStorePress,
   onTabPress,
+  onRequireAuth,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { profile } = useUserStore();
+  const { isAuthenticated } = useAuthStore();
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -97,6 +101,10 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   };
 
   const handleAddToCart = async (product: Product) => {
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return;
+    }
     if (!product.variantId) {
       Alert.alert('Error', 'Product variant not found');
       return;

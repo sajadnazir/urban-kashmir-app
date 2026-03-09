@@ -20,7 +20,7 @@ export const BuyButton: React.FC<BuyButtonProps> = ({
     <View style={styles.wrapper}>
       <View style={styles.container}>
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>${price.toFixed(1)}</Text>
+          <Text style={styles.price}>₹ {price.toFixed(1)}</Text>
         </View>
         <TouchableOpacity
           style={[styles.button, disabled && styles.buttonDisabled]}

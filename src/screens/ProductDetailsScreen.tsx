@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Image,
   StatusBar,
   Dimensions,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
@@ -18,35 +20,53 @@ import {
   QuantitySelector,
   BuyButton,
 } from '../components';
+import { productService, FullProduct } from '../api/services/productService';
+import { cartService } from '../api/services/cartService';
+import { useAuthStore } from '../store/authStore';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 const { width } = Dimensions.get('window');
 
 interface ProductDetailsScreenProps {
+  productId: string | number;
   onBack?: () => void;
   onShare?: () => void;
+  onRequireAuth?: () => void;
 }
 
 export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
+  productId,
   onBack,
   onShare,
+  onRequireAuth,
 }) => {
+  const [product, setProduct] = useState<FullProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated } = useAuthStore();
   const [selectedColor, setSelectedColor] = useState('black');
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Sample data
-  const product = {
-    name: 'Cotton Sweater',
-    subtitle: 'Clean 90 Triode Huddy',
-    price: 44.5,
-    rating: 5,
-    reviewCount: 250,
-    inStock: true,
-    description:
-      'A Cozy Cotton Hoodie Sweater, Perfect For Cooler Weather. Soft, Breathable, And Stylish, Offering A Relaxed Fit With A Comfortable Hood And Front Pocket.',
+  useEffect(() => {
+    fetchProductDetails();
+  }, [productId]);
+
+  const fetchProductDetails = async () => {
+    try {
+      setIsLoading(true);
+      const data = await productService.getProductById(productId);
+      setProduct(data);
+      if (data.variants && data.variants.length > 0) {
+        setSelectedSize(data.variants[0].name);
+      }
+    } catch (error) {
+      console.error('Failed to fetch product details:', error);
+      Alert.alert('Error', 'Failed to load product details');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const colors = [
@@ -56,27 +76,27 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
     { id: 'lightBlue', color: '#4A90E2', name: 'Light Blue' },
   ];
 
-  const sizes = [
-    { id: 'S', label: 'S' },
-    { id: 'M', label: 'M' },
-    { id: 'L', label: 'L' },
-    { id: 'XL', label: 'XL' },
-    { id: 'XXL', label: 'XXL' },
-  ];
+  const handleBuyNow = async () => {
+    if (!product) return;
+    
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return;
+    }
+    
+    const variantId = product.variantId;
+    if (!variantId) {
+      Alert.alert('Error', 'Product variant not found');
+      return;
+    }
 
-  const images = [
-    'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-    'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400',
-    'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400',
-    'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
-  ];
-
-  const handleBuyNow = () => {
-    console.log('Buy now pressed', {
-      color: selectedColor,
-      size: selectedSize,
-      quantity,
-    });
+    try {
+      await cartService.addToCart(Number(product.id), variantId, quantity);
+      Alert.alert('Success', 'Product added to cart');
+    } catch (error) {
+      console.error('Add to cart failed:', error);
+      Alert.alert('Error', 'Failed to add to cart');
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -90,6 +110,32 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
       />
     ));
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.wrapper}>
+        <View style={[styles.container, styles.centerAll]}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!product) {
+    return (
+      <SafeAreaView style={styles.wrapper}>
+        <View style={[styles.container, styles.centerAll]}>
+          <Text>Product not found</Text>
+          <TouchableOpacity onPress={onBack}>
+            <Text style={{ color: COLORS.primary, marginTop: 10 }}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const images = product.images && product.images.length > 0 ? product.images : [];
+  const sizes = product.variants?.map(v => ({ id: v.name, label: v.name })) || [];
 
   return (
     <SafeAreaView style={styles.wrapper}>
@@ -180,7 +226,7 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
               {renderStars(product.rating)}
             </View>
             <Text style={styles.ratingText}>
-              ( {product.reviewCount} Review)
+              ( 250 Review)
             </Text>
           </View>
 
@@ -189,26 +235,28 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
             <View style={styles.titleRow}>
               <View style={styles.titleContainer}>
                 <Text style={styles.productName}>{product.name}</Text>
-                <Text style={styles.productSubtitle}>{product.subtitle}</Text>
+                <Text style={styles.productSubtitle}>Premium Quality</Text>
               </View>
               <QuantitySelector
                 quantity={quantity}
                 onIncrease={() => setQuantity(quantity + 1)}
-                onDecrease={() => setQuantity(quantity - 1)}
+                onDecrease={() => setQuantity(Math.max(1, quantity - 1))}
               />
             </View>
 
             {/* Stock Status */}
             <Text style={styles.stockStatus}>
-              {product.inStock ? 'Available In Stock' : 'Out of Stock'}
+              Available In Stock
             </Text>
 
             {/* Size Selector */}
-            <SizeSelector
-              sizes={sizes}
-              selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
-            />
+            {sizes.length > 0 && (
+              <SizeSelector
+                sizes={sizes}
+                selectedSize={selectedSize}
+                onSelectSize={setSelectedSize}
+              />
+            )}
 
             {/* Description */}
             <View style={styles.descriptionSection}>
@@ -233,6 +281,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  centerAll: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
