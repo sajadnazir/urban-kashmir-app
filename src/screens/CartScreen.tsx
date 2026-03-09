@@ -36,7 +36,13 @@ export const CartScreen: React.FC<CartScreenProps> = ({
   const [promoCode, setPromoCode] = useState('');
   const [cartItems, setCartItems] = useState<CartItemData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [totals, setTotals] = useState({ subtotal: 0, tax: 0, itemCount: 0 });
+  const [totals, setTotals] = useState({ 
+    subtotal: 0, 
+    tax: 0, 
+    discount: 0, 
+    total: 0, 
+    itemCount: 0 
+  });
   const [swipedItemId, setSwipedItemId] = useState<string | null>(null);
 
   const fetchCart = useCallback(async () => {
@@ -44,21 +50,35 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       setIsLoading(true);
       const data = await cartService.getCart();
       
+      if (!data || !data.items) {
+        setCartItems([]);
+        setTotals({ 
+          subtotal: 0, 
+          tax: 0, 
+          discount: 0, 
+          total: 0, 
+          itemCount: 0 
+        });
+        return;
+      }
+
       const mappedItems: CartItemData[] = data.items.map(apiItem => ({
         id: String(apiItem.id),
         name: apiItem.product?.title || 'Product',
         price: apiItem.variant?.sale_price || apiItem.variant?.price || 0,
-        size: 'XL', // Default as API might not provide it yet
-        quantity: apiItem.quantity,
+        size: 'XL', 
+        quantity: apiItem.quantity || 0,
         rating: 5,
         image: apiItem.product?.images?.[0]?.url,
       }));
 
       setCartItems(mappedItems);
       setTotals({
-        subtotal: data.total_price,
-        tax: data.total_price * 0.1, // Assuming 10% tax for now
-        itemCount: data.total_quantity,
+        subtotal: data.summary.subtotal || 0,
+        tax: data.summary.tax || 0,
+        discount: data.summary.discount || 0,
+        total: data.summary.total || 0,
+        itemCount: data.items_count || 0,
       });
     } catch (error) {
       console.error('Failed to fetch cart:', error);
@@ -146,13 +166,14 @@ export const CartScreen: React.FC<CartScreenProps> = ({
     onTabPress?.(tab);
   };
 
-  // Calculate totals
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  // Calculate totals (with safety checks)
+  const cartItemsSafe = cartItems || [];
+  const subtotalValue = cartItemsSafe.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
     0,
   );
-  const tax = subtotal * 0.1; // 10% tax
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const taxValue = subtotalValue * 0.1;
+  const itemCountValue = cartItemsSafe.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   return (
     <SafeAreaView style={styles.wrapper}>
@@ -198,7 +219,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
                         onIncrease={handleIncrease}
                         onDecrease={handleDecrease}
                         onRemove={handleRemove}
-                        showDelete={swipedItemId === item.id}
+                        showDelete={true} 
                       />
                     ))}
                   </>
@@ -220,10 +241,12 @@ export const CartScreen: React.FC<CartScreenProps> = ({
                   />
 
                   {/* Order Summary */}
-                  <OrderSummary 
-                    subtotal={totals.subtotal} 
-                    tax={totals.tax} 
-                    itemCount={totals.itemCount} 
+                  <OrderSummary
+                    subtotal={totals.subtotal}
+                    tax={totals.tax}
+                    discount={totals.discount}
+                    total={totals.total}
+                    itemCount={totals.itemCount}
                   />
 
                   {/* Checkout Button */}

@@ -7,11 +7,17 @@ export interface ApiCartItem {
   product_id: number;
   variant_id: number;
   quantity: number;
+  price: number;
+  subtotal: number;
+  tax_rate: number;
+  tax_amount: number;
   product?: {
+    id: number;
     title: string;
     images?: Array<{ url: string }>;
   };
   variant?: {
+    id: number;
     price: number;
     sale_price: number;
   };
@@ -19,8 +25,13 @@ export interface ApiCartItem {
 
 export interface CartResponse {
   items: ApiCartItem[];
-  total_quantity: number;
-  total_price: number;
+  items_count: number;
+  summary: {
+    subtotal: number;
+    tax: number;
+    discount: number;
+    total: number;
+  };
 }
 
 export const cartService = {

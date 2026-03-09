@@ -5,40 +5,49 @@ import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 interface OrderSummaryProps {
   subtotal: number;
   tax: number;
+  discount?: number;
+  total: number;
   itemCount: number;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
-  subtotal,
-  tax,
-  itemCount,
+  subtotal = 0,
+  tax = 0,
+  discount = 0,
+  total = 0,
+  itemCount = 0,
 }) => {
-  const total = subtotal + tax;
-
   return (
     <View style={styles.container}>
       {/* Order Amount */}
       <View style={styles.row}>
         <Text style={styles.label}>Order Amount</Text>
-        <Text style={styles.value}>${subtotal.toFixed(2)}</Text>
+        <Text style={styles.value}>₹ {(subtotal || 0).toFixed(2)}</Text>
       </View>
 
       {/* Tax */}
       <View style={styles.row}>
         <Text style={styles.label}>Tax</Text>
-        <Text style={styles.value}>${tax.toFixed(2)}</Text>
+        <Text style={styles.value}>₹ {(tax || 0).toFixed(2)}</Text>
       </View>
 
-      {/* Divider */}
-      {/* <View style={styles.divider} /> */}
+      {/* Discount */}
+      {(discount || 0) > 0 && (
+        <View style={styles.row}>
+          <Text style={styles.label}>Discount</Text>
+          <Text style={[styles.value, { color: COLORS.success }]}>
+            - ₹ {(discount || 0).toFixed(2)}
+          </Text>
+        </View>
+      )}
 
       {/* Total Payment */}
       <View style={styles.totalRow}>
         <View style={styles.totalLeft}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.itemCount}>({itemCount} Items)</Text>
+          <Text style={styles.itemCount}>({itemCount || 0} Items)</Text>
         </View>
-        <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
+        <Text style={styles.totalValue}>₹ {(total || 0).toFixed(2)}</Text>
       </View>
     </View>
   );

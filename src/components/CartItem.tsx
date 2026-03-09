@@ -65,9 +65,18 @@ export const CartItem: React.FC<CartItemProps> = ({
 
         {/* Product Details */}
         <View style={styles.details}>
-          <Text style={styles.productName} numberOfLines={1}>
-            {item.name}
-          </Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.productName} numberOfLines={1}>
+              {item.name}
+            </Text>
+            <TouchableOpacity 
+              onPress={() => onRemove(item.id)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              activeOpacity={0.6}
+            >
+              <Icon name="trash-2" size={18} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
 
           {/* Rating */}
           <View style={styles.ratingContainer}>{renderStars(item.rating)}</View>
@@ -101,17 +110,6 @@ export const CartItem: React.FC<CartItemProps> = ({
           </View>
         </View>
       </View>
-
-      {/* Delete Button - Swipe to reveal */}
-      {showDelete && (
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => onRemove(item.id)}
-          activeOpacity={0.7}
-        >
-          <Icon name="trash-2" size={20} color={COLORS.background} />
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -154,11 +152,18 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.md,
     justifyContent: 'center',
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
   productName: {
+    flex: 1,
     fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
-    marginBottom: SPACING.xs,
+    marginRight: SPACING.xs,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -176,6 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     height: 80,
+    marginLeft: SPACING.sm,
   },
   size: {
     fontSize: FONT_SIZES.xs,
@@ -204,17 +210,5 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     minWidth: 20,
     textAlign: 'center',
-  },
-  deleteButton: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 80,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
   },
 });

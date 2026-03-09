@@ -48,17 +48,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       title: 'Profile',
       subtitle: 'Shopping, Email, Password, Shoe Size',
     },
+  
     {
-      id: 'buying',
-      icon: 'shopping-bag',
-      title: 'Buying',
-      subtitle: 'Active Bids, In Progress, Orders',
-    },
-    {
-      id: 'selling',
-      icon: 'users',
-      title: 'Selling',
-      subtitle: 'Active Asks, Sales, Seller Profile',
+      id: 'address',
+      icon: 'address',
+      title: 'Address',
+      subtitle: 'Manage your delivery addresses',
     },
     {
       id: 'favorites',
@@ -74,20 +69,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     },
   ];
 
-  const settingsItems: ProfileMenuItemData[] = [
-    {
-      id: 'wallet',
-      icon: 'credit-card',
-      title: 'Wallet',
-      subtitle: 'Payments, Payout, Gift Cards, Credits',
-    },
-    {
-      id: 'settings',
-      icon: 'settings',
-      title: 'Settings',
-      subtitle: 'Security And Notifications',
-    },
-  ];
+ 
 
   const handleMenuPress = (id: string) => {
     console.log('Menu item pressed:', id);
@@ -166,16 +148,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             ))}
           </View>
 
-          {/* Settings Section */}
-          <View style={styles.menuSection}>
-            {settingsItems.map(item => (
-              <ProfileMenuItem
-                key={item.id}
-                item={item}
-                onPress={handleMenuPress}
-              />
-            ))}
-          </View>
 
           {/* Logout Button */}
           <TouchableOpacity 
