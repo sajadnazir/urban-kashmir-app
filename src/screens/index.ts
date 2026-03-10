@@ -12,3 +12,4 @@ export { EditProfileScreen } from './EditProfileScreen';
 export { StoreHomeScreen } from './StoreHomeScreen';
 export { ReelsPlayerScreen } from './ReelsPlayerScreen';
 export { LoginScreen } from './LoginScreen';
+export { SplashScreen } from './SplashScreen';

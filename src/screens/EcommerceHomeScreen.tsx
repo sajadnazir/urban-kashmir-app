@@ -25,6 +25,7 @@ interface EcommerceHomeScreenProps {
   onStorePress?: (store: Store) => void;
   onTabPress?: (tab: TabName) => void;
   onRequireAuth?: () => void;
+  onDataLoaded?: () => void;
 }
 
 export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
@@ -32,6 +33,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   onStorePress,
   onTabPress,
   onRequireAuth,
+  onDataLoaded,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -129,6 +131,9 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     } finally {
       setIsLoading(false);
       setIsFetchingMore(false);
+      if (pageNumber === 1) {
+        onDataLoaded?.();
+      }
     }
   };
 
@@ -206,12 +211,15 @@ const bannerItems = [
         <Banner items={bannerItems} onBannerPress={(item) => console.log('Banner pressed', item)} />
       </View>
 
+
+<View style={{marginTop:-SPACING.xxl}}> 
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
         onFilterPress={() => console.log('Filter pressed')}
         placeholder="Search..."
       />
+ </View>
 
       <CategoryFilter
         categories={categories}

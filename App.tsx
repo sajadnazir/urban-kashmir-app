@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
@@ -18,6 +18,7 @@ import {
   StoreHomeScreen,
   ReelsPlayerScreen,
   LoginScreen,
+  SplashScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { useAuthStore } from './src/store/authStore';
@@ -41,6 +42,16 @@ function App(): React.JSX.Element {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [isAppLoading, setIsAppLoading] = useState(true);
+  const startTime = useRef(Date.now());
+
+  // Safety timeout for splash screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAppLoading(false);
+    }, 5000); // 5 seconds maximum
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLoginSuccess = () => {
     setCurrentScreen(intendedScreen || 'home');
@@ -130,6 +141,11 @@ function App(): React.JSX.Element {
             onStorePress={handleStorePress}
             onTabPress={handleTabPress}
             onRequireAuth={handleRequireAuth}
+            onDataLoaded={() => {
+              const elapsed = Date.now() - startTime.current;
+              const remaining = Math.max(0, 3000 - elapsed);
+              setTimeout(() => setIsAppLoading(false), remaining);
+            }}
           />
         );
       case 'shop':
@@ -191,6 +207,7 @@ function App(): React.JSX.Element {
         backgroundColor="transparent"
       />
       {renderScreen()}
+      {isAppLoading && <SplashScreen />}
     </SafeAreaProvider>
   );
 }
