@@ -331,6 +331,7 @@ const styles = StyleSheet.create({
   bannerContainer: {
     marginTop: -SPACING.md,
     marginBottom: SPACING.md,
+    paddingVertical: SPACING.xl,
   },
   sectionHeader: {
     flexDirection: 'row',

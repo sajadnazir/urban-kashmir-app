@@ -123,8 +123,9 @@ const styles = StyleSheet.create({
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 1,
+    // elevation: 1,
+    borderWidth: 0.1,
   },
   bannerContent: {
     flex: 1,
