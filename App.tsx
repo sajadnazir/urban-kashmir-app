@@ -116,7 +116,12 @@ function App(): React.JSX.Element {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'login':
-        return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+        return (
+          <LoginScreen 
+            onLoginSuccess={handleLoginSuccess} 
+            onHome={() => setCurrentScreen('home')}
+          />
+        );
 
       case 'home':
         return (

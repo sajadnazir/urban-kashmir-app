@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Feather';
 import { authService } from '../api';
 import { useAuthStore } from '../store/authStore';
 import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING } from '../constants';
@@ -36,11 +37,15 @@ type Step = 'phone' | 'otp';
 
 interface LoginScreenProps {
   onLoginSuccess?: () => void;
+  onHome?: () => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ 
+  onLoginSuccess,
+  onHome 
+}) => {
   const [step, setStep] = useState<Step>('phone');
 
   // Phone step
@@ -161,6 +166,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
   return (
     <SafeAreaView style={styles.wrapper}>
+ {/* ── Header Row ── */}
+          <View style={styles.headerRow}>
+            <TouchableOpacity 
+              style={styles.homeBtn} 
+              onPress={onHome}
+              activeOpacity={0.7}
+            >
+              <Icon name="home" size={24} color={COLORS.darkGray} />
+            </TouchableOpacity>
+          </View>
+
       <StatusBar
         barStyle="dark-content"
         backgroundColor={COLORS.background}
@@ -174,6 +190,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
+
+         
 
           {/* ── Brand ── */}
           <View style={styles.brand}>
@@ -340,55 +358,76 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xl,
   },
 
+  // ── Header Row ─────────────────────────────────────────────────────────────
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: SPACING.md,
+    marginRight: SPACING.md,
+  },
+  homeBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
   // ── Brand ──────────────────────────────────────────────────────────────────
   brand: {
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   logoRing: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: COLORS.darkGray,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   logoText: {
     color: COLORS.background,
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: 1,
   },
   appName: {
     color: COLORS.text,
-    fontSize: FONT_SIZES.xxl,
+    fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: 0.5,
   },
   tagline: {
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZES.sm,
-    marginTop: 4,
+    fontSize: FONT_SIZES.xs,
+    marginTop: 2,
   },
 
   // ── Card — white rounded panel, same as EditProfileScreen sections ─────────
   card: {
     backgroundColor: COLORS.background,
-    borderRadius: 24,
-    padding: SPACING.lg,
+    borderRadius: 20,
+    padding: SPACING.md,
   },
   cardTitle: {
     color: COLORS.text,
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
-    marginBottom: SPACING.xs,
+    marginBottom: 4,
   },
   cardSub: {
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZES.sm,
-    lineHeight: 20,
-    marginBottom: SPACING.lg,
+    fontSize: FONT_SIZES.xs,
+    lineHeight: 18,
+    marginBottom: SPACING.md,
   },
   phoneHighlight: {
     color: COLORS.primary,
@@ -397,33 +436,33 @@ const styles = StyleSheet.create({
 
   // ── Form label — matches EditProfileScreen label ───────────────────────────
   label: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
-    marginBottom: SPACING.xs,
+    marginBottom: 6,
   },
 
   // ── Phone row ──────────────────────────────────────────────────────────────
   phoneRow: {
     flexDirection: 'row',
     marginBottom: SPACING.md,
-    height: 56,
+    height: 48,
     gap: SPACING.sm,
   },
   countryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.lightGray,    // same as inputContainer in EditProfileScreen
-    borderRadius: 12,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 10,
     paddingHorizontal: SPACING.sm,
     gap: 4,
   },
   flag: {
-    fontSize: 20,
+    fontSize: 18,
   },
   dial: {
     color: COLORS.text,
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontWeight: FONT_WEIGHTS.medium,
   },
   caret: {
@@ -433,10 +472,10 @@ const styles = StyleSheet.create({
   phoneInput: {
     flex: 1,
     backgroundColor: COLORS.lightGray,
-    borderRadius: 12,
+    borderRadius: 10,
     paddingHorizontal: SPACING.md,
     color: COLORS.text,
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.regular,
   },
 
@@ -453,21 +492,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
     gap: SPACING.sm,
   },
-  dropdownFlag: { fontSize: 20 },
+  dropdownFlag: { fontSize: 18 },
   dropdownDial: {
     color: COLORS.text,
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontWeight: FONT_WEIGHTS.medium,
-    width: 44,
+    width: 40,
   },
   dropdownCode: {
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
   },
 
   // ── OTP boxes ──────────────────────────────────────────────────────────────
@@ -481,9 +520,9 @@ const styles = StyleSheet.create({
     flex: 1,
     aspectRatio: 1,
     backgroundColor: COLORS.lightGray,
-    borderRadius: 12,
+    borderRadius: 10,
     color: COLORS.text,
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     borderWidth: 1.5,
     borderColor: COLORS.border,
@@ -500,7 +539,7 @@ const styles = StyleSheet.create({
   },
   countdownText: {
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
   },
   countdownNum: {
     color: COLORS.primary,
@@ -508,15 +547,15 @@ const styles = StyleSheet.create({
   },
   resendText: {
     color: COLORS.primary,
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontWeight: FONT_WEIGHTS.semiBold,
   },
 
   // ── Primary button — matches saveButton in EditProfileScreen ──────────────
   primaryBtn: {
     backgroundColor: COLORS.darkGray,
-    paddingVertical: SPACING.md,
-    borderRadius: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -526,7 +565,7 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     color: COLORS.background,
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.semiBold,
     letterSpacing: 0.3,
   },
@@ -536,7 +575,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: FONT_SIZES.xs,
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 16,
   },
   link: {
     color: COLORS.primary,
@@ -548,7 +587,7 @@ const styles = StyleSheet.create({
   },
   changeNumberText: {
     color: COLORS.textSecondary,
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
   },
 
   // ── Error ──────────────────────────────────────────────────────────────────
