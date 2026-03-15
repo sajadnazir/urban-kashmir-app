@@ -72,6 +72,16 @@ function App(): React.JSX.Element {
   const [selectedTrackingNumber, setSelectedTrackingNumber] = useState<string | null>(null);
   const startTime = useRef(Date.now());
 
+  // Global Auth Guard — check when auth state changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // If we just logged out, reset to home or login
+      if (currentScreen !== 'login' && currentScreen !== 'home' && currentScreen !== 'shop' && currentScreen !== 'productDetails' && currentScreen !== 'storeHome' && currentScreen !== 'reelsPlayer') {
+        setCurrentScreen('login');
+      }
+    }
+  }, [isAuthenticated, currentScreen]);
+
   // Hardware back button handler
   useEffect(() => {
     const onBackPress = () => {
