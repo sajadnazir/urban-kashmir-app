@@ -21,6 +21,7 @@ import {
   LoginScreen,
   SplashScreen,
   WishlistScreen,
+  AddressScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { useAuthStore } from './src/store/authStore';
@@ -35,7 +36,8 @@ type Screen =
   | 'storeHome'
   | 'reelsPlayer'
   | 'productDetails'
-  | 'wishlist';
+  | 'wishlist'
+  | 'address';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -88,6 +90,8 @@ function App(): React.JSX.Element {
       setCurrentScreen('home');
     } else if (currentScreen === 'wishlist') {
       setCurrentScreen('profile'); // defaulting back to profile from wishlist
+    } else if (currentScreen === 'address') {
+      setCurrentScreen('profile'); // returning back to profile
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -184,6 +188,13 @@ function App(): React.JSX.Element {
                 } else {
                   setCurrentScreen('wishlist');
                 }
+              } else if (id === 'address') {
+                if (!isAuthenticated) {
+                  setIntendedScreen('address');
+                  setCurrentScreen('login');
+                } else {
+                  setCurrentScreen('address');
+                }
               }
             }}
           />
@@ -219,6 +230,8 @@ function App(): React.JSX.Element {
             onTabPress={handleTabPress}
           />
         );
+      case 'address':
+        return <AddressScreen onBack={handleBack} />;
       default:
         return (
           <EcommerceHomeScreen

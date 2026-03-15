@@ -73,7 +73,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   const handleMenuPress = (id: string) => {
     console.log('Menu item pressed:', id);
-    if (id === 'wishlist' && onMenuPress) {
+    if ((id === 'wishlist' || id === 'address') && onMenuPress) {
       onMenuPress(id);
     }
   };

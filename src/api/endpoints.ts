@@ -64,4 +64,13 @@ export const ENDPOINTS = {
     REMOVE_ITEM: (id: string | number) => `/wishlist/${id}`,
     MOVE_TO_CART: (id: string | number) => `/wishlist/${id}/move-to-cart`,
   },
+
+  // Address endpoints
+  ADDRESSES: {
+    LIST: '/addresses',
+    CREATE: '/addresses',
+    UPDATE: (id: string | number) => `/addresses/${id}`,
+    DELETE: (id: string | number) => `/addresses/${id}`,
+    SET_DEFAULT: (id: string | number) => `/addresses/${id}/set-default`,
+  },
 } as const;
