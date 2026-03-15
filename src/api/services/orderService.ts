@@ -19,7 +19,7 @@ const calculatePriceFromTax = (item: any) => {
 
 const mapApiOrder = (apiOrder: any): Order => ({
   id: apiOrder.id,
-  order_number: apiOrder.order_number,
+  order_number: apiOrder.order_number || apiOrder.order_no || apiOrder.number || `ORD-${apiOrder.id}`,
   status: apiOrder.status,
   total: apiOrder.total_amount || apiOrder.total || 0,
   subtotal: apiOrder.subtotal || 0,
@@ -56,7 +56,7 @@ export const orderService = {
 
   placeOrder: async (payload: PlaceOrderPayload): Promise<Order> => {
     const res = await apiService.post<any, PlaceOrderPayload>(ENDPOINTS.ORDERS.PLACE, payload);
-    const data = res?.data ?? res;
+    const data = res?.order || res?.data?.order || res?.data || res;
     return mapApiOrder(data);
   },
 
@@ -78,7 +78,7 @@ export const orderService = {
 
   getOrderDetails: async (id: string | number): Promise<Order> => {
     const res = await apiService.get<any>(ENDPOINTS.ORDERS.DETAIL(id));
-    const data = res?.data ?? res?.order ?? res;
+    const data = res?.order || res?.data?.order || res?.data || res;
     return mapApiOrder(data);
   },
 

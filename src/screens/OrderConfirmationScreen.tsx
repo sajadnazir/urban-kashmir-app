@@ -51,7 +51,7 @@ export const OrderConfirmationScreen: React.FC<OrderConfirmationScreenProps> = (
           
           <Text style={styles.subtitle}>
             {success 
-              ? `Your order has been placed successfully. Order number is #${orderNumber || 'N/A'}`
+              ? `Your order has been placed successfully. ${orderNumber ? `Order number is #${orderNumber}` : 'We are processing your request.'}`
               : errorMessage || 'Something went wrong while placing your order. Please try again.'
             }
           </Text>
