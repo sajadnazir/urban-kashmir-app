@@ -91,10 +91,21 @@ export const orderService = {
   },
 
   cancelOrder: async (id: string | number, reason: string, comments: string): Promise<any> => {
-    return apiService.post<any>(ENDPOINTS.ORDERS.CANCEL(id), { reason, comments });
+    const payload: any = { reason };
+    if (comments && comments.trim()) {
+      payload.comments = comments.trim();
+    }
+    return apiService.post<any>(ENDPOINTS.ORDERS.CANCEL(id), payload);
   },
 
   returnOrder: async (id: string | number, payload: any): Promise<any> => {
+    // Ensure comments are trimmed if present
+    if (payload.items) {
+        payload.items = payload.items.map((item: any) => ({
+            ...item,
+            comments: item.comments?.trim() || undefined
+        }));
+    }
     return apiService.post<any>(ENDPOINTS.ORDERS.RETURN(id), payload);
   },
 

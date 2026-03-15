@@ -13,6 +13,7 @@ import {
   Alert,
   Linking,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderTwo } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
@@ -82,11 +83,20 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
     try {
       setIsActionLoading(true);
       await orderService.cancelOrder(orderId, cancelReason, cancelComments);
-      Alert.alert('Success', 'Order cancelled successfully');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Order cancelled successfully',
+      });
       setShowCancelModal(false);
       fetchOrderDetails(); // Refresh
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Failed to cancel order');
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to cancel order';
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: errorMsg,
+      });
     } finally {
       setIsActionLoading(false);
     }
@@ -110,11 +120,20 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
         preferred_resolution: returnResolution,
       });
 
-      Alert.alert('Success', 'Return request submitted successfully');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Return request submitted successfully',
+      });
       setShowReturnModal(false);
       fetchOrderDetails(); // Refresh
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Failed to submit return request');
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to submit return request';
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: errorMsg,
+      });
     } finally {
       setIsActionLoading(false);
     }
