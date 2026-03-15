@@ -79,6 +79,8 @@ export const ENDPOINTS = {
     PLACE: '/orders',
     LIST: '/orders',
     DETAIL: (id: string | number) => `/orders/${id}`,
+    CANCEL: (id: string | number) => `/orders/${id}/cancel`,
+    RETURN: (id: string | number) => `/orders/${id}/return`,
   },
 
   // Payment methods

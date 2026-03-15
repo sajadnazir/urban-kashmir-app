@@ -63,6 +63,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       title: 'My Wishlist',
       subtitle: 'Items You\'ve Saved',
     },
+    {
+      id: 'orders',
+      icon: 'package',
+      title: 'My Orders',
+      subtitle: 'View your order history',
+    },
     // {
     //   id: 'portfolio',
     //   icon: 'briefcase',
@@ -73,7 +79,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   const handleMenuPress = (id: string) => {
     console.log('Menu item pressed:', id);
-    if ((id === 'wishlist' || id === 'address') && onMenuPress) {
+    if ((id === 'wishlist' || id === 'address' || id === 'orders') && onMenuPress) {
       onMenuPress(id);
     }
   };

@@ -26,8 +26,11 @@ import {
   NotificationDetailsScreen,
   CheckoutScreen,
   OrderConfirmationScreen,
+  OrdersScreen,
+  OrderDetailsScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
+import { Order } from './src/types/order';
 import { useAuthStore } from './src/store/authStore';
 import type { Notification } from './src/types/notification';
 
@@ -46,7 +49,9 @@ type Screen =
   | 'notifications'
   | 'notificationDetails'
   | 'checkout'
-  | 'orderConfirmation';
+  | 'orderConfirmation'
+  | 'orders'
+  | 'orderDetails';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -61,6 +66,7 @@ function App(): React.JSX.Element {
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [checkoutTotals, setCheckoutTotals] = useState({ total: 0, subtotal: 0, tax: 0, discount: 0, itemCount: 0 });
   const [orderResult, setOrderResult] = useState<{ success: boolean; orderNumber?: string; errorMessage?: string } | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const startTime = useRef(Date.now());
 
   // Hardware back button handler
@@ -70,6 +76,7 @@ function App(): React.JSX.Element {
         'productDetails', 'cart', 'storeHome', 'reelsPlayer',
         'editProfile', 'profile', 'wishlist', 'address',
         'notifications', 'notificationDetails', 'shop',
+        'orders', 'orderDetails',
       ];
       if (screensWithBack.includes(currentScreen)) {
         handleBack();
@@ -133,6 +140,10 @@ function App(): React.JSX.Element {
       setCurrentScreen('cart');
     } else if (currentScreen === 'orderConfirmation') {
       setCurrentScreen('home');
+    } else if (currentScreen === 'orders') {
+      setCurrentScreen('profile');
+    } else if (currentScreen === 'orderDetails') {
+      setCurrentScreen('orders');
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -246,6 +257,13 @@ function App(): React.JSX.Element {
                 } else {
                   setCurrentScreen('address');
                 }
+              } else if (id === 'orders') {
+                if (!isAuthenticated) {
+                  setIntendedScreen('orders');
+                  setCurrentScreen('login');
+                } else {
+                  setCurrentScreen('orders');
+                }
               }
             }}
           />
@@ -324,6 +342,23 @@ function App(): React.JSX.Element {
             errorMessage={orderResult.errorMessage}
             onContinueShopping={() => setCurrentScreen('home')}
             onRetry={() => setCurrentScreen('checkout')}
+          />
+        ) : null;
+      case 'orders':
+        return (
+          <OrdersScreen 
+            onBack={handleBack} 
+            onOrderPress={(order: Order) => {
+              setSelectedOrderId(order.id);
+              setCurrentScreen('orderDetails');
+            }} 
+          />
+        );
+      case 'orderDetails':
+        return selectedOrderId ? (
+          <OrderDetailsScreen 
+            orderId={selectedOrderId} 
+            onBack={handleBack} 
           />
         ) : null;
       default:
