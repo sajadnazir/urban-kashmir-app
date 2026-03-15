@@ -257,7 +257,7 @@ const bannerItems = [
       />
       <View style={styles.container}>
         <Header
-          userName={profile?.name || "User"}
+          userName={profile?.name || "Guest"}
           onProfilePress={() => console.log('Profile pressed')}
           onWishlistPress={() => console.log('Wishlist pressed')}
           onNotificationPress={() => console.log('Notification pressed')}
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.md,
   },
   footerLoader: {
     paddingVertical: SPACING.lg,

@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   container: {
     width: Dimensions.get('window').width * 0.45,
     backgroundColor: COLORS.background,
+  //  backgroundColor:"red",
     borderRadius: 16,
     marginBottom: SPACING.md,
     overflow: 'hidden',
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     height: 140,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   productName: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.xs,
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   price: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },

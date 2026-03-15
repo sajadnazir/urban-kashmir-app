@@ -312,6 +312,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: SPACING.md,
     justifyContent: 'center',
+    gap:10
   },
   emptyContainer: {
     padding: SPACING.xl,

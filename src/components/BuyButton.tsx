@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     paddingLeft: SPACING.sm,
   },
   price: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
