@@ -6,9 +6,9 @@ import {
   FlatList,
   StatusBar,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { HeaderTwo, ProductCard, Product, TabName } from '../components';
@@ -65,7 +65,11 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
       setWishlistItems(mappedItems);
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
-      Alert.alert('Error', 'Failed to load wishlist items');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load wishlist items',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +94,11 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
       }
     } catch (error) {
       console.error('Failed to remove item from wishlist:', error);
-      Alert.alert('Error', 'Failed to remove product from wishlist');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to remove product from wishlist',
+      });
       fetchWishlist(); // Revert back
     }
   };
@@ -101,7 +109,11 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
       if (wishlistItemId) {
         await wishlistService.moveToCart(wishlistItemId);
         fetchCartCount();
-        Alert.alert('Success', 'Item moved to cart');
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Item moved to cart',
+        });
         
         // Also inform the global store
         await toggleWishlistItem(product.id);
@@ -112,11 +124,19 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
          // Fallback to normal add to cart if not found in map (edge case)
          await cartService.addToCart(Number(product.id), 1);
          fetchCartCount();
-         Alert.alert('Success', 'Item added to cart');
+         Toast.show({
+           type: 'success',
+           text1: 'Success',
+           text2: 'Item added to cart',
+         });
       }
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      Alert.alert('Error', 'Failed to add item to cart');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add item to cart',
+      });
     }
   };
 

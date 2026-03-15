@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import {
   EcommerceHomeScreen,
   ProductDetailsScreen,
@@ -237,6 +238,7 @@ function App(): React.JSX.Element {
       />
       {renderScreen()}
       {isAppLoading && <SplashScreen />}
+      <Toast />
     </SafeAreaProvider>
   );
 }

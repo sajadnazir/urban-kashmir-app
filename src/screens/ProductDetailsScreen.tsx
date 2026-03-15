@@ -9,8 +9,8 @@ import {
   StatusBar,
   Dimensions,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {
@@ -69,7 +69,11 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
       }
     } catch (error) {
       console.error('Failed to fetch product details:', error);
-      Alert.alert('Error', 'Failed to load product details');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load product details',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -92,17 +96,29 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
     
     const variantId = product.variantId;
     if (!variantId) {
-      Alert.alert('Error', 'Product variant not found');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Product variant not found',
+      });
       return;
     }
 
     try {
       await cartService.addToCart(Number(product.id), variantId, quantity);
       fetchCartCount();
-      Alert.alert('Success', 'Product added to cart');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Product added to cart',
+      });
     } catch (error) {
       console.error('Add to cart failed:', error);
-      Alert.alert('Error', 'Failed to add to cart');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add to cart',
+      });
     }
   };
 
@@ -119,7 +135,11 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
     } catch (error) {
       // Error is caught by optimistic store
       console.error('Wishlist toggle failed:', error);
-      Alert.alert('Error', 'Failed to update wishlist');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update wishlist',
+      });
     }
   };
 

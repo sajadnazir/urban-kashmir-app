@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import {
@@ -85,7 +86,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       updateCartCount(data.items_count || 0);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
-      Alert.alert('Error', 'Failed to load cart items');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load cart items',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +109,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       fetchCart(); // Refresh cart
     } catch (error) {
       console.error('Failed to increase quantity:', error);
-      Alert.alert('Error', 'Failed to update quantity');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update quantity',
+      });
     }
   };
 
@@ -117,7 +126,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       fetchCart(); // Refresh cart
     } catch (error) {
       console.error('Failed to decrease quantity:', error);
-      Alert.alert('Error', 'Failed to update quantity');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to update quantity',
+      });
     }
   };
 
@@ -128,7 +141,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       fetchCart(); // Refresh cart
     } catch (error) {
       console.error('Failed to remove item:', error);
-      Alert.alert('Error', 'Failed to remove item');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to remove item',
+      });
     }
   };
 
@@ -148,7 +165,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({
               fetchCart();
             } catch (error) {
               console.error('Failed to clear cart:', error);
-              Alert.alert('Error', 'Failed to clear cart');
+              Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to clear cart',
+              });
             }
           }
         },

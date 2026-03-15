@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, StatusBar, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, StatusBar, ActivityIndicator, RefreshControl,
+  TouchableOpacity, } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Header,
@@ -81,11 +83,19 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       ]);
       
       if (!apiCats || apiCats.length === 0) {
-        Alert.alert('Categories Empty', 'No categories returned or array is empty');
+        Toast.show({
+          type: 'error',
+          text1: 'Categories Empty',
+          text2: 'No categories returned or array is empty',
+        });
       }
     } catch (error: any) {
       console.error('Failed to fetch categories:', error);
-      Alert.alert('Fetch Error', String(error?.message || JSON.stringify(error)));
+      Toast.show({
+        type: 'error',
+        text1: 'Fetch Error',
+        text2: String(error?.message || JSON.stringify(error)),
+      });
     }
   };
 
@@ -160,16 +170,28 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       return;
     }
     if (!product.variantId) {
-      Alert.alert('Error', 'Product variant not found');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Product variant not found',
+      });
       return;
     }
     try {
       await cartService.addToCart(Number(product.id), product.variantId, 1);
       fetchCartCount();
-      Alert.alert('Success', `${product.name} added to cart!`);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: `${product.name} added to cart!`,
+      });
     } catch (error: any) {
       console.error('Add to cart failed:', error);
-      Alert.alert('Error', error?.message || 'Failed to add to cart');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error?.message || 'Failed to add to cart',
+      });
     }
   };
 
