@@ -23,7 +23,7 @@ import {
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { vendorService, productService, cartService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, useCartStore } from '../store';
 
 interface StoreHomeScreenProps {
   vendorSlug: string;
@@ -41,6 +41,7 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
   onRequireAuth,
 }) => {
   const { isAuthenticated } = useAuthStore();
+  const { fetchCartCount } = useCartStore();
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [vendor, setVendor] = useState<ApiVendor | null>(null);
@@ -112,6 +113,7 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
     }
     try {
       await cartService.addToCart(Number(product.id), product.variantId, 1);
+      fetchCartCount();
       Alert.alert('Success', `${product.name} added to cart!`);
     } catch (error: any) {
       console.error('Add to cart failed:', error);

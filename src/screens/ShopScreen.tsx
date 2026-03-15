@@ -22,7 +22,7 @@ import {
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { productService, categoryService, cartService } from '../api';
 import type { Category } from '../api/services/categoryService';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, useCartStore } from '../store';
 
 interface ShopScreenProps {
   onProductPress?: (product: Product) => void;
@@ -40,6 +40,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const { isAuthenticated } = useAuthStore();
+  const { fetchCartCount } = useCartStore();
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -127,6 +128,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
     }
     try {
       await cartService.addToCart(Number(product.id), product.variantId, 1);
+      fetchCartCount();
       Alert.alert('Success', `${product.name} added to cart!`);
     } catch (error: any) {
       console.error('Add to cart failed:', error);

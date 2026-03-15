@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { useCartStore } from '../store';
 
 export type TabName = 'home' | 'search' | 'cart' | 'profile';
 
@@ -27,6 +28,8 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab,
   onTabPress,
 }) => {
+  const { cartItemCount } = useCartStore();
+
   return (
     <View style={styles.container}>
       <View style={styles.navBar}>
@@ -40,11 +43,18 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               activeOpacity={0.7}
             >
               <View style={styles.tabContent}>
-                <Icon
-                  name={tab.iconName}
-                  size={22}
-                  color={isActive ? COLORS.text : COLORS.background}
-                />
+                <View>
+                  <Icon
+                    name={tab.iconName}
+                    size={22}
+                    color={isActive ? COLORS.text : COLORS.background}
+                  />
+                  {tab.id === 'cart' && cartItemCount > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{cartItemCount > 99 ? '99+' : cartItemCount}</Text>
+                    </View>
+                  )}
+                </View>
                 {isActive && <Text style={styles.tabLabel}>{tab.label}</Text>}
               </View>
             </TouchableOpacity>
@@ -99,5 +109,24 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
+  },
+  badge: {
+    position: 'absolute',
+    top: -6,
+    right: -10,
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1,
+    borderColor: COLORS.darkGray,
+  },
+  badgeText: {
+    color: COLORS.background,
+    fontSize: 9,
+    fontWeight: 'bold',
   },
 });

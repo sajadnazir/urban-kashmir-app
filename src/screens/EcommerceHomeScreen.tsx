@@ -20,6 +20,7 @@ import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
 import { useWishlistStore } from '../store/wishlistStore';
+import { useCartStore } from '../store/cartStore';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
@@ -42,6 +43,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const { profile } = useUserStore();
   const { isAuthenticated } = useAuthStore();
   const { fetchWishlist } = useWishlistStore();
+  const { fetchCartCount } = useCartStore();
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -62,6 +64,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   useEffect(() => {
     if (isAuthenticated) {
       fetchWishlist();
+      fetchCartCount();
     }
   }, [isAuthenticated]);
 
@@ -162,6 +165,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     }
     try {
       await cartService.addToCart(Number(product.id), product.variantId, 1);
+      fetchCartCount();
       Alert.alert('Success', `${product.name} added to cart!`);
     } catch (error: any) {
       console.error('Add to cart failed:', error);

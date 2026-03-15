@@ -23,8 +23,7 @@ import {
 import { productService, FullProduct } from '../api/services/productService';
 import { cartService } from '../api/services/cartService';
 import { wishlistService } from '../api/services/wishlistService';
-import { useAuthStore } from '../store/authStore';
-import { useWishlistStore } from '../store/wishlistStore';
+import { useAuthStore, useWishlistStore, useCartStore } from '../store';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 const { width } = Dimensions.get('window');
@@ -50,6 +49,7 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { wishlistIds, toggleWishlistItem } = useWishlistStore();
+  const { fetchCartCount } = useCartStore();
 
   const isFavorite = React.useMemo(() => {
     return wishlistIds.has(String(product?.id));
@@ -98,6 +98,7 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
 
     try {
       await cartService.addToCart(Number(product.id), variantId, quantity);
+      fetchCartCount();
       Alert.alert('Success', 'Product added to cart');
     } catch (error) {
       console.error('Add to cart failed:', error);

@@ -7,26 +7,30 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
-import { HeaderTwo, ProductCard, Product } from '../components';
+import { HeaderTwo, ProductCard, Product, TabName } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { wishlistService, cartService } from '../api';
-import { useWishlistStore } from '../store';
+import { useWishlistStore, useCartStore } from '../store';
 
 interface WishlistScreenProps {
   onBack?: () => void;
   onProductPress?: (product: Product) => void;
+  onTabPress?: (tab: TabName) => void;
 }
 
 export const WishlistScreen: React.FC<WishlistScreenProps> = ({
   onBack,
   onProductPress,
+  onTabPress,
 }) => {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toggleWishlistItem } = useWishlistStore();
+  const { fetchCartCount } = useCartStore();
 
   // Reference IDs required for removal and move to cart
   const [wishlistMap, setWishlistMap] = useState<Record<string, number>>({});
@@ -96,6 +100,7 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
       const wishlistItemId = wishlistMap[product.id];
       if (wishlistItemId) {
         await wishlistService.moveToCart(wishlistItemId);
+        fetchCartCount();
         Alert.alert('Success', 'Item moved to cart');
         
         // Also inform the global store
@@ -106,6 +111,7 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
       } else {
          // Fallback to normal add to cart if not found in map (edge case)
          await cartService.addToCart(Number(product.id), 1);
+         fetchCartCount();
          Alert.alert('Success', 'Item added to cart');
       }
     } catch (error) {
@@ -121,6 +127,13 @@ export const WishlistScreen: React.FC<WishlistScreenProps> = ({
       <Text style={styles.emptySubtitle}>
         Save items you love here and they'll be ready when you are.
       </Text>
+      <TouchableOpacity
+        style={styles.continueShoppingButton}
+        onPress={() => onTabPress?.('home')}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.continueShoppingText}>Continue Shopping</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -213,5 +226,17 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  continueShoppingButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 30,
+    marginTop: SPACING.xl,
+  },
+  continueShoppingText: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.semiBold,
+    color: COLORS.background,
   },
 });

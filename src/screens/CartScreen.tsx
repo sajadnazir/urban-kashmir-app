@@ -22,6 +22,7 @@ import {
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { cartService } from '../api';
+import { useCartStore } from '../store';
 
 interface CartScreenProps {
   onBack?: () => void;
@@ -44,6 +45,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
     itemCount: 0 
   });
   const [swipedItemId, setSwipedItemId] = useState<string | null>(null);
+  const { updateCartCount, fetchCartCount } = useCartStore();
 
   const fetchCart = useCallback(async () => {
     try {
@@ -80,6 +82,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
         total: data.summary.total || 0,
         itemCount: data.items_count || 0,
       });
+      updateCartCount(data.items_count || 0);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
       Alert.alert('Error', 'Failed to load cart items');
@@ -141,6 +144,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
           onPress: async () => {
             try {
               await cartService.clearCart();
+              updateCartCount(0);
               fetchCart();
             } catch (error) {
               console.error('Failed to clear cart:', error);
@@ -227,6 +231,13 @@ export const CartScreen: React.FC<CartScreenProps> = ({
                   <View style={styles.emptyContainer}>
                     <Icon name="shopping-cart" size={64} color={COLORS.gray} />
                     <Text style={styles.emptyText}>Your cart is empty</Text>
+                    <TouchableOpacity
+                      style={styles.continueShoppingButton}
+                      onPress={() => handleTabPress('home')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.continueShoppingText}>Continue Shopping</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
               </View>
@@ -322,6 +333,18 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.gray,
     marginTop: SPACING.md,
+  },
+  continueShoppingButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 30,
+    marginTop: SPACING.xl,
+  },
+  continueShoppingText: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.semiBold,
+    color: COLORS.background,
   },
   listHeader: {
     flexDirection: 'row',

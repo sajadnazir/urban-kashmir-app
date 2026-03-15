@@ -215,6 +215,7 @@ function App(): React.JSX.Element {
           <WishlistScreen
             onBack={handleBack}
             onProductPress={handleProductPress}
+            onTabPress={handleTabPress}
           />
         );
       default:
