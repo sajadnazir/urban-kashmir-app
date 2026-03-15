@@ -22,7 +22,9 @@ import {
 } from '../components';
 import { productService, FullProduct } from '../api/services/productService';
 import { cartService } from '../api/services/cartService';
+import { wishlistService } from '../api/services/wishlistService';
 import { useAuthStore } from '../store/authStore';
+import { useWishlistStore } from '../store/wishlistStore';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 
 const { width } = Dimensions.get('window');
@@ -47,7 +49,11 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { wishlistIds, toggleWishlistItem } = useWishlistStore();
+
+  const isFavorite = React.useMemo(() => {
+    return wishlistIds.has(String(product?.id));
+  }, [product?.id, wishlistIds]);
 
   useEffect(() => {
     fetchProductDetails();
@@ -96,6 +102,23 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
     } catch (error) {
       console.error('Add to cart failed:', error);
       Alert.alert('Error', 'Failed to add to cart');
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      onRequireAuth?.();
+      return;
+    }
+    
+    if (!product) return;
+
+    try {
+      await toggleWishlistItem(product.id);
+    } catch (error) {
+      // Error is caught by optimistic store
+      console.error('Wishlist toggle failed:', error);
+      Alert.alert('Error', 'Failed to update wishlist');
     }
   };
 
@@ -197,10 +220,10 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
               {/* Favorite Button */}
               <TouchableOpacity
                 style={styles.favoriteButton}
-                onPress={() => setIsFavorite(!isFavorite)}
+                onPress={handleFavoriteToggle}
                 activeOpacity={0.7}
               >
-                <Icon name="refresh-cw" size={20} color={COLORS.background} />
+                <Icon name="heart" size={20} color={isFavorite ? COLORS.primary : COLORS.background} />
               </TouchableOpacity>
             </View>
 

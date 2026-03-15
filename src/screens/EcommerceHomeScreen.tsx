@@ -19,6 +19,7 @@ import type { ApiVendor } from '../api/services/vendorService';
 import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
+import { useWishlistStore } from '../store/wishlistStore';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
@@ -40,6 +41,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const { profile } = useUserStore();
   const { isAuthenticated } = useAuthStore();
+  const { fetchWishlist } = useWishlistStore();
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,6 +58,12 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     fetchCategories();
     fetchVendors();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchWishlist();
+    }
+  }, [isAuthenticated]);
 
   const fetchCategories = async () => {
     try {
@@ -259,7 +267,15 @@ const bannerItems = [
         <Header
           userName={profile?.name || "Guest"}
           onProfilePress={() => console.log('Profile pressed')}
-          onWishlistPress={() => console.log('Wishlist pressed')}
+          onWishlistPress={() => {
+            if (!isAuthenticated) {
+              onRequireAuth?.();
+            } else {
+              // Hacky way to simulate a tab press for routing or add explicit prop handling
+              // Adding an explicit prop makes more sense:
+              onTabPress?.('wishlist' as TabName); // using cast as we expand types
+            }
+          }}
           onNotificationPress={() => console.log('Notification pressed')}
         />
 
@@ -281,7 +297,6 @@ const bannerItems = [
               <ProductCard
                 product={item}
                 onPress={onProductPress}
-                onFavoritePress={(p) => console.log('Fav', p)}
                 onAddToCart={handleAddToCart}
               />
             )}

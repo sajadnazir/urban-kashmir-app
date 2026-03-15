@@ -19,6 +19,7 @@ import {
   ReelsPlayerScreen,
   LoginScreen,
   SplashScreen,
+  WishlistScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { useAuthStore } from './src/store/authStore';
@@ -32,7 +33,8 @@ type Screen =
   | 'editProfile'
   | 'storeHome'
   | 'reelsPlayer'
-  | 'productDetails';
+  | 'productDetails'
+  | 'wishlist';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -83,6 +85,8 @@ function App(): React.JSX.Element {
       setCurrentScreen('profile');
     } else if (currentScreen === 'profile') {
       setCurrentScreen('home');
+    } else if (currentScreen === 'wishlist') {
+      setCurrentScreen('profile'); // defaulting back to profile from wishlist
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -106,6 +110,13 @@ function App(): React.JSX.Element {
         setCurrentScreen('login');
       } else {
         setCurrentScreen('profile');
+      }
+    } else if (tab === 'wishlist' as any) {
+      if (!isAuthenticated) {
+         setIntendedScreen('wishlist');
+         setCurrentScreen('login');
+      } else {
+         setCurrentScreen('wishlist');
       }
     }
   };
@@ -164,6 +175,16 @@ function App(): React.JSX.Element {
             onBack={handleBack}
             onTabPress={handleTabPress}
             onEditProfile={handleEditProfile}
+            onMenuPress={(id) => {
+              if (id === 'wishlist') {
+                if (!isAuthenticated) {
+                  setIntendedScreen('wishlist');
+                  setCurrentScreen('login');
+                } else {
+                  setCurrentScreen('wishlist');
+                }
+              }
+            }}
           />
         );
       case 'editProfile':
@@ -187,6 +208,13 @@ function App(): React.JSX.Element {
             onBack={handleBack}
             onShare={() => console.log('Share')}
             onRequireAuth={handleRequireAuth}
+          />
+        );
+      case 'wishlist':
+        return (
+          <WishlistScreen
+            onBack={handleBack}
+            onProductPress={handleProductPress}
           />
         );
       default:

@@ -26,12 +26,14 @@ interface ProfileScreenProps {
   onBack?: () => void;
   onTabPress?: (tab: TabName) => void;
   onEditProfile?: () => void;
+  onMenuPress?: (menuId: string) => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onBack,
   onTabPress,
   onEditProfile,
+  onMenuPress,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('profile');
   const { profile, fetchProfile, isLoading } = useUserStore();
@@ -51,16 +53,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   
     {
       id: 'address',
-      icon: 'address',
+      icon: 'map-pin', // Fix icon name map-pin vs address
       title: 'Address',
       subtitle: 'Manage your delivery addresses',
     },
-    // {
-    //   id: 'favorites',
-    //   icon: 'heart',
-    //   title: 'Favorites',
-    //   subtitle: 'Items and Lists You,ve Saved',
-    // },
+    {
+      id: 'wishlist',
+      icon: 'heart',
+      title: 'My Wishlist',
+      subtitle: 'Items You\'ve Saved',
+    },
     // {
     //   id: 'portfolio',
     //   icon: 'briefcase',
@@ -69,10 +71,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     // },
   ];
 
- 
-
   const handleMenuPress = (id: string) => {
     console.log('Menu item pressed:', id);
+    if (id === 'wishlist' && onMenuPress) {
+      onMenuPress(id);
+    }
   };
 
   const handleTabPress = (tab: TabName) => {

@@ -6,9 +6,12 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { wishlistService } from '../api/services/wishlistService';
+import { useWishlistStore } from '../store';
 
 export interface Product {
   id: string;
@@ -33,6 +36,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onFavoritePress,
   onAddToCart,
 }) => {
+  const { wishlistIds, toggleWishlistItem } = useWishlistStore();
+  
+  // Calculate true favorite status 
+  // It's favorite if it's explicitly set on the model (from certain APIs) 
+  // OR if it's currently tracked in our global wishlist store
+  const isFavorite = React.useMemo(() => {
+    return product.isFavorite || wishlistIds.has(String(product.id));
+  }, [product.isFavorite, product.id, wishlistIds]);
+
+  const handleFavoritePress = async () => {
+    if (onFavoritePress) {
+      onFavoritePress(product);
+      return;
+    }
+
+    try {
+      await toggleWishlistItem(product.id);
+    } catch (error) {
+       // Error inherently handled and reverted via optimistic UI logic in store
+    }
+  };
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Icon
@@ -54,13 +78,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Favorite Button */}
       <TouchableOpacity
         style={styles.favoriteButton}
-        onPress={() => onFavoritePress?.(product)}
+        onPress={handleFavoritePress}
         activeOpacity={0.7}
       >
         <Icon
           name="heart"
           size={18}
-          color={product.isFavorite ? COLORS.primary : COLORS.gray}
+          color={isFavorite ? COLORS.primary : COLORS.gray}
         />
       </TouchableOpacity>
 

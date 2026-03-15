@@ -56,4 +56,12 @@ export const ENDPOINTS = {
     LIST: '/vendors',
     DETAIL: (slug: string) => `/vendors/${slug}`,
   },
+
+  // Wishlist endpoints
+  WISHLIST: {
+    LIST: '/wishlist',
+    ADD_ITEM: '/wishlist',
+    REMOVE_ITEM: (id: string | number) => `/wishlist/${id}`,
+    MOVE_TO_CART: (id: string | number) => `/wishlist/${id}/move-to-cart`,
+  },
 } as const;
