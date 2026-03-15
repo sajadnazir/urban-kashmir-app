@@ -23,9 +23,10 @@ import Icon from 'react-native-vector-icons/Feather';
 interface OrderDetailsScreenProps {
   orderId: number;
   onBack: () => void;
+  onTrackOrder?: (trackingNumber: string) => void;
 }
 
-export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId, onBack }) => {
+export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId, onBack, onTrackOrder }) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -193,6 +194,16 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
               </>
             )}
           </TouchableOpacity>
+
+          {order.tracking_number && (
+            <TouchableOpacity 
+              style={[styles.invoiceButton, { backgroundColor: 'rgba(59, 130, 246, 0.08)', marginTop: 8 }]} 
+              onPress={() => onTrackOrder?.(order.tracking_number!)}
+            >
+              <Icon name="truck" size={16} color="#3B82F6" />
+              <Text style={[styles.invoiceButtonText, { color: '#3B82F6' }]}>Track Order</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Shipping Address */}

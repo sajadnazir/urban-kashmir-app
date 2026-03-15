@@ -46,6 +46,7 @@ const mapApiOrder = (apiOrder: any): Order => ({
       image_url: item.product?.image_url || ((item as any).product?.images?.[0]?.url) || item.image_url,
     };
   }),
+  tracking_number: apiOrder.tracking_number || apiOrder.tracking_no,
   created_at: apiOrder.created_at,
 });
 
@@ -95,5 +96,9 @@ export const orderService = {
 
   returnOrder: async (id: string | number, payload: any): Promise<any> => {
     return apiService.post<any>(ENDPOINTS.ORDERS.RETURN(id), payload);
+  },
+
+  trackOrder: async (trackingNumber: string): Promise<any> => {
+    return apiService.get<any>(ENDPOINTS.TRACKING(trackingNumber));
   },
 };

@@ -42,6 +42,7 @@ export interface Order {
   shipping_address?: any; // Reusing Address type from address.ts is better but keeping it simple for now
   billing_address?: any;
   items?: OrderItem[];
+  tracking_number?: string;
   created_at: string;
 }
 

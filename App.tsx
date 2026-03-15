@@ -28,6 +28,7 @@ import {
   OrderConfirmationScreen,
   OrdersScreen,
   OrderDetailsScreen,
+  TrackOrderScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { Order } from './src/types/order';
@@ -51,7 +52,8 @@ type Screen =
   | 'checkout'
   | 'orderConfirmation'
   | 'orders'
-  | 'orderDetails';
+  | 'orderDetails'
+  | 'trackOrder';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -67,6 +69,7 @@ function App(): React.JSX.Element {
   const [checkoutTotals, setCheckoutTotals] = useState({ total: 0, subtotal: 0, tax: 0, discount: 0, itemCount: 0 });
   const [orderResult, setOrderResult] = useState<{ success: boolean; orderNumber?: string; errorMessage?: string } | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [selectedTrackingNumber, setSelectedTrackingNumber] = useState<string | null>(null);
   const startTime = useRef(Date.now());
 
   // Hardware back button handler
@@ -144,6 +147,8 @@ function App(): React.JSX.Element {
       setCurrentScreen('profile');
     } else if (currentScreen === 'orderDetails') {
       setCurrentScreen('orders');
+    } else if (currentScreen === 'trackOrder') {
+      setCurrentScreen('orderDetails');
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -359,7 +364,15 @@ function App(): React.JSX.Element {
           <OrderDetailsScreen 
             orderId={selectedOrderId} 
             onBack={handleBack} 
+            onTrackOrder={(trackingNumber: string) => {
+              setSelectedTrackingNumber(trackingNumber);
+              setCurrentScreen('trackOrder');
+            }}
           />
+        ) : null;
+      case 'trackOrder':
+        return selectedTrackingNumber ? (
+          <TrackOrderScreen trackingNumber={selectedTrackingNumber} onBack={handleBack} />
         ) : null;
       default:
         return (

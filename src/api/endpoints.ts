@@ -96,4 +96,7 @@ export const ENDPOINTS = {
     MARK_ALL_READ: '/notifications/mark-all-read',
     FCM_TOKEN: '/notifications/fcm-token',
   },
+
+  // Track endpoint
+  TRACKING: (number: string) => `/track/${number}`,
 } as const;

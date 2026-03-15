@@ -20,4 +20,5 @@ export * from './CheckoutScreen';
 export * from './OrderConfirmationScreen';
 export * from './OrdersScreen';
 export * from './OrderDetailsScreen';
+export * from './TrackOrderScreen';
 export { LoginScreen } from './LoginScreen';
