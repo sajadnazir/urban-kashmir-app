@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, BackHandler, View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import {
@@ -54,7 +54,28 @@ function App(): React.JSX.Element {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
+  const [showExitDialog, setShowExitDialog] = useState(false);
   const startTime = useRef(Date.now());
+
+  // Hardware back button handler
+  useEffect(() => {
+    const onBackPress = () => {
+      const screensWithBack: Screen[] = [
+        'productDetails', 'cart', 'storeHome', 'reelsPlayer',
+        'editProfile', 'profile', 'wishlist', 'address',
+        'notifications', 'notificationDetails', 'shop',
+      ];
+      if (screensWithBack.includes(currentScreen)) {
+        handleBack();
+        return true; // Consumed — don't exit
+      }
+      // On home screen — show custom exit dialog
+      setShowExitDialog(true);
+      return true;
+    };
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => subscription.remove();
+  }, [currentScreen]);
 
   // Safety timeout for splash screen
   useEffect(() => {
@@ -277,8 +298,141 @@ function App(): React.JSX.Element {
       {renderScreen()}
       {isAppLoading && <SplashScreen />}
       <Toast />
+
+      {/* Custom Exit Dialog */}
+      <Modal
+        visible={showExitDialog}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowExitDialog(false)}
+      >
+        <TouchableOpacity
+          style={exitStyles.overlay}
+          activeOpacity={1}
+          onPress={() => setShowExitDialog(false)}
+        >
+          <View style={exitStyles.sheet}>
+            {/* Handle */}
+            <View style={exitStyles.handle} />
+
+            {/* Icon */}
+            <View style={exitStyles.iconWrap}>
+              <Text style={exitStyles.iconEmoji}>🚪</Text>
+            </View>
+
+            <Text style={exitStyles.title}>Exit Urban Kashmir?</Text>
+            <Text style={exitStyles.subtitle}>
+              You can always come back and explore more.
+            </Text>
+
+            <View style={exitStyles.buttonRow}>
+              <TouchableOpacity
+                style={exitStyles.cancelButton}
+                onPress={() => setShowExitDialog(false)}
+              >
+                <Text style={exitStyles.cancelText}>Stay</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={exitStyles.exitButton}
+                onPress={() => BackHandler.exitApp()}
+              >
+                <Text style={exitStyles.exitText}>Exit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaProvider>
   );
 }
+
+const exitStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+    paddingTop: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 16,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E5E7EB',
+    marginBottom: 24,
+  },
+  iconWrap: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: '#FFF3EE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  iconEmoji: {
+    fontSize: 28,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 6,
+    letterSpacing: -0.2,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 14,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+  },
+  cancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  exitButton: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 14,
+    backgroundColor: '#ED7745',
+    alignItems: 'center',
+    shadowColor: '#ED7745',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  exitText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+});
 
 export default App;
