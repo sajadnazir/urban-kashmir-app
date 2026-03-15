@@ -87,10 +87,14 @@ export const authService = {
    * Verify the OTP received by the user and log them in.
    * Saves tokens on success.
    */
-  verifyOtp: async (phone: string, otp: string): Promise<VerifyOtpResponse> => {
+  verifyOtp: async (phone: string, otp: string, name?: string, email?: string): Promise<VerifyOtpResponse> => {
+    const payload: VerifyOtpPayload = { phone_number: phone, otp };
+    if (name) payload.name = name;
+    if (email) payload.email = email;
+    
     const data = await apiService.post<VerifyOtpResponse, VerifyOtpPayload>(
       ENDPOINTS.AUTH.VERIFY_OTP,
-      { phone_number: phone, otp },
+      payload,
     );
     await tokenStorage.saveTokens(data.token, data.refreshToken);
     return data;

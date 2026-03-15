@@ -47,11 +47,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onHome 
 }) => {
   const [step, setStep] = useState<Step>('phone');
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Phone step
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
   // OTP step
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
@@ -66,6 +69,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const fullPhone = `${selectedCountry.dial}${phone}`;
   const isPhoneValid = phone.replace(/\D/g, '').length >= 7;
+  const isRegisterValid = authMode === 'register' ? (name.trim().length >= 2 && email.includes('@')) : true;
   const otpValue = otp.join('');
   const isOtpComplete = otpValue.length === OTP_LENGTH;
 
@@ -146,7 +150,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     if (!isOtpComplete || isLoading) return;
     clearError();
     try {
-      await loginWithOtp(fullPhone, otpValue);
+      await loginWithOtp(
+        fullPhone, 
+        otpValue, 
+        authMode === 'register' ? name : undefined,
+        authMode === 'register' ? email : undefined
+      );
       onLoginSuccess?.();
     } catch { /* error shown via store */ }
   };
@@ -205,10 +214,38 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           {step === 'phone' ? (
             // ────── PHONE STEP ──────
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Enter Your Number</Text>
-              <Text style={styles.cardSub}>
-                We'll send a one-time code to verify your identity.
+              <Text style={styles.cardTitle}>
+                {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
               </Text>
+              <Text style={styles.cardSub}>
+                {authMode === 'login' 
+                  ? 'We\'ll send a one-time code to verify your identity.' 
+                  : 'Join us for a better shopping experience.'}
+              </Text>
+
+              {authMode === 'register' && (
+                <>
+                  <Text style={styles.label}>Full Name</Text>
+                  <TextInput
+                    style={[styles.phoneInput, { marginBottom: SPACING.md, height: 48 }]}
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Enter your name"
+                    placeholderTextColor={COLORS.gray}
+                  />
+
+                  <Text style={styles.label}>Email Address</Text>
+                  <TextInput
+                    style={[styles.phoneInput, { marginBottom: SPACING.md, height: 48 }]}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Enter your email"
+                    placeholderTextColor={COLORS.gray}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </>
+              )}
 
               {/* Label */}
               <Text style={styles.label}>Mobile Number</Text>
@@ -256,13 +293,30 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               {sendError ? <Text style={styles.errorText}>{sendError}</Text> : null}
 
               <TouchableOpacity
-                style={[styles.primaryBtn, !isPhoneValid && styles.primaryBtnDisabled]}
+                style={[styles.primaryBtn, (!isPhoneValid || !isRegisterValid) && styles.primaryBtnDisabled]}
                 onPress={handleSendOtp}
-                disabled={!isPhoneValid || sendingOtp}
+                disabled={!isPhoneValid || !isRegisterValid || sendingOtp}
                 activeOpacity={0.85}>
                 {sendingOtp
                   ? <ActivityIndicator color={COLORS.background} size="small" />
-                  : <Text style={styles.primaryBtnText}>Send OTP</Text>}
+                  : <Text style={styles.primaryBtnText}>
+                      {authMode === 'login' ? 'Send OTP' : 'Register & Send OTP'}
+                    </Text>}
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.modeToggle} 
+                onPress={() => {
+                  setAuthMode(authMode === 'login' ? 'register' : 'login');
+                  clearError();
+                  setSendError(null);
+                }}
+              >
+                <Text style={styles.modeToggleText}>
+                  {authMode === 'login' 
+                    ? "Don't have an account? Register" 
+                    : "Already have an account? Login"}
+                </Text>
               </TouchableOpacity>
 
               <Text style={styles.disclaimer}>
@@ -596,5 +650,15 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     marginBottom: SPACING.sm,
     textAlign: 'center',
+  },
+  modeToggle: {
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+    paddingVertical: SPACING.xs,
+  },
+  modeToggleText: {
+    color: COLORS.primary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: FONT_WEIGHTS.semiBold,
   },
 });

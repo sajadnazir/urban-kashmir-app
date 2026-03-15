@@ -20,7 +20,7 @@ interface AuthState {
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
-  loginWithOtp: (phone: string, otp: string) => Promise<void>;
+  loginWithOtp: (phone: string, otp: string, name?: string, email?: string) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: User) => void;
   clearError: () => void;
@@ -61,10 +61,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   /** Verify OTP and transition to authenticated state. */
-  loginWithOtp: async (phone: string, otp: string) => {
+  loginWithOtp: async (phone: string, otp: string, name?: string, email?: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await authService.verifyOtp(phone, otp);
+      const response = await authService.verifyOtp(phone, otp, name, email);
       set({ user: response.user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       set({

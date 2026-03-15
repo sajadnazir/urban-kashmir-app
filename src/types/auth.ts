@@ -35,6 +35,8 @@ export interface SendOtpResponse {
 export interface VerifyOtpPayload {
   phone_number: string;
   otp: string;
+  name?: string;
+  email?: string;
 }
 
 export interface VerifyOtpResponse {
