@@ -22,9 +22,12 @@ import {
   SplashScreen,
   WishlistScreen,
   AddressScreen,
+  NotificationsScreen,
+  NotificationDetailsScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { useAuthStore } from './src/store/authStore';
+import type { Notification } from './src/types/notification';
 
 type Screen =
   | 'login'
@@ -37,7 +40,9 @@ type Screen =
   | 'reelsPlayer'
   | 'productDetails'
   | 'wishlist'
-  | 'address';
+  | 'address'
+  | 'notifications'
+  | 'notificationDetails';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -47,6 +52,7 @@ function App(): React.JSX.Element {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
   const startTime = useRef(Date.now());
 
@@ -89,9 +95,13 @@ function App(): React.JSX.Element {
     } else if (currentScreen === 'profile') {
       setCurrentScreen('home');
     } else if (currentScreen === 'wishlist') {
-      setCurrentScreen('profile'); // defaulting back to profile from wishlist
+      setCurrentScreen('profile');
     } else if (currentScreen === 'address') {
-      setCurrentScreen('profile'); // returning back to profile
+      setCurrentScreen('profile');
+    } else if (currentScreen === 'notifications') {
+      setCurrentScreen('home');
+    } else if (currentScreen === 'notificationDetails') {
+      setCurrentScreen('notifications');
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -157,6 +167,7 @@ function App(): React.JSX.Element {
             onStorePress={handleStorePress}
             onTabPress={handleTabPress}
             onRequireAuth={handleRequireAuth}
+            onNotificationsPress={() => setCurrentScreen('notifications')}
             onDataLoaded={() => {
               const elapsed = Date.now() - startTime.current;
               const remaining = Math.max(0, 3000 - elapsed);
@@ -232,6 +243,20 @@ function App(): React.JSX.Element {
         );
       case 'address':
         return <AddressScreen onBack={handleBack} />;
+      case 'notifications':
+        return (
+          <NotificationsScreen
+            onBack={handleBack}
+            onNotificationPress={(notification) => {
+              setSelectedNotification(notification);
+              setCurrentScreen('notificationDetails');
+            }}
+          />
+        );
+      case 'notificationDetails':
+        return selectedNotification ? (
+          <NotificationDetailsScreen notification={selectedNotification} onBack={handleBack} />
+        ) : null;
       default:
         return (
           <EcommerceHomeScreen

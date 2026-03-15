@@ -73,4 +73,12 @@ export const ENDPOINTS = {
     DELETE: (id: string | number) => `/addresses/${id}`,
     SET_DEFAULT: (id: string | number) => `/addresses/${id}/set-default`,
   },
+
+  // Notification endpoints
+  NOTIFICATIONS: {
+    LIST: '/notifications',
+    READ: (id: string | number) => `/notifications/${id}/read`,
+    MARK_ALL_READ: '/notifications/mark-all-read',
+    FCM_TOKEN: '/notifications/fcm-token',
+  },
 } as const;

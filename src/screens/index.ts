@@ -14,4 +14,6 @@ export * from './ReelsPlayerScreen';
 export * from './SplashScreen';
 export * from './WishlistScreen';
 export * from './AddressScreen';
+export * from './NotificationsScreen';
+export * from './NotificationDetailsScreen';
 export { LoginScreen } from './LoginScreen';

@@ -30,6 +30,7 @@ interface EcommerceHomeScreenProps {
   onTabPress?: (tab: TabName) => void;
   onRequireAuth?: () => void;
   onDataLoaded?: () => void;
+  onNotificationsPress?: () => void;
 }
 
 export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
@@ -38,6 +39,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   onTabPress,
   onRequireAuth,
   onDataLoaded,
+  onNotificationsPress,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -302,7 +304,7 @@ const bannerItems = [
               onTabPress?.('wishlist' as TabName); // using cast as we expand types
             }
           }}
-          onNotificationPress={() => console.log('Notification pressed')}
+          onNotificationPress={() => onNotificationsPress?.()}
         />
 
         {isLoading && page === 1 ? (
