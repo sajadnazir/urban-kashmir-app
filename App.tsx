@@ -24,6 +24,7 @@ import {
   AddressScreen,
   NotificationsScreen,
   NotificationDetailsScreen,
+  CheckoutScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { useAuthStore } from './src/store/authStore';
@@ -42,7 +43,8 @@ type Screen =
   | 'wishlist'
   | 'address'
   | 'notifications'
-  | 'notificationDetails';
+  | 'notificationDetails'
+  | 'checkout';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -55,6 +57,7 @@ function App(): React.JSX.Element {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [checkoutTotals, setCheckoutTotals] = useState({ total: 0, subtotal: 0, tax: 0, discount: 0, itemCount: 0 });
   const startTime = useRef(Date.now());
 
   // Hardware back button handler
@@ -123,6 +126,8 @@ function App(): React.JSX.Element {
       setCurrentScreen('home');
     } else if (currentScreen === 'notificationDetails') {
       setCurrentScreen('notifications');
+    } else if (currentScreen === 'checkout') {
+      setCurrentScreen('cart');
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -205,7 +210,16 @@ function App(): React.JSX.Element {
           />
         );
       case 'cart':
-        return <CartScreen onBack={handleBack} onTabPress={handleTabPress} />;
+        return (
+          <CartScreen
+            onBack={handleBack}
+            onTabPress={handleTabPress}
+            onProceedToCheckout={(totals) => {
+              setCheckoutTotals(totals);
+              setCurrentScreen('checkout');
+            }}
+          />
+        );
       case 'profile':
         return (
           <ProfileScreen
@@ -278,6 +292,18 @@ function App(): React.JSX.Element {
         return selectedNotification ? (
           <NotificationDetailsScreen notification={selectedNotification} onBack={handleBack} />
         ) : null;
+      case 'checkout':
+        return (
+          <CheckoutScreen
+            onBack={handleBack}
+            onOrderSuccess={() => setCurrentScreen('home')}
+            cartTotal={checkoutTotals.total}
+            cartSubtotal={checkoutTotals.subtotal}
+            cartTax={checkoutTotals.tax}
+            cartDiscount={checkoutTotals.discount}
+            itemCount={checkoutTotals.itemCount}
+          />
+        );
       default:
         return (
           <EcommerceHomeScreen

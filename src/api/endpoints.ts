@@ -74,6 +74,18 @@ export const ENDPOINTS = {
     SET_DEFAULT: (id: string | number) => `/addresses/${id}/set-default`,
   },
 
+  // Order endpoints
+  ORDERS: {
+    PLACE: '/orders',
+    LIST: '/orders',
+    DETAIL: (id: string | number) => `/orders/${id}`,
+  },
+
+  // Payment methods
+  PAYMENTS: {
+    METHODS: '/payments/methods',
+  },
+
   // Notification endpoints
   NOTIFICATIONS: {
     LIST: '/notifications',

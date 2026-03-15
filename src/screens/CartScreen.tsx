@@ -28,11 +28,13 @@ import { useCartStore } from '../store';
 interface CartScreenProps {
   onBack?: () => void;
   onTabPress?: (tab: TabName) => void;
+  onProceedToCheckout?: (totals: { total: number; subtotal: number; tax: number; discount: number; itemCount: number }) => void;
 }
 
 export const CartScreen: React.FC<CartScreenProps> = ({
   onBack,
   onTabPress,
+  onProceedToCheckout,
 }) => {
   const [activeTab, setActiveTab] = useState<TabName>('cart');
   const [promoCode, setPromoCode] = useState('');
@@ -183,7 +185,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
   };
 
   const handleCheckout = () => {
-    console.log('Proceed to checkout');
+    onProceedToCheckout?.(totals);
   };
 
   const handleTabPress = (tab: TabName) => {

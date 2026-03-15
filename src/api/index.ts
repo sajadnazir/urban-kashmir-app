@@ -19,4 +19,5 @@ export * from './services/vendorService';
 export * from './services/wishlistService';
 export { addressService } from './services/addressService';
 export { notificationService } from './services/notificationService';
+export { orderService } from './services/orderService';
 export type { ApiResponse, RequestOptions } from './apiService';
