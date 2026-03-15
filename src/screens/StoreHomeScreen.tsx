@@ -195,6 +195,7 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
                       product={product}
                       onPress={() => onProductPress?.(product)}
                       onAddToCart={handleAddToCart}
+                      onRequireAuth={onRequireAuth}
                     />
                   ))
                 ) : (

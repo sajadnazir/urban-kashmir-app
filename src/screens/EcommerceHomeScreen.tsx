@@ -298,6 +298,7 @@ const bannerItems = [
                 product={item}
                 onPress={onProductPress}
                 onAddToCart={handleAddToCart}
+                onRequireAuth={onRequireAuth}
               />
             )}
             onEndReached={handleLoadMore}

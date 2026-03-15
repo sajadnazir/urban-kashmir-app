@@ -11,7 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { wishlistService } from '../api/services/wishlistService';
-import { useWishlistStore } from '../store';
+import { useWishlistStore, useAuthStore } from '../store';
 
 export interface Product {
   id: string;
@@ -28,6 +28,7 @@ interface ProductCardProps {
   onPress?: (product: Product) => void;
   onFavoritePress?: (product: Product) => void;
   onAddToCart?: (product: Product) => void;
+  onRequireAuth?: () => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -35,8 +36,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onPress,
   onFavoritePress,
   onAddToCart,
+  onRequireAuth,
 }) => {
   const { wishlistIds, toggleWishlistItem } = useWishlistStore();
+  const { isAuthenticated } = useAuthStore();
   
   // Calculate true favorite status 
   // It's favorite if it's explicitly set on the model (from certain APIs) 
@@ -48,6 +51,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleFavoritePress = async () => {
     if (onFavoritePress) {
       onFavoritePress(product);
+      return;
+    }
+
+    if (!isAuthenticated) {
+      onRequireAuth?.();
       return;
     }
 

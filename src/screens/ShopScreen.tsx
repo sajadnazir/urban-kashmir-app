@@ -191,8 +191,8 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
               <ProductCard
                 product={item}
                 onPress={onProductPress}
-                onFavoritePress={(p) => console.log('Fav', p)}
                 onAddToCart={handleAddToCart}
+                onRequireAuth={onRequireAuth}
               />
             )}
             onEndReached={handleLoadMore}

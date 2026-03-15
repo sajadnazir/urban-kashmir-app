@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { useWishlistStore } from '../store';
 
 interface HeaderProps {
   userName: string;
@@ -18,6 +19,9 @@ export const Header: React.FC<HeaderProps> = ({
   onWishlistPress,
   onNotificationPress,
 }) => {
+  const { wishlistIds } = useWishlistStore();
+  const wishlistCount = wishlistIds.size;
+
   return (
     <View style={styles.container}>
       {/* Left Side - Profile */}
@@ -50,7 +54,14 @@ export const Header: React.FC<HeaderProps> = ({
           onPress={onWishlistPress}
           activeOpacity={0.7}
         >
-          <Icon name="heart" size={20} color={COLORS.text} />
+          <View>
+            <Icon name="heart" size={20} color={COLORS.text} />
+            {wishlistCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{wishlistCount}</Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -140,5 +151,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: COLORS.primary, // Make sure it contrasts well
+    borderRadius: 10,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1,
+    borderColor: COLORS.background, // Adds a nice separation
+  },
+  badgeText: {
+    color: COLORS.background,
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
