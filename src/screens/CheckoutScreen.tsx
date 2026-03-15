@@ -20,7 +20,8 @@ import type { PaymentMethod } from '../types/order';
 
 interface CheckoutScreenProps {
   onBack?: () => void;
-  onOrderSuccess?: (orderId: number) => void;
+  onOrderSuccess?: (orderId: number, orderNumber?: string) => void;
+  onOrderError?: (errorMessage: string) => void;
   cartTotal: number;
   cartSubtotal: number;
   cartTax: number;
@@ -42,6 +43,7 @@ const PAYMENT_ICONS: Record<string, string> = {
 export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({
   onBack,
   onOrderSuccess,
+  onOrderError,
   cartTotal,
   cartSubtotal,
   cartTax,
@@ -112,10 +114,11 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({
         payment_method: selectedPayment,
       });
       Toast.show({ type: 'success', text1: '🎉 Order Placed!', text2: `Order #${order.order_number || order.id} confirmed` });
-      onOrderSuccess?.(order.id);
+      onOrderSuccess?.(order.id, order.order_number);
     } catch (error: any) {
       const msg = error?.response?.data?.message ?? error?.message ?? 'Failed to place order';
       Toast.show({ type: 'error', text1: 'Order Failed', text2: msg });
+      onOrderError?.(msg);
     } finally {
       setIsPlacingOrder(false);
     }

@@ -17,4 +17,5 @@ export * from './AddressScreen';
 export * from './NotificationsScreen';
 export * from './NotificationDetailsScreen';
 export * from './CheckoutScreen';
+export * from './OrderConfirmationScreen';
 export { LoginScreen } from './LoginScreen';
