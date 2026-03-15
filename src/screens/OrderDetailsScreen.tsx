@@ -11,11 +11,12 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderTwo } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
-import { orderService } from '../api';
+import { orderService, tokenStorage } from '../api';
 import { Order } from '../types/order';
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -28,6 +29,8 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
+
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('changed_mind');
   const [cancelComments, setCancelComments] = useState('');
@@ -49,6 +52,28 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
       console.error('Failed to fetch order details:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    try {
+      setIsInvoiceLoading(true);
+      const { url } = await orderService.getOrderInvoice(orderId);
+      const token = await tokenStorage.getAccessToken();
+      
+      // Since we don't have a download manager, we'll try to open it in browser 
+      // with token if supported.
+      const fullUrl = `${url}?token=${token}`; 
+      
+      try {
+        await Linking.openURL(fullUrl);
+      } catch (err) {
+        Alert.alert('Error', 'Cannot open invoice link. Please ensure a browser is installed.');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to generate invoice link');
+    } finally {
+      setIsInvoiceLoading(false);
     }
   };
 
@@ -153,6 +178,21 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
             </View>
           </View>
           <Text style={styles.orderDate}>Placed on {new Date(order.created_at).toLocaleString()}</Text>
+          
+          <TouchableOpacity 
+            style={styles.invoiceButton} 
+            onPress={handleDownloadInvoice}
+            disabled={isInvoiceLoading}
+          >
+            {isInvoiceLoading ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <>
+                <Icon name="download" size={16} color={COLORS.primary} />
+                <Text style={styles.invoiceButtonText}>Download Invoice</Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Shipping Address */}
@@ -413,6 +453,22 @@ const styles = StyleSheet.create({
   orderDate: {
     fontSize: 13,
     color: '#6B7280',
+    marginBottom: SPACING.md,
+  },
+  invoiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(237, 119, 69, 0.08)',
+    alignSelf: 'flex-start',
+    gap: 6,
+  },
+  invoiceButtonText: {
+    fontSize: 13,
+    fontWeight: FONT_WEIGHTS.semiBold,
+    color: COLORS.primary,
   },
   sectionHeader: {
     flexDirection: 'row',

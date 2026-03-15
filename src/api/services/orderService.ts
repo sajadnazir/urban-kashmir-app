@@ -1,3 +1,4 @@
+import apiClient from '../client';
 import { apiService } from '../apiService';
 import { ENDPOINTS } from '../endpoints';
 import type { PaymentMethod, PlaceOrderPayload, Order, OrdersResponse } from '../../types/order';
@@ -58,6 +59,12 @@ export const orderService = {
     const res = await apiService.post<any, PlaceOrderPayload>(ENDPOINTS.ORDERS.PLACE, payload);
     const data = res?.order || res?.data?.order || res?.data || res;
     return mapApiOrder(data);
+  },
+
+  getOrderInvoice: async (id: string | number): Promise<any> => {
+    // For now, we'll return the full URL with base URL since we might need to open it
+    const url = `${apiClient.defaults.baseURL}${ENDPOINTS.ORDERS.INVOICE(id)}`;
+    return { url };
   },
 
   getOrders: async (page: number = 1, perPage: number = 20): Promise<OrdersResponse> => {
