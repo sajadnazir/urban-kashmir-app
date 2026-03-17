@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { useWishlistStore } from '../store';
+import { normalizeFont } from '../utils/responsive';
 
 interface HeaderProps {
   userName: string;
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profilePlaceholderText: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: normalizeFont(FONT_SIZES.xl),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
   },
@@ -120,13 +121,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   userName: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: normalizeFont(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.background,
     marginBottom: 2,
   },
   welcomeText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: normalizeFont(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.lightGray,
   },
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: COLORS.background,
-    fontSize: 10,
+    fontSize: normalizeFont(10),
     fontWeight: 'bold',
   },
 });

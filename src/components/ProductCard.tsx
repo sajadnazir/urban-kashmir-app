@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { wishlistService } from '../api/services/wishlistService';
 import { useWishlistStore, useAuthStore } from '../store';
+import { normalizeFont, scale } from '../utils/responsive';
 
 export interface Product {
   id: string;
@@ -140,7 +141,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: Dimensions.get('window').width * 0.45,
+    width: scale(165),
     backgroundColor: COLORS.background,
   //  backgroundColor:"red",
     borderRadius: 16,
@@ -189,13 +190,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imagePlaceholderText: {
-    fontSize: 50,
+    fontSize: normalizeFont(50),
   },
   infoContainer: {
     padding: SPACING.sm,
   },
   productName: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: normalizeFont(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   star: {
-    fontSize: 12,
+    fontSize: normalizeFont(12),
     marginRight: 2,
   },
   footer: {
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   price: {
-    fontSize: FONT_SIZES.md,
+    fontSize: normalizeFont(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },

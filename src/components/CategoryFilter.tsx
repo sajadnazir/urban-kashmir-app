@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { normalizeFont } from '../utils/responsive';
 
 interface Category {
   id: string;
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.darkGray,
   },
   categoryText: {
-    fontSize: FONT_SIZES.md,
+    fontSize: normalizeFont(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.text,
   },

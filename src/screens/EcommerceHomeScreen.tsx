@@ -23,6 +23,7 @@ import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useCartStore } from '../store/cartStore';
+import { normalizeFont } from '../utils/responsive';
 
 interface EcommerceHomeScreenProps {
   onProductPress?: (product: Product) => void;
@@ -394,12 +395,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: normalizeFont(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   seeAll: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: normalizeFont(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.primary,
   },

@@ -17,6 +17,7 @@ import type { SuccessResponse } from 'react-native-razorpay';
 import { HeaderTwo } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { addressService, orderService } from '../api';
+import { scale, normalizeFont } from '../utils/responsive';
 import type { Address } from '../types/address';
 import type { PaymentMethod } from '../types/order';
 
@@ -424,7 +425,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: normalizeFont(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     letterSpacing: -0.3,
@@ -472,7 +473,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   addrCard: {
-    width: 160,
+    width: scale(160),
     backgroundColor: COLORS.background,
     borderRadius: 14,
     padding: 12,
@@ -498,7 +499,7 @@ const styles = StyleSheet.create({
   typeBadgeSelected: {
     backgroundColor: '#FEE8DF',
   },
-  typeBadgeText: { fontSize: 10, fontWeight: FONT_WEIGHTS.bold, color: '#0284C7' },
+  typeBadgeText: { fontSize: normalizeFont(10), fontWeight: FONT_WEIGHTS.bold, color: '#0284C7' },
   typeBadgeTextSelected: { color: COLORS.primary },
   checkCircle: {
     width: 18,
@@ -509,13 +510,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addrName: {
-    fontSize: 13,
+    fontSize: normalizeFont(13),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginBottom: 4,
   },
   addrText: {
-    fontSize: 11,
+    fontSize: normalizeFont(11),
     color: COLORS.gray,
     lineHeight: 16,
     marginBottom: 6,
@@ -528,7 +529,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     marginTop: 2,
   },
-  defaultPillText: { fontSize: 9, fontWeight: FONT_WEIGHTS.bold, color: '#16A34A' },
+  defaultPillText: { fontSize: normalizeFont(9), fontWeight: FONT_WEIGHTS.bold, color: '#16A34A' },
 
   emptyCard: {
     backgroundColor: COLORS.background,
@@ -541,14 +542,14 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
     marginBottom: SPACING.sm,
   },
-  emptyCardText: { fontSize: FONT_SIZES.sm, color: COLORS.gray, flex: 1 },
+  emptyCardText: { fontSize: normalizeFont(FONT_SIZES.sm), color: COLORS.gray, flex: 1 },
 
   // Shipping & Payment
-  methodLabel: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.semiBold, color: COLORS.text, marginBottom: 2 },
-  methodSub: { fontSize: FONT_SIZES.sm, color: COLORS.gray },
-  methodPrice: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.text },
+  methodLabel: { fontSize: normalizeFont(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.semiBold, color: COLORS.text, marginBottom: 2 },
+  methodSub: { fontSize: normalizeFont(FONT_SIZES.sm), color: COLORS.gray },
+  methodPrice: { fontSize: normalizeFont(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.text },
   free: { color: '#22C55E' },
-  codCharge: { fontSize: 11, color: '#F59E0B', marginTop: 3 },
+  codCharge: { fontSize: normalizeFont(11), color: '#F59E0B', marginTop: 3 },
 
   paymentIconBox: {
     width: 40,
@@ -570,9 +571,9 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
   },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  summaryLabel: { fontSize: FONT_SIZES.sm, color: COLORS.gray },
-  summaryValue: { fontSize: FONT_SIZES.sm, color: COLORS.text },
-  summaryBold: { fontWeight: FONT_WEIGHTS.bold, fontSize: FONT_SIZES.md, color: COLORS.text },
+  summaryLabel: { fontSize: normalizeFont(FONT_SIZES.sm), color: COLORS.gray },
+  summaryValue: { fontSize: normalizeFont(FONT_SIZES.sm), color: COLORS.text },
+  summaryBold: { fontWeight: FONT_WEIGHTS.bold, fontSize: normalizeFont(FONT_SIZES.md), color: COLORS.text },
   summaryDivider: { height: 1, backgroundColor: '#F0F0F0', marginVertical: SPACING.sm },
 
   // Footer
@@ -597,8 +598,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   footerTotal: { flex: 1 },
-  footerTotalLabel: { fontSize: 12, color: COLORS.gray, marginBottom: 2 },
-  footerTotalValue: { fontSize: 20, fontWeight: FONT_WEIGHTS.bold, color: COLORS.text },
+  footerTotalLabel: { fontSize: normalizeFont(12), color: COLORS.gray, marginBottom: 2 },
+  footerTotalValue: { fontSize: normalizeFont(20), fontWeight: FONT_WEIGHTS.bold, color: COLORS.text },
   placeOrderBtn: {
     backgroundColor: COLORS.primary,
     borderRadius: 14,
@@ -614,5 +615,5 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   placeOrderBtnDisabled: { opacity: 0.7 },
-  placeOrderText: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: '#fff' },
+  placeOrderText: { fontSize: normalizeFont(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: '#fff' },
 });

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { useCartStore } from '../store';
+import { normalizeFont } from '../utils/responsive';
 
 export type TabName = 'home' | 'search' | 'cart' | 'profile';
 
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   tabLabel: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: normalizeFont(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
   },
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: COLORS.background,
-    fontSize: 9,
+    fontSize: normalizeFont(9),
     fontWeight: 'bold',
   },
 });

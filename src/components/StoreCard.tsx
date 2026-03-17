@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { normalizeFont, scale } from '../utils/responsive';
 
 const { width } = Dimensions.get('window');
 
@@ -63,7 +64,7 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: width * 0.42,
+    width: scale(160),
     backgroundColor: COLORS.background,
     borderRadius: 16,
     marginRight: SPACING.md,
@@ -85,13 +86,13 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   name: {
-    fontSize: FONT_SIZES.md,
+    fontSize: normalizeFont(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   description: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: normalizeFont(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
@@ -107,12 +108,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ratingText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: normalizeFont(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
   },
   productsCount: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: normalizeFont(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
   },

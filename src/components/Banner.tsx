@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { normalizeFont, scale } from '../utils/responsive';
 
 const { width } = Dimensions.get('window');
 const BANNER_WIDTH = width - SPACING.md * 2;
@@ -153,13 +154,13 @@ const styles = StyleSheet.create({
     paddingLeft: SPACING.md,
   },
   subtitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: normalizeFont(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.darkGray,
     marginBottom: SPACING.xs,
   },
   title: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: normalizeFont(FONT_SIZES.xl),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.md,
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   buttonText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: normalizeFont(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },

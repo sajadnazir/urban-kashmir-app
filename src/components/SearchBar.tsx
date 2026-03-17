@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { normalizeFont } from '../utils/responsive';
 
 interface SearchBarProps {
   value?: string;
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: FONT_SIZES.md,
+    fontSize: normalizeFont(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.text,
   },
