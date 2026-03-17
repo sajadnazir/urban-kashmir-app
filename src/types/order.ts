@@ -13,6 +13,25 @@ export interface PlaceOrderPayload {
   billing_address_id: number;
   shipping_method: string;
   payment_method: string;
+  // Required by backend when payment_method is 'razorpay'
+  payment_details?: {
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+    razorpay_signature: string;
+  };
+}
+
+/** Returned by the react-native-razorpay SDK on successful payment */
+export interface RazorpayPaymentResult {
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+}
+
+/** Thrown/returned by the react-native-razorpay SDK on failure */
+export interface RazorpayPaymentError {
+  code: number;
+  description: string;
 }
 
 export interface OrderItem {

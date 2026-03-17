@@ -87,6 +87,7 @@ export const ENDPOINTS = {
   // Payment methods
   PAYMENTS: {
     METHODS: '/payments/methods',
+    RAZORPAY_CREATE_ORDER: '/payments/razorpay/create-order',
   },
 
   // Notification endpoints

@@ -12,11 +12,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import Toast from 'react-native-toast-message';
+import RazorpayCheckout from 'react-native-razorpay';
+import type { SuccessResponse } from 'react-native-razorpay';
 import { HeaderTwo } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { addressService, orderService } from '../api';
 import type { Address } from '../types/address';
 import type { PaymentMethod } from '../types/order';
+
+// ─── Razorpay Config ─────────────────────────────────────────────────────────
+// Replace with your actual Razorpay Key ID (rzp_test_XXXX or rzp_live_XXXX)
+const RAZORPAY_KEY_ID = 'rzp_test_86WkPJhezQ3gNR';
 
 interface CheckoutScreenProps {
   onBack?: () => void;
@@ -105,11 +111,83 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({
       Toast.show({ type: 'error', text1: 'Select Address', text2: 'Please select a delivery address to continue' });
       return;
     }
+
+    if (selectedPayment === 'razorpay') {
+      await handleRazorpayPayment();
+    } else {
+      await placeOrderDirect();
+    }
+  };
+
+  /** Opens the Razorpay payment sheet, then posts the order on success */
+  const handleRazorpayPayment = async () => {
+    setIsPlacingOrder(true);
+    try {
+      // Guard against the native module not being linked yet (requires a native rebuild)
+      if (!RazorpayCheckout || typeof RazorpayCheckout.open !== 'function') {
+        throw new Error('Razorpay module is not available. Please rebuild the app (run-android / run-ios).');
+      }
+
+      const amountInPaise = Math.round(grandTotal * 100);
+
+      // Note: order_id is intentionally omitted here because we are NOT
+      // pre-creating a Razorpay order on the backend. If you add a backend
+      // create-order step later, set order_id to the returned razorpay_order_id.
+      const options = {
+        description: 'Urban Kashmir Order',
+        image: 'https://urban.bracecodes.in/logo.png',
+        currency: 'INR',
+        key: RAZORPAY_KEY_ID,
+        amount: amountInPaise,
+        name: 'Urban Kashmir',
+        prefill: {
+          email: '',
+          contact: '',
+          name: '',
+        },
+        theme: { color: COLORS.primary },
+      } as any; // 'as any' needed because @types requires order_id, but SDK works without it
+
+      const paymentResult: SuccessResponse =
+        await RazorpayCheckout.open(options);
+      console.log("razorpay payment result", paymentResult)
+
+      // Payment succeeded on client — now confirm order with backend
+      const order = await orderService.placeOrder({
+        shipping_address_id: selectedAddressId!,
+        billing_address_id: selectedAddressId!,
+        shipping_method: selectedShipping,
+        payment_method: 'razorpay',
+        payment_details: {
+          razorpay_payment_id: paymentResult.razorpay_payment_id,
+          razorpay_order_id: paymentResult.razorpay_order_id || paymentResult.razorpay_payment_id,
+          razorpay_signature: paymentResult.razorpay_signature || paymentResult.razorpay_payment_id,
+        },
+      });
+
+      Toast.show({ type: 'success', text1: '🎉 Payment Successful!', text2: `Order #${order.order_number || order.id} confirmed` });
+      onOrderSuccess?.(order.id, order.order_number);
+    } catch (error: any) {
+      // Razorpay SDK throws { code, description } on failure/cancellation
+      const msg =
+        error?.description ??
+        error?.response?.data?.message ??
+        error?.message ??
+        'Payment failed. Please try again.';
+      Toast.show({ type: 'error', text1: 'Payment Failed', text2: msg });
+      onOrderError?.(msg);
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
+  /** Standard placeOrder call (COD and other non-Razorpay methods) */
+  const placeOrderDirect = async () => {
     try {
       setIsPlacingOrder(true);
       const order = await orderService.placeOrder({
-        shipping_address_id: selectedAddressId,
-        billing_address_id: selectedAddressId,
+        shipping_address_id: selectedAddressId!,
+        billing_address_id: selectedAddressId!,
         shipping_method: selectedShipping,
         payment_method: selectedPayment,
       });
