@@ -19,5 +19,6 @@
     "**/ios/Pods": true,
     "**/android/.gradle": true,
     "**/android/build": true
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

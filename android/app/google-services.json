@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "930454467670",
+    "project_id": "urban-kashmir-4fe4b",
+    "storage_bucket": "urban-kashmir-4fe4b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930454467670:android:cd98215223a5623b73b7f7",
+        "android_client_info": {
+          "package_name": "com.bracecodes.urbankashmir"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIghViKv9caDeIb7UpGKt9W4Ab8mCKoXw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

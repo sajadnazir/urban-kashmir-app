@@ -1,4 +1,4 @@
-package com.urbankashmirrn
+package com.bracecodes.urbankashmir
 
 import android.app.Application
 import com.facebook.react.PackageList

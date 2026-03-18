@@ -1,4 +1,4 @@
-package com.urbankashmirrn
+package com.bracecodes.urbankashmir
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

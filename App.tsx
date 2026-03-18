@@ -5,10 +5,11 @@
  * @format
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { StatusBar, BackHandler, View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { StatusBar, BackHandler, View, Text, StyleSheet, TouchableOpacity, Modal, PermissionsAndroid, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import messaging from '@react-native-firebase/messaging';
 import {
   EcommerceHomeScreen,
   ProductDetailsScreen,
@@ -33,6 +34,7 @@ import {
 import { Product, Store, TabName } from './src/components';
 import { Order } from './src/types/order';
 import { useAuthStore } from './src/store/authStore';
+import { notificationService } from './src/api/services/notificationService';
 import type { Notification } from './src/types/notification';
 
 type Screen =
@@ -72,6 +74,69 @@ function App(): React.JSX.Element {
   const [selectedTrackingNumber, setSelectedTrackingNumber] = useState<string | null>(null);
   const startTime = useRef(Date.now());
 
+  // Helper for FCM token registration
+  const handleFcmRegistration = useCallback(async () => {
+    try {
+      const token = await messaging().getToken();
+      if (token) {
+        console.log('\n\n=== YOUR FCM TOKEN ===\n', token, '\n========================\n\n');
+        await notificationService.registerFcmToken({
+          fcm_token: token,
+          device_type: Platform.OS === 'ios' ? 'ios' : 'android',
+          device_id: `app_install_${Platform.OS}`, // Basic fallback device_id
+        });
+        console.log('FCM token registered.');
+      }
+    } catch (error) {
+      console.warn('FCM registration failed:', error);
+    }
+  }, []);
+
+  // Request Notification Permissions
+  useEffect(() => {
+    async function requestNotificationPermission() {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        try {
+          const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Notification permission granted.');
+            if (isAuthenticated) handleFcmRegistration();
+          }
+        } catch (err) {
+          console.warn('Failed to request notification permission:', err);
+        }
+      } else {
+        try {
+          const authStatus = await messaging().requestPermission();
+          const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+          if (enabled) {
+            console.log('Notification authorization status:', authStatus);
+            if (isAuthenticated) handleFcmRegistration();
+          }
+        } catch (err) {
+          console.warn('Failed to setup firebase messaging permission:', err);
+        }
+      }
+    }
+    requestNotificationPermission();
+  }, [isAuthenticated, handleFcmRegistration]);
+
+  // Listen for Token Refresh
+  useEffect(() => {
+    const unsubscribe = messaging().onTokenRefresh((token) => {
+      if (isAuthenticated) {
+        notificationService.registerFcmToken({
+          fcm_token: token,
+          device_type: Platform.OS === 'ios' ? 'ios' : 'android',
+          device_id: `app_install_${Platform.OS}`,
+        }).catch(err => console.warn('Token refresh registration failed', err));
+      }
+    });
+    return unsubscribe;
+  }, [isAuthenticated]);
+
   // Global Auth Guard — check when auth state changes
   useEffect(() => {
     if (!isAuthenticated) {
@@ -79,8 +144,11 @@ function App(): React.JSX.Element {
       if (currentScreen !== 'login' && currentScreen !== 'home' && currentScreen !== 'shop' && currentScreen !== 'productDetails' && currentScreen !== 'storeHome' && currentScreen !== 'reelsPlayer') {
         setCurrentScreen('login');
       }
+    } else {
+      // Register token if user is logged in
+      handleFcmRegistration();
     }
-  }, [isAuthenticated, currentScreen]);
+  }, [isAuthenticated, currentScreen, handleFcmRegistration]);
 
   // Hardware back button handler
   useEffect(() => {
