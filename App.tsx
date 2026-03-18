@@ -10,6 +10,7 @@ import { StatusBar, BackHandler, View, Text, StyleSheet, TouchableOpacity, Modal
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import messaging from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import {
   EcommerceHomeScreen,
   ProductDetailsScreen,
@@ -136,6 +137,44 @@ function App(): React.JSX.Element {
     });
     return unsubscribe;
   }, [isAuthenticated]);
+
+  // Handle Foreground Messages
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('A new FCM message arrived in foreground!', JSON.stringify(remoteMessage));
+
+      try {
+        // Request permissions (required for iOS, no-op on Android 13+ if already granted)
+        await notifee.requestPermission();
+
+        // Create a channel (required for Android)
+        const channelId = await notifee.createChannel({
+          id: 'default',
+          name: 'Default Channel',
+          importance: AndroidImportance.HIGH,
+        });
+
+        // Display a notification
+        if (remoteMessage.notification) {
+          await notifee.displayNotification({
+            title: remoteMessage.notification.title,
+            body: remoteMessage.notification.body,
+            android: {
+              channelId,
+              importance: AndroidImportance.HIGH,
+              pressAction: {
+                id: 'default',
+              },
+            },
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to display foreground notification:', error);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
 
   // Global Auth Guard — check when auth state changes
   useEffect(() => {
