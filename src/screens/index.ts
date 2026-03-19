@@ -21,4 +21,7 @@ export * from './OrderConfirmationScreen';
 export * from './OrdersScreen';
 export * from './OrderDetailsScreen';
 export * from './TrackOrderScreen';
+export * from './TicketsListScreen';
+export * from './CreateTicketScreen';
+export * from './TicketChatScreen';
 export { LoginScreen } from './LoginScreen';

@@ -31,6 +31,9 @@ import {
   OrdersScreen,
   OrderDetailsScreen,
   TrackOrderScreen,
+  TicketsListScreen,
+  CreateTicketScreen,
+  TicketChatScreen,
 } from './src/screens';
 import { Product, Store, TabName } from './src/components';
 import { Order } from './src/types/order';
@@ -56,7 +59,10 @@ type Screen =
   | 'orderConfirmation'
   | 'orders'
   | 'orderDetails'
-  | 'trackOrder';
+  | 'trackOrder'
+  | 'ticketsList'
+  | 'createTicket'
+  | 'ticketChat';
 
 function App(): React.JSX.Element {
   const { isAuthenticated } = useAuthStore();
@@ -73,6 +79,7 @@ function App(): React.JSX.Element {
   const [orderResult, setOrderResult] = useState<{ success: boolean; orderNumber?: string; errorMessage?: string } | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [selectedTrackingNumber, setSelectedTrackingNumber] = useState<string | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<number | string | null>(null);
   const startTime = useRef(Date.now());
 
   // Helper for FCM token registration
@@ -196,7 +203,7 @@ function App(): React.JSX.Element {
         'productDetails', 'cart', 'storeHome', 'reelsPlayer',
         'editProfile', 'profile', 'wishlist', 'address',
         'notifications', 'notificationDetails', 'shop',
-        'orders', 'orderDetails',
+        'orders', 'orderDetails', 'ticketsList', 'createTicket', 'ticketChat'
       ];
       if (screensWithBack.includes(currentScreen)) {
         handleBack();
@@ -266,6 +273,12 @@ function App(): React.JSX.Element {
       setCurrentScreen('orders');
     } else if (currentScreen === 'trackOrder') {
       setCurrentScreen('orderDetails');
+    } else if (currentScreen === 'ticketsList') {
+      setCurrentScreen('profile');
+    } else if (currentScreen === 'createTicket') {
+      setCurrentScreen('ticketsList');
+    } else if (currentScreen === 'ticketChat') {
+      setCurrentScreen('ticketsList');
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -386,6 +399,13 @@ function App(): React.JSX.Element {
                 } else {
                   setCurrentScreen('orders');
                 }
+              } else if (id === 'support') {
+                if (!isAuthenticated) {
+                  setIntendedScreen('ticketsList');
+                  setCurrentScreen('login');
+                } else {
+                  setCurrentScreen('ticketsList');
+                }
               }
             }}
           />
@@ -490,6 +510,31 @@ function App(): React.JSX.Element {
       case 'trackOrder':
         return selectedTrackingNumber ? (
           <TrackOrderScreen trackingNumber={selectedTrackingNumber} onBack={handleBack} />
+        ) : null;
+      case 'ticketsList':
+        return (
+          <TicketsListScreen
+            onBack={handleBack}
+            onCreateTicket={() => setCurrentScreen('createTicket')}
+            onTicketPress={(ticketId: string | number) => {
+              setSelectedTicketId(ticketId);
+              setCurrentScreen('ticketChat');
+            }}
+          />
+        );
+      case 'createTicket':
+        return (
+          <CreateTicketScreen
+            onBack={handleBack}
+            onSuccess={() => setCurrentScreen('ticketsList')}
+          />
+        );
+      case 'ticketChat':
+        return selectedTicketId ? (
+          <TicketChatScreen
+            ticketId={selectedTicketId}
+            onBack={handleBack}
+          />
         ) : null;
       default:
         return (

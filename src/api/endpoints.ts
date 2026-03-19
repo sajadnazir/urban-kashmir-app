@@ -98,6 +98,15 @@ export const ENDPOINTS = {
     FCM_TOKEN: '/notifications/fcm-token',
   },
 
+  // Support endpoints
+  SUPPORT: {
+    LIST: '/support',
+    CREATE: '/support',
+    DETAIL: (id: string | number) => `/support/${id}`,
+    REPLY: (id: string | number) => `/support/${id}/reply`,
+    MARK_READ: (id: string | number) => `/support/${id}/mark-read`,
+  },
+
   // Track endpoint
   TRACKING: (number: string) => `/track/${number}`,
 } as const;
