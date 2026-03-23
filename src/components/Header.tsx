@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { useWishlistStore } from '../store';
 import { normalizeFont } from '../utils/responsive';
 
@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
   },
   profilePlaceholderText: {
     fontSize: normalizeFont(FONT_SIZES.xl),
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.primary,
   },
@@ -122,6 +123,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: normalizeFont(FONT_SIZES.lg),
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.background,
     marginBottom: 2,

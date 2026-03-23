@@ -645,6 +645,7 @@ const exitStyles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
+    fontFamily: 'DMSans-Bold',
     fontWeight: '700',
     color: '#111827',
     marginBottom: 6,
@@ -652,6 +653,7 @@ const exitStyles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
+    fontFamily: 'DMSans-Regular',
     color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 20,
@@ -671,6 +673,7 @@ const exitStyles = StyleSheet.create({
   },
   cancelText: {
     fontSize: 15,
+    fontFamily: 'DMSans-Medium',
     fontWeight: '600',
     color: '#374151',
   },
@@ -688,6 +691,7 @@ const exitStyles = StyleSheet.create({
   },
   exitText: {
     fontSize: 15,
+    fontFamily: 'DMSans-Bold',
     fontWeight: '700',
     color: '#FFFFFF',
   },
