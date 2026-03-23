@@ -15,7 +15,7 @@ import Toast from 'react-native-toast-message';
 import RazorpayCheckout from 'react-native-razorpay';
 import type { SuccessResponse } from 'react-native-razorpay';
 import { HeaderTwo } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { addressService, orderService } from '../api';
 import { scale, normalizeFont } from '../utils/responsive';
 import type { Address } from '../types/address';
@@ -426,6 +426,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: normalizeFont(FONT_SIZES.md),
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     letterSpacing: -0.3,
@@ -615,5 +616,5 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   placeOrderBtnDisabled: { opacity: 0.7 },
-  placeOrderText: { fontSize: normalizeFont(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: '#fff' },
+  placeOrderText: { fontSize: normalizeFont(FONT_SIZES.md), fontFamily: getFontFamily('bold'), fontWeight: FONT_WEIGHTS.bold, color: '#fff' },
 });

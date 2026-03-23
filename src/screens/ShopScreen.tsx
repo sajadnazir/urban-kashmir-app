@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    
   },
   list: {
     flex: 1,
@@ -293,8 +294,9 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
   },
   footerLoader: {
     paddingVertical: SPACING.md,

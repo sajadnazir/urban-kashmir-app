@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, FONTS, getFontFamily } from '../constants';
 import { wishlistService } from '../api/services/wishlistService';
 import { useWishlistStore, useAuthStore } from '../store';
 import { normalizeFont, scale } from '../utils/responsive';
@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: normalizeFont(FONT_SIZES.xs),
+    fontFamily: getFontFamily('semiBold'),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
@@ -218,6 +219,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: normalizeFont(FONT_SIZES.md),
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },

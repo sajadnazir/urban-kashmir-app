@@ -21,7 +21,7 @@ import {
   BottomNavigation,
   TabName,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { cartService } from '../api';
 import { useCartStore } from '../store';
 
@@ -337,6 +337,7 @@ const styles = StyleSheet.create({
   },
   checkoutText: {
     fontSize: FONT_SIZES.md,
+    fontFamily: getFontFamily('semiBold'),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
@@ -366,6 +367,7 @@ const styles = StyleSheet.create({
   },
   continueShoppingText: {
     fontSize: FONT_SIZES.md,
+    fontFamily: getFontFamily('semiBold'),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },

@@ -20,7 +20,7 @@ import {
   BottomNavigation,
   TabName,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { vendorService, productService, cartService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
 import { useAuthStore, useCartStore } from '../store';
@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
   },
   storeName: {
     fontSize: FONT_SIZES.xxl,
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.background,
   },
@@ -309,6 +310,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },

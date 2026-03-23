@@ -15,7 +15,7 @@ import {
   Store,
   TabName,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { productService, categoryService, cartService, vendorService, bannerService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
 import type { Category } from '../api/services/categoryService';
@@ -409,11 +409,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: normalizeFont(FONT_SIZES.lg),
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
   seeAll: {
     fontSize: normalizeFont(FONT_SIZES.sm),
+    fontFamily: getFontFamily('medium'),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.primary,
   },
@@ -421,8 +423,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
   },
   footerLoader: {
     paddingVertical: SPACING.lg,

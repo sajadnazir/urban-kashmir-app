@@ -35,27 +35,42 @@ export const SPACING = {
 } as const;
 
 export const FONT_SIZES = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 18,
-  xl: 24,
-  xxl: 32,
-  xxxl: 40,
+  xs: 11,
+  sm: 12,
+  md: 13,
+  lg: 14,
+  xl: 15,
+  xxl: 16,
+  xxxl: 18,
 } as const;
 
 export const FONTS = {
-  regular: 'System',
-  medium: 'System',
-  semiBold: 'System',
-  bold: 'System',
-  light: 'System',
+  regular: 'DMSans-Regular',
+  medium: 'DMSans-Medium',
+  semiBold: 'DMSans-SemiBold',
+  bold: 'DMSans-Bold',
+  light: 'DMSans-Light',
 } as const;
 
 export const FONT_WEIGHTS = {
-  light: '300' as const,
-  regular: '400' as const,
-  medium: '500' as const,
-  semiBold: '600' as const,
-  bold: '700' as const,
+  light: '300',
+  regular: '400',
+  medium: '500',
+  semiBold: '600',
+  bold: '700',
 } as const;
+
+export const getFontFamily = (weight: keyof typeof FONT_WEIGHTS = 'regular') => {
+  switch (weight) {
+    case 'light':
+      return FONTS.light;
+    case 'medium':
+      return FONTS.medium;
+    case 'semiBold':
+      return FONTS.semiBold;
+    case 'bold':
+      return FONTS.bold;
+    default:
+      return FONTS.regular;
+  }
+};

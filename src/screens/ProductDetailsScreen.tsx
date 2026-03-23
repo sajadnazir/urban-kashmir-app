@@ -24,7 +24,7 @@ import { productService, FullProduct } from '../api/services/productService';
 import { cartService } from '../api/services/cartService';
 import { wishlistService } from '../api/services/wishlistService';
 import { useAuthStore, useWishlistStore, useCartStore } from '../store';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 
 const { width } = Dimensions.get('window');
 
@@ -465,6 +465,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: FONT_SIZES.lg,
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
@@ -485,6 +486,7 @@ const styles = StyleSheet.create({
   },
   descriptionTitle: {
     fontSize: FONT_SIZES.md,
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.xs,
