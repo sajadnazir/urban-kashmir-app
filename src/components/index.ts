@@ -20,6 +20,7 @@ export { OrderSummary } from './OrderSummary';
 export { ProfileHeader } from './ProfileHeader';
 export { ProfileMenuItem } from './ProfileMenuItem';
 export { StoreCard } from './StoreCard';
+export { HomeHeader } from './HomeHeader';
 export { ReelCard } from './ReelCard';
 export type { Product } from './ProductCard';
 export type { TabName } from './BottomNavigation';

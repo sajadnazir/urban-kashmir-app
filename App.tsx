@@ -310,6 +310,13 @@ function App(): React.JSX.Element {
       } else {
          setCurrentScreen('wishlist');
       }
+    } else if (tab === 'address' as any) {
+      if (!isAuthenticated) {
+        setIntendedScreen('address');
+        setCurrentScreen('login');
+      } else {
+        setCurrentScreen('address');
+      }
     }
   };
 

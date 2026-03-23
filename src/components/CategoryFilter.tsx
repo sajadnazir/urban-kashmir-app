@@ -63,7 +63,8 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: SPACING.sm,
+    // marginVertical: SPACING.sm,
+  //  backgroundColor:'red'
   },
   scrollContent: {
     paddingHorizontal: SPACING.md,

@@ -14,6 +14,7 @@ import {
   Product,
   Store,
   TabName,
+  HomeHeader,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { productService, categoryService, cartService, vendorService, bannerService } from '../api';
@@ -23,7 +24,7 @@ import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useCartStore } from '../store/cartStore';
-import { useBannerStore } from '../store/bannerStore';
+import { useBannerStore, useAddressStore } from '../store';
 import { normalizeFont } from '../utils/responsive';
 
 interface EcommerceHomeScreenProps {
@@ -50,6 +51,9 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const { isAuthenticated } = useAuthStore();
   const { fetchWishlist } = useWishlistStore();
   const { fetchCartCount } = useCartStore();
+  const { fetchAddresses, getDefaultAddress, addresses } = useAddressStore();
+  const defaultAddress = getDefaultAddress();
+  const hasAddress = addresses.length > 0;
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -74,6 +78,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     if (isAuthenticated) {
       fetchWishlist();
       fetchCartCount();
+      fetchAddresses();
     }
   }, [isAuthenticated]);
 
@@ -257,19 +262,27 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
    */
   const renderHeader = useCallback(() => (
     <View style={styles.headerBlock}>
+      <HomeHeader
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        isLoggedIn={isAuthenticated}
+        hasAddress={hasAddress}
+        location={defaultAddress ? `${defaultAddress.address_line_1}, ${defaultAddress.city}` : undefined}
+        notificationCount={3}
+        onNotificationPress={() => onNotificationsPress?.()}
+        onLocationPress={() => {
+          if (isAuthenticated && !hasAddress) {
+            onTabPress?.('profile'); 
+          } else if (isAuthenticated) {
+             onTabPress?.('address' as any);
+          }
+        }}
+        onScanPress={() => console.log('Scan press')}
+      />
+
       <View style={styles.bannerContainer}>
         <Banner items={banners} onBannerPress={handleBannerPress} />
       </View>
-
-
-<View style={{marginTop:-SPACING.xxl}}> 
-      <SearchBar
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        onFilterPress={() => console.log('Filter pressed')}
-        placeholder="Search..."
-      />
- </View>
 
       <CategoryFilter
         categories={categories}
@@ -277,7 +290,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         onSelectCategory={setSelectedCategory}
       />
 
-      <View style={styles.sectionHeader}>
+      <View style={[styles.sectionHeader, {marginTop: SPACING.md}]}>
         <Text style={styles.sectionTitle}>Featured Stores</Text>
         {/* <Text style={styles.seeAll}>See All</Text> */}
       </View>
@@ -307,20 +320,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         translucent={false}
       />
       <View style={styles.container}>
-        <Header
-          userName={profile?.name || "Guest"}
-          onProfilePress={() => console.log('Profile pressed')}
-          onWishlistPress={() => {
-            if (!isAuthenticated) {
-              onRequireAuth?.();
-            } else {
-              // Hacky way to simulate a tab press for routing or add explicit prop handling
-              // Adding an explicit prop makes more sense:
-              onTabPress?.('wishlist' as TabName); // using cast as we expand types
-            }
-          }}
-          onNotificationPress={() => onNotificationsPress?.()}
-        />
+<View style={styles.contentContainer}>
 
         {isLoading && page === 1 ? (
           <View style={[styles.listWrapper, styles.centerAll]}>
@@ -364,6 +364,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
           }} 
         />
       </View>
+    </View>
     </SafeAreaView>
   );
 };
@@ -379,6 +380,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: 'hidden',
+  },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: COLORS.lightGray,
   },
   listWrapper: {
     flex: 1,
@@ -396,9 +401,8 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.md,
   },
   bannerContainer: {
-    marginTop: -SPACING.md,
-    marginBottom: SPACING.md,
-    paddingVertical: SPACING.xl,
+    // marginBottom: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   sectionHeader: {
     flexDirection: 'row',
