@@ -15,8 +15,11 @@ interface HomeHeaderProps {
   location?: string;
   isLoggedIn?: boolean;
   hasAddress?: boolean;
+  hasUnreadNotifications?: boolean;
+  wishlistCount?: number;
   notificationCount?: number;
   onNotificationPress?: () => void;
+  onWishlistPress?: () => void;
   onLocationPress?: () => void;
   onScanPress?: () => void;
   searchQuery: string;
@@ -27,8 +30,11 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   location,
   isLoggedIn = false,
   hasAddress = false,
+  hasUnreadNotifications = false,
+  wishlistCount = 0,
   notificationCount = 0,
   onNotificationPress,
+  onWishlistPress,
   onLocationPress,
   onScanPress,
   searchQuery,
@@ -67,20 +73,35 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.iconButton} 
-          onPress={onNotificationPress}
-          activeOpacity={0.7}
-        >
-          <View>
-            <Icon name="bell" size={18} color={COLORS.text} />
-            {notificationCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{notificationCount}</Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
+        <View style={styles.rightIcons}>
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={onWishlistPress}
+            activeOpacity={0.7}
+          >
+            <View>
+              <Icon name="heart" size={18} color={COLORS.text} />
+              {wishlistCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{wishlistCount}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={onNotificationPress}
+            activeOpacity={0.7}
+          >
+            <View>
+              <Icon name="bell" size={18} color={COLORS.text} />
+              {hasUnreadNotifications && (
+                <View style={styles.dotBadge} />
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Bottom Row: Search and Scan */}
@@ -164,6 +185,21 @@ const styles = StyleSheet.create({
     fontSize: normalizeFont(8),
     fontFamily: getFontFamily('bold'),
     fontWeight: 'bold',
+  },
+  dotBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#FF5E5E',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: COLORS.background,
+  },
+  rightIcons: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
   },
   searchRow: {
     flexDirection: 'row',

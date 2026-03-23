@@ -20,11 +20,7 @@ import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../con
 import { productService, categoryService, cartService, vendorService, bannerService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
 import type { Category } from '../api/services/categoryService';
-import { useUserStore } from '../store/userStore';
-import { useAuthStore } from '../store/authStore';
-import { useWishlistStore } from '../store/wishlistStore';
-import { useCartStore } from '../store/cartStore';
-import { useBannerStore, useAddressStore } from '../store';
+import { useUserStore, useAuthStore, useWishlistStore, useCartStore, useBannerStore, useAddressStore, useNotificationStore } from '../store';
 import { normalizeFont } from '../utils/responsive';
 
 interface EcommerceHomeScreenProps {
@@ -52,6 +48,8 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const { fetchWishlist } = useWishlistStore();
   const { fetchCartCount } = useCartStore();
   const { fetchAddresses, getDefaultAddress, addresses } = useAddressStore();
+  const { fetchNotifications, unreadCount } = useNotificationStore();
+  const { wishlistIds } = useWishlistStore();
   const defaultAddress = getDefaultAddress();
   const hasAddress = addresses.length > 0;
 
@@ -79,6 +77,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       fetchWishlist();
       fetchCartCount();
       fetchAddresses();
+      fetchNotifications();
     }
   }, [isAuthenticated]);
 
@@ -262,24 +261,6 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
    */
   const renderHeader = useCallback(() => (
     <View style={styles.headerBlock}>
-      <HomeHeader
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        isLoggedIn={isAuthenticated}
-        hasAddress={hasAddress}
-        location={defaultAddress ? `${defaultAddress.address_line_1}, ${defaultAddress.city}` : undefined}
-        notificationCount={3}
-        onNotificationPress={() => onNotificationsPress?.()}
-        onLocationPress={() => {
-          if (isAuthenticated && !hasAddress) {
-            onTabPress?.('profile'); 
-          } else if (isAuthenticated) {
-             onTabPress?.('address' as any);
-          }
-        }}
-        onScanPress={() => console.log('Scan press')}
-      />
-
       <View style={styles.bannerContainer}>
         <Banner items={banners} onBannerPress={handleBannerPress} />
       </View>
@@ -320,7 +301,32 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         translucent={false}
       />
       <View style={styles.container}>
-<View style={styles.contentContainer}>
+        <HomeHeader
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          isLoggedIn={isAuthenticated}
+          hasAddress={hasAddress}
+          hasUnreadNotifications={unreadCount > 0}
+          wishlistCount={wishlistIds.size}
+          location={defaultAddress ? `${defaultAddress.address_line_1}, ${defaultAddress.city}` : undefined}
+          onNotificationPress={() => onNotificationsPress?.()}
+          onWishlistPress={() => {
+            if (!isAuthenticated) {
+              onRequireAuth?.();
+            } else {
+              onTabPress?.('wishlist' as TabName);
+            }
+          }}
+          onLocationPress={() => {
+            if (isAuthenticated && !hasAddress) {
+              onTabPress?.('profile'); 
+            } else if (isAuthenticated) {
+               onTabPress?.('address' as any);
+            }
+          }}
+          onScanPress={() => console.log('Scan press')}
+        />
+        <View style={styles.contentContainer}>
 
         {isLoading && page === 1 ? (
           <View style={[styles.listWrapper, styles.centerAll]}>
