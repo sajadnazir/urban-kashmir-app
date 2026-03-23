@@ -24,6 +24,9 @@ interface HomeHeaderProps {
   onScanPress?: () => void;
   searchQuery: string;
   onSearchChange: (text: string) => void;
+  onClearSearch?: () => void;
+  suggestions?: string[];
+  onSuggestionPress?: (suggestion: string) => void;
 }
 
 export const HomeHeader: React.FC<HomeHeaderProps> = ({
@@ -39,6 +42,9 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   onScanPress,
   searchQuery,
   onSearchChange,
+  onClearSearch,
+  suggestions = [],
+  onSuggestionPress,
 }) => {
   const displayLocation = isLoggedIn 
     ? (hasAddress ? location : 'Add Address')
@@ -115,6 +121,11 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
             value={searchQuery}
             onChangeText={onSearchChange}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={onClearSearch} style={styles.clearButton}>
+              <Icon name="x" size={16} color={COLORS.gray} />
+            </TouchableOpacity>
+          )}
         </View>
 
         <TouchableOpacity 
@@ -125,6 +136,25 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
           <Icon name="maximize" size={18} color={COLORS.background} />
         </TouchableOpacity>
       </View>
+
+      {/* Suggestion Dropdown */}
+      {suggestions.length > 0 && (
+        <View style={styles.suggestionsContainer}>
+          {suggestions.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.suggestionItem,
+                index === suggestions.length - 1 && { borderBottomWidth: 0 }
+              ]}
+              onPress={() => onSuggestionPress?.(item)}
+            >
+              <Icon name="search" size={14} color={COLORS.gray} style={styles.suggestionIcon} />
+              <Text style={styles.suggestionText}>{item}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 };
@@ -170,7 +200,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: '#FF5E5E',
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -190,7 +220,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: -2,
-    backgroundColor: '#FF5E5E',
+    backgroundColor: COLORS.primary,
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -226,6 +256,9 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     padding: 0,
   },
+  clearButton: {
+    padding: SPACING.xs,
+  },
   scanButton: {
     width: 50,
     height: 50,
@@ -233,5 +266,38 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkGray,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: 118, // Aligned below search bar
+    left: SPACING.lg,
+    right: 50 + SPACING.sm + SPACING.lg, // Align with search bar (Scan button width + gap)
+    backgroundColor: COLORS.background,
+    borderRadius: 15,
+    paddingVertical: SPACING.xs,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  suggestionIcon: {
+    marginRight: SPACING.sm,
+  },
+  suggestionText: {
+    fontSize: normalizeFont(FONT_SIZES.md),
+    fontFamily: getFontFamily('regular'),
+    color: COLORS.text,
   },
 });

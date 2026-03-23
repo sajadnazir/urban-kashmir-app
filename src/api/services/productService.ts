@@ -103,13 +103,17 @@ export const productService = {
     page: number = 1,
     perPage: number = 20
   ): Promise<PaginatedResponse<Product[]>> => {
-    const response = await apiService.getPaginated<ApiProduct[]>(
+    // Note: Search API uses a different structure { data: { products: [], categories: [] } }
+    // It doesn't seem to follow the standard PaginatedResponse envelope directly
+    const response = await apiService.get<any>(
       ENDPOINTS.PRODUCTS.SEARCH,
       { q: query, page, per_page: perPage }
     );
 
+    const apiProducts: ApiProduct[] = response.products || [];
+
     // Map ApiProduct -> UI Product
-    const mappedProducts: Product[] = response.data.map(apiProduct => {
+    const mappedProducts: Product[] = apiProducts.map(apiProduct => {
       let price = 0;
       if (apiProduct.default_variant?.sale_price) {
         price = apiProduct.default_variant.sale_price;
@@ -134,7 +138,14 @@ export const productService = {
 
     return {
       data: mappedProducts,
-      pagination: response.pagination,
+      pagination: {
+        current_page: page,
+        last_page: 1,
+        per_page: perPage,
+        total: mappedProducts.length,
+        from: 1,
+        to: mappedProducts.length,
+      },
     };
   },
 

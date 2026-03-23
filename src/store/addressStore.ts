@@ -8,6 +8,10 @@ interface AddressState {
   error: string | null;
   fetchAddresses: () => Promise<void>;
   getDefaultAddress: () => Address | null;
+  createAddress: (payload: any) => Promise<void>;
+  updateAddress: (id: number | string, payload: any) => Promise<void>;
+  deleteAddress: (id: number | string) => Promise<void>;
+  setDefaultAddress: (id: number | string) => Promise<void>;
 }
 
 export const useAddressStore = create<AddressState>((set, get) => ({
@@ -31,5 +35,25 @@ export const useAddressStore = create<AddressState>((set, get) => ({
   getDefaultAddress: () => {
     const { addresses } = get();
     return addresses.find(addr => addr.is_default) || addresses[0] || null;
+  },
+
+  createAddress: async (payload) => {
+    await addressService.createAddress(payload);
+    await get().fetchAddresses();
+  },
+
+  updateAddress: async (id, payload) => {
+    await addressService.updateAddress(Number(id), payload);
+    await get().fetchAddresses();
+  },
+
+  deleteAddress: async (id) => {
+    await addressService.deleteAddress(Number(id));
+    await get().fetchAddresses();
+  },
+
+  setDefaultAddress: async (id) => {
+    await addressService.setDefaultAddress(Number(id));
+    await get().fetchAddresses();
   },
 }));

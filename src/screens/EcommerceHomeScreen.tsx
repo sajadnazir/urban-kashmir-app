@@ -53,6 +53,10 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const defaultAddress = getDefaultAddress();
   const hasAddress = addresses.length > 0;
 
+  // Search & Suggestions State
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
@@ -157,9 +161,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     setIsLoadingStores(true);
     try {
       const response = await vendorService.getVendors(1, 10);
-      console.log('Vendors API response:', JSON.stringify(response, null, 2));
       const vendorArray = response.data || [];
-      console.log('Vendor array count:', vendorArray.length);
       
       const organicFallbacks = [
         'https://images.unsplash.com/photo-1584362917165-526a968579e8?q=80&w=400&auto=format&fit=crop', // Honey
@@ -184,6 +186,54 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     } finally {
       setIsLoadingStores(false);
     }
+  };
+
+  // Suggestive Search Logic
+  useEffect(() => {
+    if (searchQuery.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await productService.searchProducts(searchQuery, 1, 5);
+        // Map product titles to suggestions and unique them
+        const titles = [...new Set(response.data.map(p => p.name))];
+        setSuggestions(titles);
+      } catch (error) {
+        console.error('Failed to fetch suggestions:', error);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSuggestionPress = async (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setSuggestions([]);
+    // Immediately trigger search
+    setPage(1);
+    setIsSearching(true);
+    try {
+      const response = await productService.searchProducts(suggestion, 1);
+      setProducts(response.data);
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Search failed',
+        text2: 'Could not fetch search results',
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSuggestions([]);
+    setPage(1);
+    fetchProducts(1);
   };
 
   const fetchProducts = async (pageNumber: number) => {
@@ -251,6 +301,14 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
 
   // Sample data (Banners / Stores) no longer needed for banners as they are fetched from API
 
+  const handleRefresh = async () => {
+    fetchProducts(1);
+    if (isAuthenticated) {
+      fetchAddresses();
+      fetchNotifications();
+    }
+  };
+
   const [categories, setCategories] = useState<Category[]>([
     { id: 'all', name: 'All', icon: 'grid' }
   ]);
@@ -304,6 +362,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         <HomeHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          onClearSearch={handleClearSearch}
           isLoggedIn={isAuthenticated}
           hasAddress={hasAddress}
           hasUnreadNotifications={unreadCount > 0}
@@ -325,6 +384,8 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
             }
           }}
           onScanPress={() => console.log('Scan press')}
+          suggestions={suggestions}
+          onSuggestionPress={handleSuggestionPress}
         />
         <View style={styles.contentContainer}>
 
@@ -342,6 +403,13 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
             numColumns={2}
             columnWrapperStyle={styles.columnWrapper}
             ListHeaderComponent={renderHeader}
+            refreshControl={
+              <RefreshControl
+                refreshing={(isLoading && products.length > 0) || (isLoadingStores && stores.length > 0)}
+                onRefresh={handleRefresh}
+                colors={[COLORS.primary]}
+              />
+            }
             renderItem={({ item }) => (
               <ProductCard
                 product={item}

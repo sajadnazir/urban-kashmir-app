@@ -21,14 +21,24 @@ import { HeaderTwo } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
 import { addressService } from '../api';
 import type { Address, CreateAddressPayload, UpdateAddressPayload } from '../types/address';
+import { useAddressStore } from '../store';
 
 interface AddressScreenProps {
   onBack?: () => void;
 }
 
 export const AddressScreen: React.FC<AddressScreenProps> = ({ onBack }) => {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    addresses, 
+    isLoading, 
+    fetchAddresses, 
+    setDefaultAddress, 
+    deleteAddress: storeDeleteAddress,
+    createAddress: storeCreateAddress,
+    updateAddress: storeUpdateAddress
+  } = useAddressStore();
+  // const [addresses, setAddresses] = useState<Address[]>([]);
+  // const [isLoading, setIsLoading] = useState(true);
   
   // Modal State
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -50,22 +60,23 @@ export const AddressScreen: React.FC<AddressScreenProps> = ({ onBack }) => {
     is_default: false,
   });
 
-  const fetchAddresses = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await addressService.getAddresses();
-      setAddresses(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch addresses:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load addresses',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  /* Removed local fetchAddresses in favor of store one */
+  // const fetchAddresses = useCallback(async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const data = await addressService.getAddresses();
+  //     setAddresses(Array.isArray(data) ? data : []);
+  //   } catch (error) {
+  //     console.error('Failed to fetch addresses:', error);
+  //     Toast.show({
+  //       type: 'error',
+  //       text1: 'Error',
+  //       text2: 'Failed to load addresses',
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, []);
 
   useEffect(() => {
     fetchAddresses();
@@ -135,16 +146,16 @@ export const AddressScreen: React.FC<AddressScreenProps> = ({ onBack }) => {
           ...formData,
           phone: formData.phone_number, // API expects phone in PUT based on curl
         };
-        await addressService.updateAddress(editingAddress.id, payload);
+        await storeUpdateAddress(editingAddress.id, payload);
         Toast.show({ type: 'success', text1: 'Success', text2: 'Address updated successfully' });
       } else {
         // Create
-        await addressService.createAddress(formData);
+        await storeCreateAddress(formData);
         Toast.show({ type: 'success', text1: 'Success', text2: 'Address added successfully' });
       }
       
       handleCloseForm();
-      fetchAddresses(); // Refresh the list
+      await fetchAddresses(); // Refresh the global store!
     } catch (error: any) {
       console.error('Failed to save address:', error);
       
@@ -182,13 +193,12 @@ export const AddressScreen: React.FC<AddressScreenProps> = ({ onBack }) => {
           onPress: async () => {
             try {
               // Optimistic UI update
-              setAddresses(prev => prev.filter(a => a.id !== address.id));
-              await addressService.deleteAddress(address.id);
+              await storeDeleteAddress(address.id);
               Toast.show({ type: 'success', text1: 'Success', text2: 'Address deleted' });
             } catch (error) {
               console.error('Failed to delete address:', error);
               Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to delete address' });
-              fetchAddresses(); // Refresh to revert
+              await fetchAddresses(); // Refresh to revert
             }
           }
         }
@@ -200,18 +210,12 @@ export const AddressScreen: React.FC<AddressScreenProps> = ({ onBack }) => {
     if (address.is_default) return;
     
     try {
-      // Optimistic updat to jump UI immediately
-      setAddresses(prev => prev.map(a => ({
-        ...a,
-        is_default: a.id === address.id,
-      })));
-      
-      await addressService.setDefaultAddress(address.id);
+      await setDefaultAddress(address.id);
       Toast.show({ type: 'success', text1: 'Success', text2: 'Default address updated' });
     } catch (error) {
       console.error('Failed to set default address:', error);
       Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to update default address' });
-      fetchAddresses(); // Refresh to revert
+      await fetchAddresses(); // Refresh to revert
     }
   };
 
