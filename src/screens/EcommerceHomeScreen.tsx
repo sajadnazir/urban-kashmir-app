@@ -296,7 +296,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         <Text style={styles.seeAll}>See All</Text>
       </View>
     </View>
-  ), [searchQuery, selectedCategory, categories, stores, isLoadingStores]);
+  ), [searchQuery, selectedCategory, categories, stores, isLoadingStores, banners]);
 
   return (
     <SafeAreaView style={styles.wrapper}>

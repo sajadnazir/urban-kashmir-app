@@ -10,7 +10,7 @@ import {
   NativeScrollEvent,
   Image,
 } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { normalizeFont, scale } from '../utils/responsive';
 
 const { width } = Dimensions.get('window');
@@ -164,12 +164,14 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: normalizeFont(FONT_SIZES.sm),
+    fontFamily: getFontFamily('regular'),
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.darkGray,
     marginBottom: SPACING.xs,
   },
   title: {
     fontSize: normalizeFont(FONT_SIZES.xl),
+    fontFamily: getFontFamily('bold'),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
     marginBottom: SPACING.md,
@@ -184,6 +186,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: normalizeFont(FONT_SIZES.sm),
+    fontFamily: getFontFamily('semiBold'),
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.background,
   },
