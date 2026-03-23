@@ -17,6 +17,8 @@ export * from './services/categoryService';
 export * from './services/cartService';
 export * from './services/vendorService';
 export * from './services/wishlistService';
+export * from './services/supportService';
+export * from './services/bannerService';
 export { addressService } from './services/addressService';
 export { notificationService } from './services/notificationService';
 export { orderService } from './services/orderService';

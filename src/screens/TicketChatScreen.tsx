@@ -152,7 +152,8 @@ export const TicketChatScreen: React.FC<TicketChatScreenProps> = ({
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <FlatList
           ref={flatListRef}
@@ -161,6 +162,7 @@ export const TicketChatScreen: React.FC<TicketChatScreenProps> = ({
           renderItem={renderMessage}
           contentContainerStyle={styles.chatContainer}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+          keyboardShouldPersistTaps="handled"
         />
 
         {thread?.status !== 'closed' && thread?.status !== 'resolved' ? (

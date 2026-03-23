@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   StatusBar,
   Image,
   TouchableOpacity,
@@ -55,10 +55,11 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
   }, [vendorSlug]);
 
   useEffect(() => {
-    if (vendor?.id) {
+    // if (vendor?.id) {
       fetchProducts();
-    }
+    // }
   }, [vendor?.id, selectedCategory]);
+  // }, [vendor?.id, selectedCategory]);
 
   const fetchVendorDetails = async () => {
     try {
@@ -90,7 +91,7 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
 
   const categories = [
     { id: 'all', name: 'All', icon: 'grid' },
-    ...(vendor?.categories?.map(cat => ({
+    ...(vendor?.categories?.map((cat: any) => ({
       id: String(cat.id),
       name: cat.name,
       icon: 'tag'
@@ -150,79 +151,76 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
           onRightPress={() => console.log('Share store')}
         />
 
-        {isLoading ? (
+        {isLoading && !vendor ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={COLORS.primary} />
           </View>
         ) : (
-          <ScrollView
+          <FlatList
             style={styles.scrollView}
+            data={products}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapper}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
-          >
-            <View style={styles.storeBanner}>
-              <Image 
-                source={{ uri: vendor?.cover_url || vendor?.banner_url || vendor?.logo_url || 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop' }} 
-                style={styles.bannerImage} 
-                onError={(e) => console.log(`Store Banner Image Load Error (${vendor?.name}):`, e.nativeEvent.error)}
-              />
-              <View style={styles.bannerOverlay}>
-                <View style={styles.storeInfo}>
-                  <Text style={styles.storeName}>{vendor?.display_name || vendor?.name}</Text>
-                  <View style={styles.storeStats}>
-                    <View style={styles.statItem}>
-                      <Icon name="star" size={16} color={COLORS.primary} />
-                      <Text style={styles.statText}>{Number(vendor?.statistics?.avg_rating || 0).toFixed(1)}</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <Icon name="package" size={16} color={COLORS.background} />
-                      <Text style={styles.statText}>{vendor?.statistics?.total_products || 0} Products</Text>
+            ListHeaderComponent={
+              <>
+                <View style={styles.storeBanner}>
+                  <Image 
+                    source={{ uri: vendor?.cover_url || vendor?.banner_url || vendor?.logo_url || 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop' }} 
+                    style={styles.bannerImage} 
+                    onError={(e) => console.log(`Store Banner Image Load Error (${vendor?.name}):`, e.nativeEvent.error)}
+                  />
+                  <View style={styles.bannerOverlay}>
+                    <View style={styles.storeInfo}>
+                      <Text style={styles.storeName}>{vendor?.display_name || vendor?.name}</Text>
+                      <View style={styles.storeStats}>
+                        <View style={styles.statItem}>
+                          <Icon name="star" size={16} color={COLORS.primary} />
+                          <Text style={styles.statText}>{Number(vendor?.statistics?.avg_rating || 0).toFixed(1)}</Text>
+                        </View>
+                        <View style={styles.statDivider} />
+                        <View style={styles.statItem}>
+                          <Icon name="package" size={16} color={COLORS.background} />
+                          <Text style={styles.statText}>{vendor?.statistics?.total_products || 0} Products</Text>
+                        </View>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            </View>
 
-            {/* Categories */}
-            <View style={styles.categoriesSection}>
-              <CategoryFilter
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
+                {/* Categories */}
+                <View style={styles.categoriesSection}>
+                  <CategoryFilter
+                    categories={categories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={setSelectedCategory}
+                  />
+                </View>
+
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Products</Text>
+                </View>
+              </>
+            }
+            renderItem={({ item }) => (
+              <ProductCard
+                product={item}
+                onPress={() => onProductPress?.(item)}
+                onAddToCart={handleAddToCart}
+                onRequireAuth={onRequireAuth}
               />
-            </View>
-
-            {/* Products Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Products</Text>
-                <TouchableOpacity onPress={() => console.log('View all products')}>
-                  <Text style={styles.viewAll}>View All</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.productsGrid}>
-                {products.length > 0 ? (
-                  products.map(product => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onPress={() => onProductPress?.(product)}
-                      onAddToCart={handleAddToCart}
-                      onRequireAuth={onRequireAuth}
-                    />
-                  ))
-                ) : (
-                  <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>No products found for this vendor.</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            {/* Bottom spacing */}
-            <View style={styles.bottomSpacer} />
-          </ScrollView>
+            )}
+            ListEmptyComponent={
+              !isLoading ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>No products found for this vendor.</Text>
+                </View>
+              ) : null
+            }
+            ListFooterComponent={<View style={styles.bottomSpacer} />}
+          />
         )}
 
         {/* Bottom Navigation */}
@@ -314,20 +312,12 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.text,
   },
-  viewAll: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.medium,
-    color: COLORS.primary,
+  columnWrapper: {
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
   },
   categoriesSection: {
     marginBottom: SPACING.md,
-  },
-  productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.md,
-    justifyContent: 'center',
-    gap:10
   },
   emptyContainer: {
     padding: SPACING.xl,

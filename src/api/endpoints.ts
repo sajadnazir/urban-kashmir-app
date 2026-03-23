@@ -107,6 +107,11 @@ export const ENDPOINTS = {
     MARK_READ: (id: string | number) => `/support/${id}/mark-read`,
   },
 
+  // Banners endpoints
+  BANNERS: {
+    LIST: '/banners',
+  },
+
   // Track endpoint
   TRACKING: (number: string) => `/track/${number}`,
 } as const;

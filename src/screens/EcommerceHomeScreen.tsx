@@ -16,13 +16,14 @@ import {
   TabName,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
-import { productService, categoryService, cartService, vendorService } from '../api';
+import { productService, categoryService, cartService, vendorService, bannerService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
 import type { Category } from '../api/services/categoryService';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useCartStore } from '../store/cartStore';
+import { useBannerStore } from '../store/bannerStore';
 import { normalizeFont } from '../utils/responsive';
 
 interface EcommerceHomeScreenProps {
@@ -58,12 +59,15 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [stores, setStores] = useState<Store[]>([]);
   const [isLoadingStores, setIsLoadingStores] = useState(false);
+  const { banners: cachedBanners, setBanners: setCachedBanners } = useBannerStore();
+  const [banners, setBanners] = useState<any[]>(cachedBanners.length > 0 ? cachedBanners : []);
 
   // Initial Fetch
   useEffect(() => {
     fetchProducts(1);
     fetchCategories();
     fetchVendors();
+    fetchBanners();
   }, []);
 
   useEffect(() => {
@@ -99,6 +103,49 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         text1: 'Fetch Error',
         text2: String(error?.message || JSON.stringify(error)),
       });
+    }
+  };
+
+  const fetchBanners = async () => {
+    try {
+      const apiBanners = await bannerService.getBanners();
+      const mappedBanners = apiBanners.map((b: any) => ({
+        id: String(b.id),
+        title: b.title,
+        subtitle: b.subtitle,
+        buttonText: 'Shop Now',
+        image: b.image_url,
+        action: b.action,
+        backgroundColor: '#FFF4E6', // Fallback color
+        position: b.position || 0,
+      }));
+      const sortedBanners = mappedBanners.sort((a: any, b: any) => (a.position - b.position));
+      setBanners(sortedBanners);
+      setCachedBanners(sortedBanners as any);
+    } catch (error) {
+      console.error('Failed to fetch banners:', error);
+    }
+  };
+
+  const handleBannerPress = (item: any) => {
+    if (item.action) {
+      const { type, id } = item.action;
+      if (type === 'product') {
+        onProductPress?.({ id: String(id) } as Product);
+      } else if (type === 'vendor') {
+        // Find the vendor in the stores list to get the real slug
+        const vendor = stores.find(s => s.id === String(id));
+        if (vendor) {
+          onStorePress?.(vendor);
+        } else {
+          // Fallback if not in featured list - we can't navigate without slug
+          console.warn(`Vendor with ID ${id} not found in loaded stores list`);
+          // Try to pass ID as slug as absolute fallback, though it may 404
+          onStorePress?.({ id: String(id), slug: String(id) } as Store);
+        }
+      } else if (type === 'category') {
+        setSelectedCategory(String(id));
+      }
     }
   };
 
@@ -198,41 +245,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     }
   };
 
-  // Sample data (Banners / Stores)
-const bannerItems = [
-  {
-    id: '1',
-    title: 'Authentic Kashmiri Saffron',
-    subtitle: 'Pure Pampore Kesar',
-    buttonText: 'Shop Now',
-    backgroundColor: '#FFF4E6',
-    image: 'https://images.unsplash.com/photo-1699365604604-KeoViDKy-zA?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    id: '2',
-    title: 'Handmade Pashmina Shawls',
-    subtitle: 'Luxury From Kashmir',
-    buttonText: 'Explore',
-    backgroundColor: '#F3F4F6',
-    image: 'https://images.unsplash.com/photo-1539345285273-G9ndSNnIqkk?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    id: '3',
-    title: 'Kashmiri Walnuts & Dry Fruits',
-    subtitle: 'Fresh From The Valley',
-    buttonText: 'Buy Now',
-    backgroundColor: '#E8F5E9',
-    image: 'https://images.unsplash.com/photo-1524656855800-59465ad9d27a?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    id: '4',
-    title: 'Walnut Wood Handicrafts',
-    subtitle: 'Traditional Kashmiri Art',
-    buttonText: 'View Collection',
-    backgroundColor: '#F5EFE6',
-    image: 'https://images.unsplash.com/photo-1677856219110-Odv0CwCz7gw?auto=format&fit=crop&w=1200&q=80',
-  },
-];
+  // Sample data (Banners / Stores) no longer needed for banners as they are fetched from API
 
   const [categories, setCategories] = useState<Category[]>([
     { id: 'all', name: 'All', icon: 'grid' }
@@ -245,7 +258,7 @@ const bannerItems = [
   const renderHeader = useCallback(() => (
     <View style={styles.headerBlock}>
       <View style={styles.bannerContainer}>
-        <Banner items={bannerItems} onBannerPress={(item) => console.log('Banner pressed', item)} />
+        <Banner items={banners} onBannerPress={handleBannerPress} />
       </View>
 
 

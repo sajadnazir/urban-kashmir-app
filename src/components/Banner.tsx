@@ -23,6 +23,10 @@ interface BannerItem {
   buttonText: string;
   backgroundColor?: string;
   image?: string;
+  action?: {
+    type: string;
+    id: number | string;
+  };
 }
 
 interface BannerProps {
@@ -54,16 +58,18 @@ export const Banner: React.FC<BannerProps> = ({ items, onBannerPress }) => {
         snapToAlignment="start"
         contentContainerStyle={styles.scrollContent}
       >
-        {items.map(item => (
-          <TouchableOpacity
-            key={item.id}
-            style={[
-              styles.bannerItem,
-              { backgroundColor: item.backgroundColor || COLORS.lightGray },
-            ]}
-            onPress={() => onBannerPress?.(item)}
-            activeOpacity={0.9}
-          >
+        {items.map(item => {
+          const isClickable = !!item.action?.id;
+          return (
+            <TouchableOpacity
+              key={item.id}
+              style={[
+                styles.bannerItem,
+                { backgroundColor: item.backgroundColor || COLORS.lightGray },
+              ]}
+              onPress={() => isClickable && onBannerPress?.(item)}
+              activeOpacity={isClickable ? 0.9 : 1}
+            >
             <View style={styles.bannerContent}>
               {/* Left side - Image placeholder */}
               <View style={styles.imageContainer}>
@@ -71,7 +77,7 @@ export const Banner: React.FC<BannerProps> = ({ items, onBannerPress }) => {
                   {/* Product image would go here */}
                   {/* <Text style={styles.imagePlaceholderText}>👕</Text> */}
                   <Image 
-                    source={{ uri: item.image }} 
+                    source={{ uri: item.image?.startsWith('/') ? `https://urban.bracecodes.in${item.image}` : item.image }} 
                     style={styles.image} 
                     resizeMode="cover"
                     onError={(e) => console.log(`Banner Image Load Error (${item.title}):`, e.nativeEvent.error)}
@@ -83,13 +89,16 @@ export const Banner: React.FC<BannerProps> = ({ items, onBannerPress }) => {
               <View style={styles.textContainer}>
                 <Text style={styles.subtitle}>{item.subtitle}</Text>
                 <Text style={styles.title}>{item.title}</Text>
-                <TouchableOpacity style={styles.button}>
-                  <Text style={styles.buttonText}>{item.buttonText}</Text>
-                </TouchableOpacity>
+                {isClickable && (
+                  <View style={styles.button}>
+                    <Text style={styles.buttonText}>{item.buttonText}</Text>
+                  </View>
+                )}
               </View>
             </View>
           </TouchableOpacity>
-        ))}
+        );
+      })}
       </ScrollView>
 
       {/* Pagination Dots */}
