@@ -155,10 +155,10 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
-      <View style={styles.sectionHeader}>
+      {/* <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
         <Text style={styles.seeAll}>See All</Text>
-      </View>
+      </View> */}
     </View>
   ), [categories, selectedCategory]);
 

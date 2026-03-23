@@ -279,7 +279,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Featured Stores</Text>
-        <Text style={styles.seeAll}>See All</Text>
+        {/* <Text style={styles.seeAll}>See All</Text> */}
       </View>
       <FlatList
         horizontal
@@ -291,9 +291,10 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         ListEmptyComponent={isLoadingStores ? <ActivityIndicator size="small" color={COLORS.primary} /> : null}
       />
 
-      <View style={styles.sectionHeader}>
+      <View style={[styles.sectionHeader, {marginBottom: 0}]}>
         <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
-        <Text style={styles.seeAll}>See All</Text>
+      <TouchableOpacity onPress={() => onTabPress?.('search' as TabName)}>  <Text style={styles.seeAll}>See All</Text>
+      </TouchableOpacity>
       </View>
     </View>
   ), [searchQuery, selectedCategory, categories, stores, isLoadingStores, banners]);
