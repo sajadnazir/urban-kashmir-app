@@ -21,7 +21,7 @@ interface HomeHeaderProps {
   onNotificationPress?: () => void;
   onWishlistPress?: () => void;
   onLocationPress?: () => void;
-  onScanPress?: () => void;
+  onSortPress?: () => void;
   searchQuery: string;
   onSearchChange: (text: string) => void;
   onClearSearch?: () => void;
@@ -39,7 +39,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   onNotificationPress,
   onWishlistPress,
   onLocationPress,
-  onScanPress,
+  onSortPress,
   searchQuery,
   onSearchChange,
   onClearSearch,
@@ -130,10 +130,10 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
 
         <TouchableOpacity 
           style={styles.scanButton} 
-          onPress={onScanPress}
+          onPress={onSortPress}
           activeOpacity={0.8}
         >
-          <Icon name="maximize" size={18} color={COLORS.background} />
+          <Icon name="sliders" size={18} color={COLORS.background} />
         </TouchableOpacity>
       </View>
 

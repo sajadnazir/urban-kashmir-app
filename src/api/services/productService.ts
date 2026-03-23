@@ -48,10 +48,21 @@ export const productService = {
   getProducts: async (
     page: number = 1,
     perPage: number = 20,
+    search: string = '',
+    sort: string = 'none',
     categoryId?: string,
     vendorId?: number | string
   ): Promise<PaginatedResponse<Product[]>> => {
     const params: Record<string, any> = { page, per_page: perPage };
+    if (search) params.q = search;
+    if (sort !== 'none') {
+      const [sortBy, order] = sort.split(':');
+      if (sortBy === 'price_low') { params.sort_by = 'price'; params.order = 'asc'; }
+      else if (sortBy === 'price_high') { params.sort_by = 'price'; params.order = 'desc'; }
+      else if (sortBy === 'on_sale') { params.on_sale = 1; }
+      else if (sortBy === 'discount') { params.discount = 1; }
+      else if (sortBy === 'newest') { params.sort_by = 'id'; params.order = 'desc'; }
+    }
     if (categoryId && categoryId !== 'all') {
       params.category_id = categoryId;
     }
@@ -101,13 +112,22 @@ export const productService = {
   searchProducts: async (
     query: string,
     page: number = 1,
-    perPage: number = 20
+    perPage: number = 20,
+    sort: string = 'none'
   ): Promise<PaginatedResponse<Product[]>> => {
     // Note: Search API uses a different structure { data: { products: [], categories: [] } }
     // It doesn't seem to follow the standard PaginatedResponse envelope directly
+    const params: any = { q: query, page, per_page: perPage };
+    if (sort !== 'none') {
+      if (sort === 'price_low') { params.sort_by = 'price'; params.order = 'asc'; }
+      else if (sort === 'price_high') { params.sort_by = 'price'; params.order = 'desc'; }
+      else if (sort === 'on_sale') { params.on_sale = 1; }
+      else if (sort === 'discount') { params.discount = 1; }
+      else if (sort === 'newest') { params.sort_by = 'id'; params.order = 'desc'; }
+    }
     const response = await apiService.get<any>(
       ENDPOINTS.PRODUCTS.SEARCH,
-      { q: query, page, per_page: perPage }
+      params
     );
 
     const apiProducts: ApiProduct[] = response.products || [];

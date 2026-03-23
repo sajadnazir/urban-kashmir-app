@@ -78,6 +78,8 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
       const productsResponse = await productService.getProducts(
         1, 
         20, 
+        '',
+        'none',
         selectedCategory === 'all' ? undefined : selectedCategory, 
         vendor?.id
       );

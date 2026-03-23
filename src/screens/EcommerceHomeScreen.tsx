@@ -15,6 +15,8 @@ import {
   Store,
   TabName,
   HomeHeader,
+  SortModal,
+  SortOption,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { productService, categoryService, cartService, vendorService, bannerService } from '../api';
@@ -56,6 +58,8 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   // Search & Suggestions State
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+  const [selectedSort, setSelectedSort] = useState<SortOption>('none');
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -229,6 +233,14 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     }
   };
 
+  const handleSortSelect = (option: SortOption) => {
+    setSelectedSort(option);
+    setIsSortModalVisible(false); // Close modal after selection
+    // Refresh products with sort
+    setPage(1);
+    fetchProducts(1, searchQuery, option);
+  };
+
   const handleClearSearch = () => {
     setSearchQuery('');
     setSuggestions([]);
@@ -236,17 +248,17 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     fetchProducts(1);
   };
 
-  const fetchProducts = async (pageNumber: number) => {
+  const fetchProducts = async (pageNumber: number, search: string = '', sort: SortOption = 'none') => {
     if (pageNumber === 1) setIsLoading(true);
     else setIsFetchingMore(true);
 
     try {
-      const response = await productService.getProducts(pageNumber, 10);
+      const response = await productService.getProducts(pageNumber, 10, search, sort);
       
-      setProducts(prev => 
+      setProducts(p => 
         pageNumber === 1 
           ? response.data 
-          : [...prev, ...response.data]
+          : [...p, ...response.data]
       );
       
       setPage(response.pagination.current_page);
@@ -264,7 +276,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
 
   const handleLoadMore = () => {
     if (!isFetchingMore && hasMore && !isLoading && products.length > 0) {
-      fetchProducts(page + 1);
+      fetchProducts(page + 1, searchQuery, selectedSort);
     }
   };
 
@@ -383,10 +395,18 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
                onTabPress?.('address' as any);
             }
           }}
-          onScanPress={() => console.log('Scan press')}
+          onSortPress={() => setIsSortModalVisible(true)}
           suggestions={suggestions}
           onSuggestionPress={handleSuggestionPress}
         />
+
+      <SortModal 
+        isVisible={isSortModalVisible}
+        onClose={() => setIsSortModalVisible(false)}
+        selectedOption={selectedSort}
+        onSelectOption={handleSortSelect}
+      />
+
         <View style={styles.contentContainer}>
 
         {isLoading && page === 1 ? (
