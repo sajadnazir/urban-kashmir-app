@@ -35,13 +35,13 @@ export const SPACING = {
 } as const;
 
 export const FONT_SIZES = {
-  xs: 11,
-  sm: 12,
-  md: 13,
-  lg: 14,
-  xl: 15,
-  xxl: 16,
-  xxxl: 18,
+  xs: 12,
+  sm: 13,
+  md: 14,
+  lg: 16,
+  xl: 18,
+  xxl: 20,
+  xxxl: 22,
 } as const;
 
 export const FONTS = {

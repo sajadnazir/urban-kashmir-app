@@ -407,9 +407,10 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.xl,
+    marginTop: SPACING.xxl,
   },
 
   // ── Header Row ─────────────────────────────────────────────────────────────
@@ -455,7 +456,7 @@ const styles = StyleSheet.create({
   },
   appName: {
     color: COLORS.text,
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.xxxl,
     fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: 0.5,
   },
