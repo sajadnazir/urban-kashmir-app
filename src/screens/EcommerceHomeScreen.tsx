@@ -420,7 +420,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
             keyExtractor={item => item.id}
             numColumns={2}
             columnWrapperStyle={styles.columnWrapper}
-            ListHeaderComponent={renderHeader}
+            ListHeaderComponent={renderHeader()}
             refreshControl={
               <RefreshControl
                 refreshing={(isLoading && products.length > 0) || (isLoadingStores && stores.length > 0)}

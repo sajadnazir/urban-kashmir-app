@@ -200,7 +200,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
             keyExtractor={item => item.id}
             numColumns={2}
             columnWrapperStyle={styles.columnWrapper}
-            ListHeaderComponent={renderHeader}
+            ListHeaderComponent={renderHeader()}
             renderItem={({ item }) => (
               <ProductCard
                 product={item}
