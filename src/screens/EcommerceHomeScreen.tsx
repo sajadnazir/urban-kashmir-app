@@ -333,13 +333,8 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     <View style={styles.headerBlock}>
       <FullWidthBanner items={banners} onBannerPress={handleBannerPress} />
 
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-      />
 
-      <View style={[styles.sectionHeader, {marginTop: SPACING.md}]}>
+      <View style={[styles.sectionHeader, {marginTop: 0}]}>
         <Text style={styles.sectionTitle}>Featured Stores</Text>
         {/* <Text style={styles.seeAll}>See All</Text> */}
       </View>
@@ -352,6 +347,14 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
         renderItem={({ item }) => <StoreCard store={item} onPress={(store) => onStorePress?.(store)} />}
         ListEmptyComponent={isLoadingStores ? <ActivityIndicator size="small" color={COLORS.primary} /> : null}
       />
+
+     <View style={{marginTop: SPACING.lg}}> 
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+    </View>
 
       <View style={[styles.sectionHeader, {marginBottom: 0}]}>
         <Text style={styles.sectionTitle}>Top Picks Nearby</Text>
