@@ -5,7 +5,7 @@ import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Header,
-  Banner,
+  FullWidthBanner,
   SearchBar,
   CategoryFilter,
   ProductCard,
@@ -331,9 +331,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
    */
   const renderHeader = useCallback(() => (
     <View style={styles.headerBlock}>
-      <View style={styles.bannerContainer}>
-        <Banner items={banners} onBannerPress={handleBannerPress} />
-      </View>
+      <FullWidthBanner items={banners} onBannerPress={handleBannerPress} />
 
       <CategoryFilter
         categories={categories}
@@ -366,8 +364,8 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   return (
     <SafeAreaView style={styles.wrapper}>
       <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.darkGray}
+        barStyle="dark-content"
+        backgroundColor={COLORS.background}
         translucent={false}
       />
       <View style={styles.container}>
@@ -466,14 +464,11 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: COLORS.darkGray,
+    backgroundColor: COLORS.background, // Match StoreHomeScreen
   },
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: 'hidden',
+    backgroundColor: COLORS.lightGray,
   },
   contentContainer: {
     flex: 1,
@@ -491,12 +486,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerBlock: {
-    // Top padding handled by contentContainer, but we add space before grid begins
+    // Remove bottom padding from headerBlock as it applies globally and we now use full width banner
     paddingBottom: SPACING.md,
-  },
-  bannerContainer: {
-    // marginBottom: SPACING.md,
-    paddingVertical: SPACING.sm,
   },
   sectionHeader: {
     flexDirection: 'row',

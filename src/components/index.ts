@@ -21,6 +21,7 @@ export { ProfileHeader } from './ProfileHeader';
 export { ProfileMenuItem } from './ProfileMenuItem';
 export { StoreCard } from './StoreCard';
 export { HomeHeader } from './HomeHeader';
+export { FullWidthBanner } from './FullWidthBanner';
 export { SortModal } from './SortModal';
 export type { SortOption } from './SortModal';
 export { ReelCard } from './ReelCard';
