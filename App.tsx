@@ -6,11 +6,16 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { StatusBar, BackHandler, View, Text, StyleSheet, TouchableOpacity, Modal, PermissionsAndroid, Platform } from 'react-native';
+import { StatusBar, BackHandler, View, Text, StyleSheet, TouchableOpacity, Modal, PermissionsAndroid, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 import {
   EcommerceHomeScreen,
   ProductDetailsScreen,
@@ -217,6 +222,12 @@ function App(): React.JSX.Element {
     return () => subscription.remove();
   }, [currentScreen]);
 
+  const navigate = (screen: Screen) => {
+    // Add a smooth fade/layout transition
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setCurrentScreen(screen);
+  };
+
   // Safety timeout for splash screen
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -226,59 +237,59 @@ function App(): React.JSX.Element {
   }, []);
 
   const handleLoginSuccess = () => {
-    setCurrentScreen(intendedScreen || 'home');
+    navigate(intendedScreen || 'home');
     setIntendedScreen(null);
   };
 
   const handleProductPress = (product: Product) => {
     setSelectedProduct(product);
-    setCurrentScreen('productDetails');
+    navigate('productDetails');
   };
 
   const handleStorePress = (store: Store) => {
     setSelectedStore(store);
-    setCurrentScreen('storeHome');
+    navigate('storeHome');
   };
 
   const handleReelPress = () => {
-    setCurrentScreen('reelsPlayer');
+    navigate('reelsPlayer');
   };
 
   const handleBack = () => {
     if (currentScreen === 'productDetails' || currentScreen === 'cart') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (currentScreen === 'storeHome') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (currentScreen === 'reelsPlayer') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (currentScreen === 'editProfile') {
-      setCurrentScreen('profile');
+      navigate('profile');
     } else if (currentScreen === 'profile') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (currentScreen === 'wishlist') {
-      setCurrentScreen('profile');
+      navigate('profile');
     } else if (currentScreen === 'address') {
-      setCurrentScreen('profile');
+      navigate('profile');
     } else if (currentScreen === 'notifications') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (currentScreen === 'notificationDetails') {
-      setCurrentScreen('notifications');
+      navigate('notifications');
     } else if (currentScreen === 'checkout') {
-      setCurrentScreen('cart');
+      navigate('cart');
     } else if (currentScreen === 'orderConfirmation') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (currentScreen === 'orders') {
-      setCurrentScreen('profile');
+      navigate('profile');
     } else if (currentScreen === 'orderDetails') {
-      setCurrentScreen('orders');
+      navigate('orders');
     } else if (currentScreen === 'trackOrder') {
-      setCurrentScreen('orderDetails');
+      navigate('orderDetails');
     } else if (currentScreen === 'ticketsList') {
-      setCurrentScreen('profile');
+      navigate('profile');
     } else if (currentScreen === 'createTicket') {
-      setCurrentScreen('ticketsList');
+      navigate('ticketsList');
     } else if (currentScreen === 'ticketChat') {
-      setCurrentScreen('ticketsList');
+      navigate('ticketsList');
     }
     setSelectedProduct(null);
     setSelectedStore(null);
@@ -286,36 +297,36 @@ function App(): React.JSX.Element {
 
   const handleTabPress = (tab: TabName) => {
     if (tab === 'home') {
-      setCurrentScreen('home');
+      navigate('home');
     } else if (tab === 'search') {
-      setCurrentScreen('shop');
+      navigate('shop');
     } else if (tab === 'cart') {
       if (!isAuthenticated) {
         setIntendedScreen('cart');
-        setCurrentScreen('login');
+        navigate('login');
       } else {
-        setCurrentScreen('cart');
+        navigate('cart');
       }
     } else if (tab === 'profile') {
       if (!isAuthenticated) {
         setIntendedScreen('profile');
-        setCurrentScreen('login');
+        navigate('login');
       } else {
-        setCurrentScreen('profile');
+        navigate('profile');
       }
     } else if (tab === 'wishlist' as any) {
       if (!isAuthenticated) {
          setIntendedScreen('wishlist');
-         setCurrentScreen('login');
+         navigate('login');
       } else {
-         setCurrentScreen('wishlist');
+         navigate('wishlist');
       }
     } else if (tab === 'address' as any) {
       if (!isAuthenticated) {
         setIntendedScreen('address');
-        setCurrentScreen('login');
+        navigate('login');
       } else {
-        setCurrentScreen('address');
+         navigate('address');
       }
     }
   };
@@ -323,15 +334,15 @@ function App(): React.JSX.Element {
   const handleEditProfile = () => {
     if (!isAuthenticated) {
       setIntendedScreen('editProfile');
-      setCurrentScreen('login');
+      navigate('login');
       return;
     }
-    setCurrentScreen('editProfile');
+    navigate('editProfile');
   };
 
   const handleRequireAuth = () => {
     setIntendedScreen('cart');
-    setCurrentScreen('login');
+    navigate('login');
   };
 
   const renderScreen = () => {
