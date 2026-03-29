@@ -41,6 +41,10 @@ export interface FullProduct extends Product {
     stock: number;
   }>;
   category_id: number;
+  shipping_info?: {
+    estimated_days: string;
+    free_shipping_threshold: number;
+  };
 }
 
 
@@ -205,6 +209,7 @@ export const productService = {
       images,
       variants,
       category_id: apiProduct.category_id,
+      shipping_info: response.shipping_info ?? undefined,
     };
   },
 };

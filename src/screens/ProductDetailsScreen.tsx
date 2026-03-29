@@ -307,6 +307,46 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
               <Text style={styles.descriptionTitle}>Description</Text>
               <Text style={styles.descriptionText}>{product.description}</Text>
             </View>
+
+            {/* Shipping Info */}
+            {product.shipping_info && (
+              <View style={styles.shippingCard}>
+                <View style={styles.shippingHeader}>
+                  <View style={styles.shippingIconWrap}>
+                    <Icon name="truck" size={16} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.shippingTitle}>Shipping Information</Text>
+                </View>
+
+                <View style={styles.shippingDivider} />
+
+                {/* Estimated Delivery */}
+                <View style={styles.shippingRow}>
+                  <View style={styles.shippingRowLeft}>
+                    <Icon name="clock" size={14} color={COLORS.textSecondary} />
+                    <Text style={styles.shippingRowLabel}>Estimated Delivery</Text>
+                  </View>
+                  <View style={styles.shippingBadge}>
+                    <Text style={styles.shippingBadgeText}>
+                      {product.shipping_info.estimated_days}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Free Shipping */}
+                <View style={[styles.shippingRow, { marginTop: SPACING.sm }]}>
+                  <View style={styles.shippingRowLeft}>
+                    <Icon name="gift" size={14} color={COLORS.textSecondary} />
+                    <Text style={styles.shippingRowLabel}>Free Shipping</Text>
+                  </View>
+                  <View style={[styles.shippingBadge, styles.freeShippingBadge]}>
+                    <Text style={[styles.shippingBadgeText, styles.freeShippingText]}>
+                      On orders over ₹{product.shipping_info.free_shipping_threshold}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         </ScrollView>
 
@@ -496,5 +536,77 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.regular,
     color: COLORS.textSecondary,
     lineHeight: 18,
+  },
+
+  // ─── Shipping Info Card ───────────────────────────────────────────────────
+  shippingCard: {
+    marginTop: SPACING.lg,
+    borderRadius: 16,
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    padding: SPACING.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  shippingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  shippingIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FFF4EE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shippingTitle: {
+    fontSize: FONT_SIZES.md,
+    fontFamily: getFontFamily('bold'),
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.text,
+  },
+  shippingDivider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginVertical: SPACING.md,
+  },
+  shippingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  shippingRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  shippingRowLabel: {
+    fontSize: FONT_SIZES.sm,
+    fontFamily: getFontFamily('regular'),
+    color: COLORS.textSecondary,
+  },
+  shippingBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+  },
+  shippingBadgeText: {
+    fontSize: FONT_SIZES.xs,
+    fontFamily: getFontFamily('bold'),
+    fontWeight: FONT_WEIGHTS.semiBold,
+    color: COLORS.text,
+  },
+  freeShippingBadge: {
+    backgroundColor: '#EDFFF5',
+  },
+  freeShippingText: {
+    color: '#1DB954',
   },
 });
