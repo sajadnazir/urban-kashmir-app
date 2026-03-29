@@ -9,6 +9,7 @@ import {
   StatusBar,
   Dimensions,
   ActivityIndicator,
+  Share,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -91,6 +92,24 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
     { id: 'blue', color: '#0066CC', name: 'Blue' },
     { id: 'lightBlue', color: '#4A90E2', name: 'Light Blue' },
   ];
+
+  const BASE_URL = 'https://urban.bracecodes.in';
+
+  const handleShare = async () => {
+    if (!product) return;
+    const productUrl = product.slug
+      ? `${BASE_URL}/products/${product.slug}`
+      : `${BASE_URL}/products/${product.id}`;
+    try {
+      await Share.share({
+        title: product.name,
+        message: `Check out "${product.name}" on Urban Kashmir!\n\n${productUrl}`,
+        url: productUrl, // iOS only — adds URL preview
+      });
+    } catch (error: any) {
+      console.error('Share failed:', error);
+    }
+  };
 
   const handleBuyNow = async () => {
     if (!product) return;
@@ -210,7 +229,7 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
           leftIcon="chevron-left"
           rightIcon="share-2"
           onLeftPress={onBack}
-          onRightPress={onShare}
+          onRightPress={handleShare}
         />
 
         <ScrollView
