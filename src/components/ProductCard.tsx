@@ -11,7 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, FONTS, getFontFamily } from '../constants';
 import { wishlistService } from '../api/services/wishlistService';
-import { useWishlistStore, useAuthStore } from '../store';
+import { useWishlistStore, useAuthStore, useCartStore } from '../store';
 import { normalizeFont, scale } from '../utils/responsive';
 
 export interface Product {
@@ -29,6 +29,7 @@ interface ProductCardProps {
   onPress?: (product: Product) => void;
   onFavoritePress?: (product: Product) => void;
   onAddToCart?: (product: Product) => void;
+  onGoToCart?: () => void;
   onRequireAuth?: () => void;
 }
 
@@ -37,10 +38,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onPress,
   onFavoritePress,
   onAddToCart,
+  onGoToCart,
   onRequireAuth,
 }) => {
   const { wishlistIds, toggleWishlistItem } = useWishlistStore();
   const { isAuthenticated } = useAuthStore();
+  const { cartProductIds } = useCartStore();
+
+  const isInCart = React.useMemo(() => {
+    return cartProductIds.has(String(product.id));
+  }, [product.id, cartProductIds]);
   
   // Calculate true favorite status 
   // It's favorite if it's explicitly set on the model (from certain APIs) 
@@ -127,11 +134,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <View style={styles.footer}>
           <Text style={styles.price}>₹ {product.price}</Text>
           <TouchableOpacity
-            style={styles.cartButton}
-            onPress={() => onAddToCart?.(product)}
+            style={[styles.cartButton, isInCart && styles.inCartButton]}
+            onPress={() => {
+              if (isInCart) {
+                onGoToCart?.();
+              } else {
+                onAddToCart?.(product);
+              }
+            }}
             activeOpacity={0.7}
           >
-            <Icon name="shopping-bag" size={18} color={COLORS.background} />
+            <Icon
+              name={isInCart ? 'shopping-cart' : 'shopping-bag'}
+              size={18}
+              color={COLORS.background}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -230,6 +247,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkGray,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  inCartButton: {
+    backgroundColor: '#1DB954', // green
   },
   cartIcon: {
     fontSize: 16,

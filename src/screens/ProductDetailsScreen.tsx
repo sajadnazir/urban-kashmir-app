@@ -33,6 +33,7 @@ interface ProductDetailsScreenProps {
   onBack?: () => void;
   onShare?: () => void;
   onRequireAuth?: () => void;
+  onGoToCart?: () => void;
 }
 
 export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
@@ -40,6 +41,7 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
   onBack,
   onShare,
   onRequireAuth,
+  onGoToCart,
 }) => {
   const [product, setProduct] = useState<FullProduct | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,11 +51,15 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { wishlistIds, toggleWishlistItem } = useWishlistStore();
-  const { fetchCartCount } = useCartStore();
+  const { fetchCartCount, addProductToCart, cartProductIds } = useCartStore();
 
   const isFavorite = React.useMemo(() => {
     return wishlistIds.has(String(product?.id));
   }, [product?.id, wishlistIds]);
+
+  const isInCart = React.useMemo(() => {
+    return cartProductIds.has(String(product?.id));
+  }, [product?.id, cartProductIds]);
 
   useEffect(() => {
     fetchProductDetails();
@@ -88,12 +94,18 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
 
   const handleBuyNow = async () => {
     if (!product) return;
-    
+
     if (!isAuthenticated) {
       onRequireAuth?.();
       return;
     }
-    
+
+    // If already in cart, just navigate there
+    if (isInCart) {
+      onGoToCart?.();
+      return;
+    }
+
     const variantId = product.variantId;
     if (!variantId) {
       Toast.show({
@@ -106,12 +118,16 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
 
     try {
       await cartService.addToCart(Number(product.id), variantId, quantity);
+      addProductToCart(product.id); // optimistic update
       fetchCartCount();
       Toast.show({
         type: 'success',
-        text1: 'Success',
-        text2: 'Product added to cart',
+        text1: 'Added to Cart!',
+        text2: 'Redirecting to your cart...',
+        visibilityTime: 1200,
       });
+      // Short delay so the toast is visible before navigating
+      setTimeout(() => onGoToCart?.(), 800);
     } catch (error) {
       console.error('Add to cart failed:', error);
       Toast.show({

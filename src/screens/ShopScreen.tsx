@@ -40,7 +40,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const { isAuthenticated } = useAuthStore();
-  const { fetchCartCount } = useCartStore();
+  const { fetchCartCount, addProductToCart } = useCartStore();
 
   // Pagination State
   const [products, setProducts] = useState<Product[]>([]);
@@ -132,10 +132,11 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
     }
     try {
       await cartService.addToCart(Number(product.id), product.variantId, 1);
+      addProductToCart(product.id); // optimistic update
       fetchCartCount();
       Toast.show({
         type: 'success',
-        text1: 'Success',
+        text1: 'Added to Cart',
         text2: `${product.name} added to cart!`,
       });
     } catch (error: any) {
@@ -206,6 +207,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({
                 product={item}
                 onPress={onProductPress}
                 onAddToCart={handleAddToCart}
+                onGoToCart={() => onTabPress?.('cart' as TabName)}
                 onRequireAuth={onRequireAuth}
               />
             )}

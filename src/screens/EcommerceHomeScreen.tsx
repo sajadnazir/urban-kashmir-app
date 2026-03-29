@@ -57,7 +57,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const { profile } = useUserStore();
   const { isAuthenticated } = useAuthStore();
   const { fetchWishlist } = useWishlistStore();
-  const { fetchCartCount } = useCartStore();
+  const { fetchCartCount, addProductToCart } = useCartStore();
   const { fetchAddresses, getDefaultAddress, addresses } = useAddressStore();
   const { fetchNotifications, unreadCount } = useNotificationStore();
   const { wishlistIds } = useWishlistStore();
@@ -272,10 +272,11 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     }
     try {
       await cartService.addToCart(Number(product.id), product.variantId, 1);
+      addProductToCart(product.id); // optimistic update
       fetchCartCount();
       Toast.show({
         type: 'success',
-        text1: 'Success',
+        text1: 'Added to Cart',
         text2: `${product.name} added to cart!`,
       });
     } catch (error: any) {
@@ -420,6 +421,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
                 product={item}
                 onPress={onProductPress}
                 onAddToCart={handleAddToCart}
+                onGoToCart={() => onTabPress?.('cart' as TabName)}
                 onRequireAuth={onRequireAuth}
               />
             )}

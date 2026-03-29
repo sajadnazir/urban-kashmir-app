@@ -449,6 +449,7 @@ function App(): React.JSX.Element {
             onBack={handleBack}
             onShare={() => console.log('Share')}
             onRequireAuth={handleRequireAuth}
+            onGoToCart={() => navigate('cart')}
           />
         );
       case 'wishlist':
