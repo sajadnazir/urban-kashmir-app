@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,14 +12,61 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
+  Animated,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HeaderTwo } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { orderService, tokenStorage } from '../api';
 import { Order } from '../types/order';
 import Icon from 'react-native-vector-icons/Feather';
+
+// ─── Enum labels from spec ────────────────────────────────────────────────────
+
+const CANCEL_REASONS: { value: string; label: string; icon: string }[] = [
+  { value: 'changed_mind',         label: 'Changed my mind',       icon: 'refresh-cw' },
+  { value: 'ordered_by_mistake',   label: 'Ordered by mistake',    icon: 'alert-triangle' },
+  { value: 'found_better_price',   label: 'Found better price',    icon: 'tag' },
+  { value: 'delivery_time_too_long', label: 'Delivery too slow',  icon: 'clock' },
+  { value: 'other',                label: 'Other reason',          icon: 'more-horizontal' },
+];
+
+const RETURN_REASONS: { value: string; label: string; icon: string }[] = [
+  { value: 'defective',        label: 'Defective product',     icon: 'tool' },
+  { value: 'wrong_item',       label: 'Wrong item received',   icon: 'shuffle' },
+  { value: 'damaged',          label: 'Damaged in transit',    icon: 'package' },
+  { value: 'not_as_described', label: 'Not as described',      icon: 'file-text' },
+  { value: 'changed_mind',     label: 'Changed my mind',       icon: 'refresh-cw' },
+  { value: 'other',            label: 'Other reason',          icon: 'more-horizontal' },
+];
+
+const REFUND_METHODS: { value: string; label: string; desc: string; icon: string }[] = [
+  { value: 'original',      label: 'Original Method', desc: 'Back to card/UPI',        icon: 'credit-card' },
+  // { value: 'wallet',        label: 'Wallet',          desc: 'Instant credit',           icon: 'dollar-sign' },
+  // { value: 'store_credit',  label: 'Store Credit',    desc: 'Use on future orders',     icon: 'gift' },
+];
+
+// ─── Status helpers ───────────────────────────────────────────────────────────
+
+const STATUS_META: Record<string, { color: string; bg: string; label: string }> = {
+  pending:    { color: '#F59E0B', bg: '#FEF3C7', label: 'Pending' },
+  paid:       { color: '#3B82F6', bg: '#EFF6FF', label: 'Paid' },
+  processing: { color: '#8B5CF6', bg: '#EDE9FE', label: 'Processing' },
+  shipped:    { color: '#0EA5E9', bg: '#E0F2FE', label: 'Shipped' },
+  delivered:  { color: '#10B981', bg: '#D1FAE5', label: 'Delivered' },
+  completed:  { color: '#10B981', bg: '#D1FAE5', label: 'Completed' },
+  cancelled:  { color: '#EF4444', bg: '#FEE2E2', label: 'Cancelled' },
+};
+
+function canCancel(status: string) {
+  return ['pending', 'paid', 'processing'].includes(status);
+}
+function canReturn(status: string) {
+  return ['completed', 'delivered'].includes(status);
+}
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface OrderDetailsScreenProps {
   orderId: number;
@@ -27,23 +74,30 @@ interface OrderDetailsScreenProps {
   onTrackOrder?: (trackingNumber: string) => void;
 }
 
-export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId, onBack, onTrackOrder }) => {
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({
+  orderId,
+  onBack,
+  onTrackOrder,
+}) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
 
+  // Cancel state
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('changed_mind');
   const [cancelComments, setCancelComments] = useState('');
 
+  // Return state
   const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState('defective');
   const [returnComments, setReturnComments] = useState('');
-  const [returnResolution, setReturnResolution] = useState('refund');
+  const [refundMethod, setRefundMethod] = useState('original');
 
-  useEffect(() => {
-    fetchOrderDetails();
-  }, [orderId]);
+  useEffect(() => { fetchOrderDetails(); }, [orderId]);
 
   const fetchOrderDetails = async () => {
     try {
@@ -62,17 +116,11 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
       setIsInvoiceLoading(true);
       const { url } = await orderService.getOrderInvoice(orderId);
       const token = await tokenStorage.getAccessToken();
-      
-      // Since we don't have a download manager, we'll try to open it in browser 
-      // with token if supported.
-      const fullUrl = `${url}?token=${token}`; 
-      
-      try {
-        await Linking.openURL(fullUrl);
-      } catch (err) {
-        Alert.alert('Error', 'Cannot open invoice link. Please ensure a browser is installed.');
-      }
-    } catch (error: any) {
+      const fullUrl = `${url}?token=${token}`;
+      await Linking.openURL(fullUrl).catch(() =>
+        Alert.alert('Error', 'Cannot open invoice link.')
+      );
+    } catch {
       Alert.alert('Error', 'Failed to generate invoice link');
     } finally {
       setIsInvoiceLoading(false);
@@ -83,72 +131,51 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
     try {
       setIsActionLoading(true);
       await orderService.cancelOrder(orderId, cancelReason, cancelComments);
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Order cancelled successfully',
-      });
+      Toast.show({ type: 'success', text1: 'Cancelled', text2: 'Order cancelled successfully' });
       setShowCancelModal(false);
-      fetchOrderDetails(); // Refresh
+      fetchOrderDetails();
     } catch (error: any) {
-      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to cancel order';
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: errorMsg,
-      });
+      const msg = error?.message || 'Failed to cancel order';
+      Toast.show({ type: 'error', text1: 'Error', text2: msg });
     } finally {
       setIsActionLoading(false);
     }
   };
 
   const handleReturnOrder = async () => {
+    if (!order?.items?.length) return;
     try {
-      if (!order?.items || order.items.length === 0) return;
       setIsActionLoading(true);
       
-      // Returning all items for simplicity in this flow
       const itemsToReturn = order.items.map(item => ({
         order_item_id: item.id,
         quantity: item.quantity,
-        reason: 'defective', // Default
+        reason: returnReason,
         comments: returnComments,
       }));
 
-      await orderService.returnOrder(orderId, {
+      // Send both root-level fields (from user's snippet) and items array (required by backend)
+      const payload = {
         items: itemsToReturn,
-        preferred_resolution: returnResolution,
-      });
+        reason: returnReason,
+        reason_details: returnComments,
+        refund_method: refundMethod,
+        images: [], 
+      };
 
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Return request submitted successfully',
-      });
+      await orderService.returnOrder(orderId, payload);
+      Toast.show({ type: 'success', text1: 'Submitted', text2: 'Return request submitted successfully' });
       setShowReturnModal(false);
-      fetchOrderDetails(); // Refresh
+      fetchOrderDetails();
     } catch (error: any) {
-      const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to submit return request';
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: errorMsg,
-      });
+      const msg = error?.message || 'Failed to submit return request';
+      Toast.show({ type: 'error', text1: 'Error', text2: msg });
     } finally {
       setIsActionLoading(false);
     }
   };
 
-  const getStatusColor = (status: string | undefined) => {
-    if (!status) return COLORS.gray;
-    switch (status.toLowerCase()) {
-      case 'pending': return '#F59E0B';
-      case 'processing': return '#3B82F6';
-      case 'completed': return '#10B981';
-      case 'cancelled': return '#EF4444';
-      default: return COLORS.gray;
-    }
-  };
+  // ─── Loading / Error States ────────────────────────────────────────────────
 
   if (isLoading) {
     return (
@@ -156,6 +183,7 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
         <HeaderTwo title="Order Details" leftIcon="chevron-left" onLeftPress={onBack} showRightIcon={false} />
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.loadingText}>Loading order…</Text>
         </View>
       </SafeAreaView>
     );
@@ -166,103 +194,93 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
       <SafeAreaView style={styles.wrapper}>
         <HeaderTwo title="Order Details" leftIcon="chevron-left" onLeftPress={onBack} showRightIcon={false} />
         <View style={styles.centerContainer}>
-          <Text>Order not found</Text>
+          <Icon name="alert-circle" size={48} color={COLORS.gray} />
+          <Text style={styles.emptyText}>Order not found</Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  const statusMeta = STATUS_META[order.status] || { color: COLORS.gray, bg: '#F3F4F6', label: order.status };
+
+  // ─── JSX ──────────────────────────────────────────────────────────────────
+
   return (
     <SafeAreaView style={styles.wrapper}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <HeaderTwo 
-        title={`Order #${order.order_number}`} 
-        leftIcon="chevron-left" 
-        onLeftPress={onBack} 
+      <HeaderTwo
+        title={`Order #${order.order_number}`}
+        leftIcon="chevron-left"
+        onLeftPress={onBack}
         showRightIcon={false}
       />
-      
-      <ScrollView 
-        style={styles.container} 
+
+      <ScrollView
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Status Card */}
+
+        {/* ── Status Card ── */}
         <View style={styles.card}>
-          <View style={styles.statusHeader}>
-            <Text style={styles.sectionTitle}>Order Status</Text>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '15' }]}>
-              <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
-                {(order.status || 'pending').toUpperCase()}
+          <View style={styles.statusRow}>
+            <View>
+              <Text style={styles.sectionTitle}>Order Status</Text>
+              <Text style={styles.dateText}>
+                {new Date(order.created_at).toLocaleDateString('en-IN', {
+                  day: 'numeric', month: 'long', year: 'numeric',
+                })}
+              </Text>
+            </View>
+            <View style={[styles.statusBadge, { backgroundColor: statusMeta.bg }]}>
+              <View style={[styles.statusDot, { backgroundColor: statusMeta.color }]} />
+              <Text style={[styles.statusLabel, { color: statusMeta.color }]}>
+                {statusMeta.label}
               </Text>
             </View>
           </View>
-          <Text style={styles.orderDate}>Placed on {new Date(order.created_at).toLocaleString()}</Text>
-          
-          <TouchableOpacity 
-            style={styles.invoiceButton} 
-            onPress={handleDownloadInvoice}
-            disabled={isInvoiceLoading}
-          >
-            {isInvoiceLoading ? (
-              <ActivityIndicator size="small" color={COLORS.primary} />
-            ) : (
-              <>
-                <Icon name="download" size={16} color={COLORS.primary} />
-                <Text style={styles.invoiceButtonText}>Download Invoice</Text>
-              </>
-            )}
-          </TouchableOpacity>
 
-          {order.tracking_number && (
-            <TouchableOpacity 
-              style={[styles.invoiceButton, { backgroundColor: 'rgba(59, 130, 246, 0.08)', marginTop: 8 }]} 
-              onPress={() => onTrackOrder?.(order.tracking_number!)}
-            >
-              <Icon name="truck" size={16} color="#3B82F6" />
-              <Text style={[styles.invoiceButtonText, { color: '#3B82F6' }]}>Track Order</Text>
+          {/* Invoice / Track buttons */}
+          <View style={styles.quickActions}>
+            <TouchableOpacity style={styles.quickBtn} onPress={handleDownloadInvoice} disabled={isInvoiceLoading}>
+              {isInvoiceLoading
+                ? <ActivityIndicator size="small" color={COLORS.primary} />
+                : <><Icon name="download" size={14} color={COLORS.primary} /><Text style={styles.quickBtnText}>Invoice</Text></>
+              }
             </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Shipping Address */}
-        <View style={styles.card}>
-          <View style={styles.sectionHeader}>
-            <Icon name="map-pin" size={20} color={COLORS.primary} />
-            <Text style={styles.sectionTitle}>Delivery Address</Text>
-          </View>
-          <View style={styles.addressContainer}>
-            <Text style={styles.nameText}>{order.shipping_address?.full_name}</Text>
-            <Text style={styles.addressText}>
-                {[order.shipping_address?.address_line_1, order.shipping_address?.address_line_2, order.shipping_address?.city, order.shipping_address?.state, order.shipping_address?.postal_code]
-                    .filter(Boolean).join(', ')}
-            </Text>
-            <Text style={styles.phoneText}>Phone: {order.shipping_address?.phone_number}</Text>
+            {order.tracking_number && (
+              <TouchableOpacity
+                style={[styles.quickBtn, { backgroundColor: '#EFF6FF', borderColor: '#3B82F6' }]}
+                onPress={() => onTrackOrder?.(order.tracking_number!)}
+              >
+                <Icon name="truck" size={14} color="#3B82F6" />
+                <Text style={[styles.quickBtnText, { color: '#3B82F6' }]}>Track Order</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {/* Order Items */}
+        {/* ── Items ── */}
         <View style={styles.card}>
-          <View style={styles.sectionHeader}>
-            <Icon name="package" size={20} color={COLORS.primary} />
-            <Text style={styles.sectionTitle}>Order Items</Text>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconWrap}>
+              <Icon name="package" size={16} color={COLORS.primary} />
+            </View>
+            <Text style={styles.sectionTitle}>Items Ordered</Text>
           </View>
-          {order.items?.map((item, index) => (
-            <View key={item.id} style={[styles.itemRow, index === order.items!.length - 1 && { borderBottomWidth: 0 }]}>
-              <View style={styles.itemImageContainer}>
-                {item.image_url ? (
-                  <Image source={{ uri: item.image_url }} style={styles.itemImage} />
-                ) : (
-                  <View style={styles.itemImageFallback}>
-                    <Icon name="image" size={20} color={COLORS.gray} />
-                  </View>
-                )}
+          {order.items?.map((item, i) => (
+            <View key={item.id} style={[styles.itemRow, i === order.items!.length - 1 && { borderBottomWidth: 0 }]}>
+              <View style={styles.itemImgWrap}>
+                {item.image_url
+                  ? <Image source={{ uri: item.image_url }} style={styles.itemImg} />
+                  : <View style={styles.itemImgFallback}><Icon name="image" size={20} color={COLORS.gray} /></View>
+                }
               </View>
-              <View style={styles.itemInfo}>
+              <View style={styles.itemMeta}>
                 <Text style={styles.itemName} numberOfLines={2}>{item.product_title}</Text>
-                <Text style={styles.itemVariant}>{item.variant_name}</Text>
-                <View style={styles.itemPriceQty}>
-                  <Text style={styles.itemQty}>Qty: {item.quantity}</Text>
+                {item.variant_name ? <Text style={styles.itemVariant}>{item.variant_name}</Text> : null}
+                <View style={styles.itemFooter}>
+                  <Text style={styles.itemQty}>Qty {item.quantity}</Text>
                   <Text style={styles.itemPrice}>₹{item.price.toFixed(2)}</Text>
                 </View>
               </View>
@@ -270,96 +288,156 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
           ))}
         </View>
 
-        {/* Payment & Shipping Info */}
+        {/* ── Delivery Address ── */}
         <View style={styles.card}>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Payment Method</Text>
-              <Text style={styles.infoValue}>{(order.payment_method || 'N/A').toUpperCase()}</Text>
-              <Text style={[styles.infoStatus, { color: order.payment_status === 'paid' ? '#10B981' : '#F59E0B' }]}>
-                {(order.payment_status || 'unpaid').toUpperCase()}
-              </Text>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconWrap}>
+              <Icon name="map-pin" size={16} color={COLORS.primary} />
             </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Shipping Method</Text>
-              <Text style={styles.infoValue}>{(order.shipping_method || 'Standard').toUpperCase()}</Text>
+            <Text style={styles.sectionTitle}>Delivery Address</Text>
+          </View>
+          <View style={styles.addressBlock}>
+            <Text style={styles.addrName}>{order.shipping_address?.full_name}</Text>
+            <Text style={styles.addrText}>
+              {[
+                order.shipping_address?.address_line_1,
+                order.shipping_address?.address_line_2,
+                order.shipping_address?.city,
+                order.shipping_address?.state,
+                order.shipping_address?.postal_code,
+              ].filter(Boolean).join(', ')}
+            </Text>
+            <View style={styles.addrPhone}>
+              <Icon name="phone" size={12} color={COLORS.gray} />
+              <Text style={styles.addrPhoneText}>{order.shipping_address?.phone_number}</Text>
             </View>
           </View>
         </View>
 
-        {/* Billing Summary */}
+        {/* ── Payment & Shipping ── */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardIconWrap}>
+              <Icon name="credit-card" size={16} color={COLORS.primary} />
+            </View>
+            <Text style={styles.sectionTitle}>Payment & Shipping</Text>
+          </View>
+          <View style={styles.infoGrid}>
+            <View style={styles.infoCell}>
+              <Text style={styles.infoCellLabel}>Payment</Text>
+              <Text style={styles.infoCellValue}>{(order.payment_method || 'N/A').toUpperCase()}</Text>
+              <View style={[styles.payStatusDot, { backgroundColor: order.payment_status === 'paid' ? '#10B981' : '#F59E0B' }]}>
+                <Text style={styles.payStatusText}>{(order.payment_status || 'unpaid').toUpperCase()}</Text>
+              </View>
+            </View>
+            <View style={styles.infoSeparator} />
+            <View style={styles.infoCell}>
+              <Text style={styles.infoCellLabel}>Shipping</Text>
+              <Text style={styles.infoCellValue}>{(order.shipping_method || 'Standard').toUpperCase()}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ── Summary ── */}
         <View style={[styles.card, styles.summaryCard]}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>₹{order.subtotal.toFixed(2)}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Shipping</Text>
-            <Text style={styles.summaryValue}>₹{order.shipping_total.toFixed(2)}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tax</Text>
-            <Text style={styles.summaryValue}>₹{order.tax.toFixed(2)}</Text>
-          </View>
+          <Text style={[styles.sectionTitle, { color: '#F9FAFB', marginBottom: SPACING.md }]}>Order Summary</Text>
+          {[
+            { label: 'Subtotal', value: order.subtotal },
+            { label: 'Shipping', value: order.shipping_total },
+            { label: 'Tax', value: order.tax },
+          ].map(row => (
+            <View key={row.label} style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>{row.label}</Text>
+              <Text style={styles.summaryValue}>₹{row.value.toFixed(2)}</Text>
+            </View>
+          ))}
           {order.discount_total > 0 && (
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Discount</Text>
-              <Text style={[styles.summaryValue, { color: '#10B981' }]}>-₹{order.discount_total.toFixed(2)}</Text>
+              <Text style={[styles.summaryValue, { color: '#34D399' }]}>-₹{order.discount_total.toFixed(2)}</Text>
             </View>
           )}
-          <View style={styles.totalDivider} />
+          <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Total Amount</Text>
+            <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>₹{order.total.toFixed(2)}</Text>
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.actionContainer}>
-          {(order.status === 'pending' || order.status === 'processing') && (
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.cancelButton]} 
-              onPress={() => setShowCancelModal(true)}
-            >
-              <Icon name="x-circle" size={20} color={COLORS.error} />
-              <Text style={styles.cancelButtonText}>Cancel Order</Text>
-            </TouchableOpacity>
-          )}
-
-          {order.status === 'completed' && (
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.returnButton]} 
-              onPress={() => setShowReturnModal(true)}
-            >
-              <Icon name="rotate-ccw" size={20} color={COLORS.primary} />
-              <Text style={styles.returnButtonText}>Return Order</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {/* ── Action Buttons ── */}
+        {(canCancel(order.status) || canReturn(order.status)) && (
+          <View style={styles.actionsSection}>
+            <Text style={styles.actionsSectionTitle}>Actions</Text>
+            {canCancel(order.status) && (
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCancelModal(true)}>
+                <Icon name="x-circle" size={18} color="#EF4444" />
+                <View style={styles.actionBtnText}>
+                  <Text style={styles.cancelBtnLabel}>Cancel Order</Text>
+                  <Text style={styles.actionBtnSub}>Request order cancellation</Text>
+                </View>
+                <Icon name="chevron-right" size={18} color="#EF4444" />
+              </TouchableOpacity>
+            )}
+            {canReturn(order.status) && (
+              <TouchableOpacity style={styles.returnBtn} onPress={() => setShowReturnModal(true)}>
+                <Icon name="rotate-ccw" size={18} color={COLORS.primary} />
+                <View style={styles.actionBtnText}>
+                  <Text style={styles.returnBtnLabel}>Return Order</Text>
+                  <Text style={styles.actionBtnSub}>Request a return or refund</Text>
+                </View>
+                <Icon name="chevron-right" size={18} color={COLORS.primary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* Cancel Modal */}
+      {/* ════════════════════════════════════════════════════════════
+          CANCEL MODAL
+      ═══════════════════════════════════════════════════════════════ */}
       <Modal visible={showCancelModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Cancel Order</Text>
-            <Text style={styles.modalLabel}>Reason for cancellation</Text>
-            <View style={styles.reasonOptions}>
-              {['changed_mind', 'found_cheaper', 'delivery_delayed', 'wrong_items'].map(reason => (
-                <TouchableOpacity 
-                  key={reason}
-                  style={[styles.reasonChip, cancelReason === reason && styles.reasonChipActive]}
-                  onPress={() => setCancelReason(reason)}
-                >
-                  <Text style={[styles.reasonChipText, cancelReason === reason && styles.reasonChipTextActive]}>
-                    {reason.replace('_', ' ').toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+        <View style={styles.sheetOverlay}>
+          <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={() => setShowCancelModal(false)} />
+          <View style={styles.sheet}>
+            {/* Handle */}
+            <View style={styles.sheetHandle} />
+
+            {/* Header */}
+            <View style={styles.sheetHeader}>
+              <View style={[styles.sheetIconCircle, { backgroundColor: '#FEE2E2' }]}>
+                <Icon name="x-circle" size={22} color="#EF4444" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.sheetTitle}>Cancel Order</Text>
+                <Text style={styles.sheetSub}>Order #{order.order_number}</Text>
+              </View>
             </View>
-            <TextInput 
+
+            <View style={styles.sheetDivider} />
+
+            {/* Reasons */}
+            <Text style={styles.sheetLabel}>Why are you cancelling?</Text>
+            {CANCEL_REASONS.map(r => (
+              <TouchableOpacity
+                key={r.value}
+                style={[styles.reasonRow, cancelReason === r.value && styles.reasonRowActive]}
+                onPress={() => setCancelReason(r.value)}
+              >
+                <View style={[styles.reasonIcon, cancelReason === r.value && styles.reasonIconActive]}>
+                  <Icon name={r.icon as any} size={14} color={cancelReason === r.value ? COLORS.background : COLORS.textSecondary} />
+                </View>
+                <Text style={[styles.reasonLabel, cancelReason === r.value && styles.reasonLabelActive]}>
+                  {r.label}
+                </Text>
+                <View style={[styles.radioOuter, cancelReason === r.value && styles.radioOuterActive]}>
+                  {cancelReason === r.value && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            ))}
+
+            <TextInput
               style={styles.textInput}
               placeholder="Additional comments (optional)"
               placeholderTextColor="#9CA3AF"
@@ -367,88 +445,132 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({ orderId,
               value={cancelComments}
               onChangeText={setCancelComments}
             />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalButtonSecondary} onPress={() => setShowCancelModal(false)}>
-                <Text style={styles.modalButtonSecondaryText}>Close</Text>
+
+            {/* Buttons */}
+            <View style={styles.sheetBtns}>
+              <TouchableOpacity style={styles.sheetBtnSecondary} onPress={() => setShowCancelModal(false)}>
+                <Text style={styles.sheetBtnSecondaryText}>Keep Order</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalButtonPrimary, styles.cancelSubmitButton]} 
+              <TouchableOpacity
+                style={[styles.sheetBtnPrimary, styles.sheetBtnDanger]}
                 onPress={handleCancelOrder}
                 disabled={isActionLoading}
               >
-                {isActionLoading ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.modalButtonPrimaryText}>Confirm Cancellation</Text>}
+                {isActionLoading
+                  ? <ActivityIndicator size="small" color="#FFF" />
+                  : <Text style={styles.sheetBtnPrimaryText}>Confirm Cancellation</Text>
+                }
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Return Modal */}
+      {/* ════════════════════════════════════════════════════════════
+          RETURN MODAL
+      ═══════════════════════════════════════════════════════════════ */}
       <Modal visible={showReturnModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Return Order</Text>
-            <Text style={styles.modalDescription}>You are requesting a return for all items in this order.</Text>
-            
-            <Text style={styles.modalLabel}>Preferred Resolution</Text>
-            <View style={styles.reasonOptions}>
-              {['refund', 'replacement', 'repair'].map(res => (
-                <TouchableOpacity 
-                  key={res}
-                  style={[styles.reasonChip, returnResolution === res && styles.reasonChipActive]}
-                  onPress={() => setReturnResolution(res)}
+        <View style={styles.sheetOverlay}>
+          <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={() => setShowReturnModal(false)} />
+          <ScrollView style={styles.sheetScroll} contentContainerStyle={styles.sheetScrollContent} keyboardShouldPersistTaps="handled">
+            <View style={styles.sheet}>
+              <View style={styles.sheetHandle} />
+
+              <View style={styles.sheetHeader}>
+                <View style={[styles.sheetIconCircle, { backgroundColor: 'rgba(237,119,69,0.12)' }]}>
+                  <Icon name="rotate-ccw" size={22} color={COLORS.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sheetTitle}>Return Order</Text>
+                  <Text style={styles.sheetSub}>Order #{order.order_number}</Text>
+                </View>
+              </View>
+
+              <View style={styles.sheetDivider} />
+
+              {/* Return reasons */}
+              <Text style={styles.sheetLabel}>Reason for return</Text>
+              <View style={styles.chipGrid}>
+                {RETURN_REASONS.map(r => (
+                  <TouchableOpacity
+                    key={r.value}
+                    style={[styles.chip, returnReason === r.value && styles.chipActive]}
+                    onPress={() => setReturnReason(r.value)}
+                  >
+                    <Icon name={r.icon as any} size={12} color={returnReason === r.value ? COLORS.primary : COLORS.textSecondary} />
+                    <Text style={[styles.chipText, returnReason === r.value && styles.chipTextActive]}>
+                      {r.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Refund method */}
+              <Text style={[styles.sheetLabel, { marginTop: SPACING.md }]}>Preferred refund method</Text>
+              {REFUND_METHODS.map(m => (
+                <TouchableOpacity
+                  key={m.value}
+                  style={[styles.refundMethodRow, refundMethod === m.value && styles.refundMethodRowActive]}
+                  onPress={() => setRefundMethod(m.value)}
                 >
-                  <Text style={[styles.reasonChipText, returnResolution === res && styles.reasonChipTextActive]}>
-                    {res.toUpperCase()}
-                  </Text>
+                  <View style={[styles.refundIcon, refundMethod === m.value && styles.refundIconActive]}>
+                    <Icon name={m.icon as any} size={16} color={refundMethod === m.value ? COLORS.background : COLORS.textSecondary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.refundMethodLabel, refundMethod === m.value && styles.refundMethodLabelActive]}>
+                      {m.label}
+                    </Text>
+                    <Text style={styles.refundMethodDesc}>{m.desc}</Text>
+                  </View>
+                  <View style={[styles.radioOuter, refundMethod === m.value && styles.radioOuterActive]}>
+                    {refundMethod === m.value && <View style={styles.radioInner} />}
+                  </View>
                 </TouchableOpacity>
               ))}
-            </View>
 
-            <TextInput 
-              style={styles.textInput}
-              placeholder="Why are you returning? (e.g. Defective, Wrong item)"
-              placeholderTextColor="#9CA3AF"
-              multiline
-              value={returnComments}
-              onChangeText={setReturnComments}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalButtonSecondary} onPress={() => setShowReturnModal(false)}>
-                <Text style={styles.modalButtonSecondaryText}>Close</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.modalButtonPrimary} 
-                onPress={handleReturnOrder}
-                disabled={isActionLoading}
-              >
-                {isActionLoading ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.modalButtonPrimaryText}>Submit Request</Text>}
-              </TouchableOpacity>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Describe the issue in detail…"
+                placeholderTextColor="#9CA3AF"
+                multiline
+                value={returnComments}
+                onChangeText={setReturnComments}
+              />
+
+              <View style={styles.sheetBtns}>
+                <TouchableOpacity style={styles.sheetBtnSecondary} onPress={() => setShowReturnModal(false)}>
+                  <Text style={styles.sheetBtnSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.sheetBtnPrimary}
+                  onPress={handleReturnOrder}
+                  disabled={isActionLoading}
+                >
+                  {isActionLoading
+                    ? <ActivityIndicator size="small" color="#FFF" />
+                    : <Text style={styles.sheetBtnPrimaryText}>Submit Return</Text>
+                  }
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </SafeAreaView>
   );
 };
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollContent: {
-    padding: SPACING.lg,
-  },
+  wrapper: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: '#F7F8FA' },
+  scrollContent: { padding: SPACING.lg, paddingTop: SPACING.md },
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  loadingText: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary },
+  emptyText: { fontSize: FONT_SIZES.md, color: COLORS.textSecondary, marginTop: SPACING.sm },
+
+  // Card
   card: {
     backgroundColor: COLORS.background,
     borderRadius: 20,
@@ -460,305 +582,178 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
-  statusHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: SPACING.md },
+  cardIconWrap: {
+    width: 32, height: 32, borderRadius: 10,
+    backgroundColor: 'rgba(237,119,69,0.1)',
+    justifyContent: 'center', alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: '#111827',
+  sectionTitle: { fontSize: 15, fontFamily: getFontFamily('bold'), fontWeight: FONT_WEIGHTS.bold, color: '#111827' },
+
+  // Status row
+  statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING.md },
+  dateText: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusLabel: { fontSize: 11, fontWeight: FONT_WEIGHTS.bold },
+
+  // Quick actions
+  quickActions: { flexDirection: 'row', gap: SPACING.sm, flexWrap: 'wrap' },
+  quickBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingVertical: 7, paddingHorizontal: 12, borderRadius: 10,
+    backgroundColor: 'rgba(237,119,69,0.08)', borderWidth: 1, borderColor: 'rgba(237,119,69,0.2)',
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  orderDate: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginBottom: SPACING.md,
-  },
-  invoiceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: 'rgba(237, 119, 69, 0.08)',
-    alignSelf: 'flex-start',
-    gap: 6,
-  },
-  invoiceButtonText: {
-    fontSize: 13,
-    fontWeight: FONT_WEIGHTS.semiBold,
-    color: COLORS.primary,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: SPACING.md,
-  },
-  addressContainer: {
-    paddingLeft: 30,
-  },
-  nameText: {
-    fontSize: 15,
-    fontWeight: FONT_WEIGHTS.semiBold,
-    color: '#111827',
-    marginBottom: 4,
-  },
-  addressText: {
-    fontSize: 14,
-    color: '#4B5563',
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  phoneText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
+  quickBtnText: { fontSize: 12, fontWeight: FONT_WEIGHTS.semiBold, color: COLORS.primary },
+
+  // Items
   itemRow: {
-    flexDirection: 'row',
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    gap: 12,
+    flexDirection: 'row', paddingVertical: SPACING.md,
+    borderBottomWidth: 1, borderBottomColor: '#F3F4F6', gap: 12,
   },
-  itemImageContainer: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
+  itemImgWrap: { width: 70, height: 70, borderRadius: 12, backgroundColor: '#F3F4F6', overflow: 'hidden' },
+  itemImg: { width: '100%', height: '100%', resizeMode: 'cover' },
+  itemImgFallback: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  itemMeta: { flex: 1, justifyContent: 'center' },
+  itemName: { fontSize: 13, fontWeight: FONT_WEIGHTS.semiBold, color: '#111827', marginBottom: 2 },
+  itemVariant: { fontSize: 11, color: COLORS.textSecondary, marginBottom: 6 },
+  itemFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  itemQty: { fontSize: 12, color: '#6B7280', backgroundColor: '#F3F4F6', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  itemPrice: { fontSize: 14, fontWeight: FONT_WEIGHTS.bold, color: COLORS.primary },
+
+  // Address
+  addressBlock: { paddingLeft: 4 },
+  addrName: { fontSize: 14, fontWeight: FONT_WEIGHTS.semiBold, color: '#111827', marginBottom: 4 },
+  addrText: { fontSize: 13, color: '#4B5563', lineHeight: 20, marginBottom: 6 },
+  addrPhone: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  addrPhoneText: { fontSize: 13, color: COLORS.textSecondary },
+
+  // Info grid
+  infoGrid: { flexDirection: 'row', alignItems: 'center' },
+  infoCell: { flex: 1 },
+  infoCellLabel: { fontSize: 11, color: COLORS.textSecondary, marginBottom: 4 },
+  infoCellValue: { fontSize: 14, fontWeight: FONT_WEIGHTS.semiBold, color: '#111827', marginBottom: 4 },
+  payStatusDot: { borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, alignSelf: 'flex-start' },
+  payStatusText: { fontSize: 9, fontWeight: FONT_WEIGHTS.bold, color: '#FFF' },
+  infoSeparator: { width: 1, height: 40, backgroundColor: '#F3F4F6', marginHorizontal: SPACING.md },
+
+  // Summary
+  summaryCard: { backgroundColor: '#111827' },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  summaryLabel: { fontSize: 13, color: '#9CA3AF' },
+  summaryValue: { fontSize: 13, fontWeight: FONT_WEIGHTS.medium, color: '#E5E7EB' },
+  summaryDivider: { height: 1, backgroundColor: '#374151', marginVertical: 12 },
+  totalLabel: { fontSize: 16, fontWeight: FONT_WEIGHTS.bold, color: '#F9FAFB' },
+  totalValue: { fontSize: 18, fontWeight: FONT_WEIGHTS.bold, color: COLORS.primary },
+
+  // Action section
+  actionsSection: { marginTop: SPACING.xs },
+  actionsSectionTitle: { fontSize: 13, color: COLORS.textSecondary, fontWeight: FONT_WEIGHTS.semiBold, marginBottom: SPACING.sm, marginLeft: 2 },
+  cancelBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    padding: SPACING.md, borderRadius: 16, marginBottom: SPACING.sm,
+    backgroundColor: '#FFF5F5', borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)',
   },
-  itemImage: {
-    width: '100%',
-    height: '100%',
+  returnBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    padding: SPACING.md, borderRadius: 16, marginBottom: SPACING.sm,
+    backgroundColor: 'rgba(237,119,69,0.06)', borderWidth: 1, borderColor: 'rgba(237,119,69,0.2)',
   },
-  itemImageFallback: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  actionBtnText: { flex: 1 },
+  cancelBtnLabel: { fontSize: 14, fontWeight: FONT_WEIGHTS.bold, color: '#EF4444' },
+  returnBtnLabel: { fontSize: 14, fontWeight: FONT_WEIGHTS.bold, color: COLORS.primary },
+  actionBtnSub: { fontSize: 11, color: COLORS.textSecondary, marginTop: 1 },
+
+  // ─── Bottom Sheet ─────────────────────────────────────────────────────────
+  sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheetScroll: { maxHeight: '90%' },
+  sheetScrollContent: { justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: COLORS.background, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: SPACING.xl, paddingBottom: 36,
   },
-  itemInfo: {
-    flex: 1,
-    justifyContent: 'center',
+  sheetHandle: {
+    width: 40, height: 4, borderRadius: 2,
+    backgroundColor: '#E5E7EB', alignSelf: 'center', marginBottom: SPACING.lg,
   },
-  itemName: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.semiBold,
-    color: '#111827',
-    marginBottom: 2,
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: SPACING.md },
+  sheetIconCircle: { width: 48, height: 48, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  sheetTitle: { fontSize: 18, fontWeight: FONT_WEIGHTS.bold, color: '#111827' },
+  sheetSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  sheetDivider: { height: 1, backgroundColor: '#F3F4F6', marginBottom: SPACING.lg },
+  sheetLabel: { fontSize: 13, fontWeight: FONT_WEIGHTS.semiBold, color: '#4B5563', marginBottom: SPACING.sm },
+
+  // Reason rows (for cancel)
+  reasonRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 12, paddingHorizontal: 14, borderRadius: 14, marginBottom: 8,
+    backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#F3F4F6',
   },
-  itemVariant: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 6,
+  reasonRowActive: { backgroundColor: 'rgba(237,119,69,0.06)', borderColor: 'rgba(237,119,69,0.4)' },
+  reasonIcon: {
+    width: 30, height: 30, borderRadius: 10,
+    backgroundColor: '#F3F4F6', justifyContent: 'center', alignItems: 'center',
   },
-  itemPriceQty: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  reasonIconActive: { backgroundColor: COLORS.primary },
+  reasonLabel: { flex: 1, fontSize: 13, fontWeight: FONT_WEIGHTS.medium, color: '#374151' },
+  reasonLabelActive: { color: COLORS.primary, fontWeight: FONT_WEIGHTS.semiBold },
+
+  // Chip grid (for return reasons)
+  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: SPACING.sm },
+  chip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20,
+    backgroundColor: '#F3F4F6', borderWidth: 1.5, borderColor: '#E5E7EB',
   },
-  itemQty: {
-    fontSize: 13,
-    color: '#4B5563',
+  chipActive: { backgroundColor: 'rgba(237,119,69,0.08)', borderColor: COLORS.primary },
+  chipText: { fontSize: 11, fontWeight: FONT_WEIGHTS.semiBold, color: '#6B7280' },
+  chipTextActive: { color: COLORS.primary },
+
+  // Refund method rows
+  refundMethodRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    padding: SPACING.md, borderRadius: 14, marginBottom: 8,
+    backgroundColor: '#F9FAFB', borderWidth: 1.5, borderColor: '#F3F4F6',
   },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
+  refundMethodRowActive: { backgroundColor: 'rgba(237,119,69,0.06)', borderColor: COLORS.primary },
+  refundIcon: {
+    width: 38, height: 38, borderRadius: 12,
+    backgroundColor: '#E5E7EB', justifyContent: 'center', alignItems: 'center',
   },
-  infoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  refundIconActive: { backgroundColor: COLORS.primary },
+  refundMethodLabel: { fontSize: 13, fontWeight: FONT_WEIGHTS.semiBold, color: '#111827' },
+  refundMethodLabelActive: { color: COLORS.primary },
+  refundMethodDesc: { fontSize: 11, color: COLORS.textSecondary, marginTop: 1 },
+
+  // Radio button
+  radioOuter: {
+    width: 20, height: 20, borderRadius: 10,
+    borderWidth: 2, borderColor: '#D1D5DB',
+    justifyContent: 'center', alignItems: 'center',
   },
-  infoItem: {
-    width: '50%',
-    marginBottom: SPACING.sm,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.semiBold,
-    color: '#111827',
-  },
-  infoStatus: {
-    fontSize: 10,
-    fontWeight: FONT_WEIGHTS.bold,
-    marginTop: 2,
-  },
-  summaryCard: {
-    backgroundColor: '#111827',
-    paddingVertical: SPACING.xl,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: '#9CA3AF',
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.medium,
-    color: '#FFFFFF',
-  },
-  totalDivider: {
-    height: 1,
-    backgroundColor: '#374151',
-    marginVertical: 12,
-  },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: '#FFFFFF',
-  },
-  totalValue: {
-    fontSize: 20,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.primary,
-  },
-  actionContainer: {
-    marginTop: SPACING.md,
-    gap: SPACING.md,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: SPACING.md,
-    borderRadius: 16,
-    borderWidth: 1,
-    gap: 8,
-  },
-  cancelButton: {
-    borderColor: COLORS.error,
-    backgroundColor: 'rgba(239, 68, 68, 0.05)',
-  },
-  cancelButtonText: {
-    color: COLORS.error,
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  returnButton: {
-    borderColor: COLORS.primary,
-    backgroundColor: 'rgba(237, 119, 69, 0.05)',
-  },
-  returnButtonText: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: SPACING.xl,
-  },
-  modalContent: {
-    backgroundColor: COLORS.background,
-    borderRadius: 24,
-    padding: SPACING.xl,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: '#111827',
-    marginBottom: SPACING.sm,
-  },
-  modalDescription: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: SPACING.md,
-  },
-  modalLabel: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.semiBold,
-    color: '#4B5563',
-    marginBottom: SPACING.sm,
-  },
-  reasonOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: SPACING.md,
-  },
-  reasonChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: '#F3F4F6',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  reasonChipActive: {
-    backgroundColor: 'rgba(237, 119, 69, 0.1)',
-    borderColor: COLORS.primary,
-  },
-  reasonChipText: {
-    fontSize: 11,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: '#6B7280',
-  },
-  reasonChipTextActive: {
-    color: COLORS.primary,
-  },
+  radioOuterActive: { borderColor: COLORS.primary },
+  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.primary },
+
+  // Text input
   textInput: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    padding: SPACING.md,
-    height: 100,
-    textAlignVertical: 'top',
-    color: '#111827',
-    fontSize: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: SPACING.lg,
+    backgroundColor: '#F9FAFB', borderRadius: 14,
+    padding: SPACING.md, height: 90,
+    textAlignVertical: 'top', color: '#111827',
+    fontSize: 13, borderWidth: 1.5, borderColor: '#E5E7EB',
+    marginTop: SPACING.md, marginBottom: SPACING.lg,
   },
-  modalButtons: {
-    flexDirection: 'row',
-    gap: SPACING.md,
+
+  // Sheet buttons
+  sheetBtns: { flexDirection: 'row', gap: SPACING.sm },
+  sheetBtnSecondary: {
+    flex: 1, paddingVertical: 14, borderRadius: 14,
+    backgroundColor: '#F3F4F6', alignItems: 'center',
   },
-  modalButtonSecondary: {
-    flex: 1,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
+  sheetBtnSecondaryText: { fontSize: 14, fontWeight: FONT_WEIGHTS.bold, color: '#374151' },
+  sheetBtnPrimary: {
+    flex: 2, paddingVertical: 14, borderRadius: 14,
+    backgroundColor: COLORS.primary, alignItems: 'center',
   },
-  modalButtonSecondaryText: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: '#4B5563',
-  },
-  modalButtonPrimary: {
-    flex: 2,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-  },
-  cancelSubmitButton: {
-    backgroundColor: COLORS.error,
-  },
-  modalButtonPrimaryText: {
-    fontSize: 14,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: '#FFFFFF',
-  },
+  sheetBtnDanger: { backgroundColor: '#EF4444' },
+  sheetBtnPrimaryText: { fontSize: 14, fontWeight: FONT_WEIGHTS.bold, color: '#FFF' },
 });
