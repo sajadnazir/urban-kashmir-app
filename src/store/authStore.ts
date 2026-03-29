@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../api';
 import { tokenStorage } from '../api/tokenStorage';
 import type { User, LoginCredentials, RegisterData } from '../types';
@@ -8,7 +10,7 @@ import type { User, LoginCredentials, RegisterData } from '../types';
  *
  * Orchestrates auth state via Zustand.
  * Token persistence is handled by `authService` + `tokenStorage`; this store
- * only keeps the in-memory representation for the UI layer.
+ * now persists the user object and authentication state using AsyncStorage.
  */
 
 interface AuthState {
@@ -26,67 +28,76 @@ interface AuthState {
   clearError: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
-  error: null,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
 
-  login: async (credentials) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await authService.login(credentials);
-      set({ user: response.user, isAuthenticated: true, isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Login failed',
-        isLoading: false,
-      });
-      throw error;
+      login: async (credentials) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.login(credentials);
+          set({ user: response.user, isAuthenticated: true, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Login failed',
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      register: async (data) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.register(data);
+          set({ user: response.user, isAuthenticated: true, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Registration failed',
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      /** Verify OTP and transition to authenticated state. */
+      loginWithOtp: async (phone: string, otp: string, name?: string, email?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.verifyOtp(phone, otp, name, email);
+          set({ user: response.user, isAuthenticated: true, isLoading: false });
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'OTP verification failed',
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      logout: async () => {
+        set({ isLoading: true });
+        try {
+          await authService.logout();
+          set({ user: null, isAuthenticated: false, isLoading: false, error: null });
+        } catch {
+          // Tokens are already cleared by authService; reset UI state regardless.
+          await tokenStorage.clearTokens();
+          set({ user: null, isAuthenticated: false, isLoading: false });
+        }
+      },
+
+      setUser: (user) => set({ user }),
+      clearError: () => set({ error: null }),
+    }),
+    {
+      name: 'auth-storage', // unique name for AsyncStorage
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
-  },
-
-  register: async (data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await authService.register(data);
-      set({ user: response.user, isAuthenticated: true, isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Registration failed',
-        isLoading: false,
-      });
-      throw error;
-    }
-  },
-
-  /** Verify OTP and transition to authenticated state. */
-  loginWithOtp: async (phone: string, otp: string, name?: string, email?: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await authService.verifyOtp(phone, otp, name, email);
-      set({ user: response.user, isAuthenticated: true, isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'OTP verification failed',
-        isLoading: false,
-      });
-      throw error;
-    }
-  },
-
-  logout: async () => {
-    set({ isLoading: true });
-    try {
-      await authService.logout();
-      set({ user: null, isAuthenticated: false, isLoading: false, error: null });
-    } catch {
-      // Tokens are already cleared by authService; reset UI state regardless.
-      await tokenStorage.clearTokens();
-      set({ user: null, isAuthenticated: false, isLoading: false });
-    }
-  },
-
-  setUser: (user) => set({ user }),
-  clearError: () => set({ error: null }),
-}));
+  )
+);

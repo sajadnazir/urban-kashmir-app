@@ -74,6 +74,11 @@ apiClient.interceptors.response.use(
 
     // Only attempt a token refresh on 401 and when we haven't already retried.
     if (error.response?.status !== 401 || originalRequest._retry) {
+      if (error.response?.data) {
+        const data = error.response.data as any;
+        const message = data.message || data.error || data.errors?.[0] || error.message;
+        error.message = message;
+      }
       return Promise.reject(error);
     }
 

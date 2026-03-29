@@ -20,29 +20,36 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-let _accessToken: string | null = null;
-let _refreshToken: string | null = null;
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const TOKEN_KEY = '@auth_token';
+const REFRESH_TOKEN_KEY = '@refresh_token';
 
 export const tokenStorage = {
   /** Persist both tokens (call after login / token refresh) */
-  saveTokens: async (accessToken: string, refreshToken: string): Promise<void> => {
-    _accessToken = accessToken;
-    _refreshToken = refreshToken;
+  saveTokens: async (accessToken?: string | null, refreshToken?: string | null): Promise<void> => {
+    const pairs: [string, string][] = [];
+    
+    if (accessToken) pairs.push([TOKEN_KEY, accessToken]);
+    if (refreshToken) pairs.push([REFRESH_TOKEN_KEY, refreshToken]);
+    
+    if (pairs.length > 0) {
+      await AsyncStorage.multiSet(pairs);
+    }
   },
 
   /** Return the current access token, or null when logged out */
   getAccessToken: async (): Promise<string | null> => {
-    return _accessToken;
+    return AsyncStorage.getItem(TOKEN_KEY);
   },
 
   /** Return the current refresh token, or null when logged out */
   getRefreshToken: async (): Promise<string | null> => {
-    return _refreshToken;
+    return AsyncStorage.getItem(REFRESH_TOKEN_KEY);
   },
 
   /** Clear all tokens on logout */
   clearTokens: async (): Promise<void> => {
-    _accessToken = null;
-    _refreshToken = null;
+    await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY]);
   },
 };

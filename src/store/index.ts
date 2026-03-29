@@ -9,3 +9,4 @@ export { useCartStore } from './cartStore';
 export { useBannerStore } from './bannerStore';
 export { useAddressStore } from './addressStore';
 export { useNotificationStore } from './notificationStore';
+export { useVendorStore } from './vendorStore';

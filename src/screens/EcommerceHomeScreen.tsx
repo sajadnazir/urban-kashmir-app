@@ -22,7 +22,16 @@ import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../con
 import { productService, categoryService, cartService, vendorService, bannerService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
 import type { Category } from '../api/services/categoryService';
-import { useUserStore, useAuthStore, useWishlistStore, useCartStore, useBannerStore, useAddressStore, useNotificationStore } from '../store';
+import {
+  useUserStore,
+  useAuthStore,
+  useWishlistStore,
+  useCartStore,
+  useBannerStore,
+  useAddressStore,
+  useNotificationStore,
+  useVendorStore,
+} from '../store';
 import { normalizeFont } from '../utils/responsive';
 
 interface EcommerceHomeScreenProps {
@@ -67,8 +76,7 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [stores, setStores] = useState<Store[]>([]);
-  const [isLoadingStores, setIsLoadingStores] = useState(false);
+  const { vendors: stores, isLoading: isLoadingStores, fetchVendors } = useVendorStore();
   const { banners: cachedBanners, setBanners: setCachedBanners } = useBannerStore();
   const [banners, setBanners] = useState<any[]>(cachedBanners.length > 0 ? cachedBanners : []);
 
@@ -139,14 +147,14 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
     }
   };
 
-  const handleBannerPress = (item: any) => {
+  const handleBannerPress = (item: { action?: { type: string; id: string | number } }) => {
     if (item.action) {
       const { type, id } = item.action;
       if (type === 'product') {
         onProductPress?.({ id: String(id) } as Product);
       } else if (type === 'vendor') {
         // Find the vendor in the stores list to get the real slug
-        const vendor = stores.find(s => s.id === String(id));
+        const vendor = stores.find((s: Store) => s.id === String(id));
         if (vendor) {
           onStorePress?.(vendor);
         } else {
@@ -158,37 +166,6 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
       } else if (type === 'category') {
         setSelectedCategory(String(id));
       }
-    }
-  };
-
-  const fetchVendors = async () => {
-    setIsLoadingStores(true);
-    try {
-      const response = await vendorService.getVendors(1, 10);
-      const vendorArray = response.data || [];
-      
-      const organicFallbacks = [
-        'https://images.unsplash.com/photo-1584362917165-526a968579e8?q=80&w=400&auto=format&fit=crop', // Honey
-        'https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=400&auto=format&fit=crop', // Perfume
-        'https://images.unsplash.com/photo-1589135303604-b936d1ffbc90?q=80&w=400&auto=format&fit=crop', // Pickles/Jars
-        'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?q=80&w=400&auto=format&fit=crop', // Organic Food
-        'https://images.unsplash.com/photo-1596040033229-a9821ebd05ed?q=80&w=400&auto=format&fit=crop', // Spices
-      ];
-      
-      const mappedStores: Store[] = vendorArray.map((vendor: ApiVendor, index: number) => ({
-        id: String(vendor.id),
-        name: vendor.display_name || vendor.name,
-        slug: vendor.slug,
-        description: vendor.description || 'No description available',
-        image: vendor.banner_url || vendor.logo_url || organicFallbacks[index % organicFallbacks.length],
-        rating: Number(vendor.statistics?.avg_rating || 0),
-        productsCount: vendor.statistics?.total_products || 0,
-      }));
-      setStores(mappedStores);
-    } catch (error) {
-      console.error('Failed to fetch vendors:', error);
-    } finally {
-      setIsLoadingStores(false);
     }
   };
 
@@ -314,10 +291,17 @@ export const EcommerceHomeScreen: React.FC<EcommerceHomeScreenProps> = ({
   // Sample data (Banners / Stores) no longer needed for banners as they are fetched from API
 
   const handleRefresh = async () => {
-    fetchProducts(1);
+    await Promise.all([
+      fetchProducts(1),
+      fetchCategories(),
+      fetchVendors(true),
+      fetchBanners(),
+    ]);
     if (isAuthenticated) {
       fetchAddresses();
       fetchNotifications();
+      fetchWishlist();
+      fetchCartCount();
     }
   };
 
