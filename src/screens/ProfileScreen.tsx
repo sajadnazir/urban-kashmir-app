@@ -17,7 +17,7 @@ import {
   TabName,
   HeaderTwo,
 } from '../components';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants';
+import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily, APP_VERSION } from '../constants';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
 import { ActivityIndicator, Alert } from 'react-native';
@@ -44,11 +44,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   }, [fetchProfile]);
 
   const menuItems: ProfileMenuItemData[] = [
+    // {
+    //   id: 'profile',
+    //   icon: 'user',
+    //   title: 'Profile',
+    //   subtitle: 'Shopping, Email, Password, Shoe Size',
+    // },
     {
-      id: 'profile',
-      icon: 'user',
-      title: 'Profile',
-      subtitle: 'Shopping, Email, Password, Shoe Size',
+      id: 'orders',
+      icon: 'package',
+      title: 'My Orders',
+      subtitle: 'View your order history',
     },
   
     {
@@ -63,12 +69,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       title: 'My Wishlist',
       subtitle: 'Items You\'ve Saved',
     },
-    {
-      id: 'orders',
-      icon: 'package',
-      title: 'My Orders',
-      subtitle: 'View your order history',
-    },
+
     {
       id: 'support',
       icon: 'help-circle',
@@ -150,6 +151,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               email={profile?.email || profile?.mobile || ''}
               avatarUrl={profile?.avatar || "https://i.pravatar.cc/150?img=12"}
               onEditPress={onEditProfile}
+              version={APP_VERSION}
             />
 
           {/* Main Menu Items */}
@@ -179,6 +181,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </>
             )}
           </TouchableOpacity>
+          
 
             {/* Bottom spacing */}
             <View style={styles.bottomSpacer} />

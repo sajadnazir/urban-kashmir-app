@@ -2,7 +2,10 @@
  * App Constants
  */
 
+import DeviceInfo from 'react-native-device-info';
+
 export const APP_NAME = 'Urban Kashmir';
+export const APP_VERSION = DeviceInfo.getVersion();
 
 export const COLORS = {
   primary: '#ED7745', // Orange/Coral

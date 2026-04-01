@@ -8,6 +8,7 @@ interface ProfileHeaderProps {
   email: string;
   avatarUrl?: string;
   onEditPress?: () => void;
+  version?: string;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -15,9 +16,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   email,
   avatarUrl,
   onEditPress,
+  version,
 }) => {
   return (
     <View style={styles.container}>
+      {/* Version Tag */}
+      {version && (
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>v {version}</Text>
+        </View>
+      )}
+
       {/* Edit Button */}
       {onEditPress && (
         <TouchableOpacity
@@ -62,6 +71,21 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     marginBottom: SPACING.lg,
     position: 'relative',
+  },
+  versionContainer: {
+    position: 'absolute',
+    top: SPACING.md,
+    left: SPACING.md,
+    backgroundColor: COLORS.lightGray,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  versionText: {
+    fontSize: 10,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.gray,
+    letterSpacing: 0.5,
   },
   editButton: {
     position: 'absolute',

@@ -65,7 +65,7 @@ npx react-native link
 
 After linking, verify in Xcode:
 
-1. Open `ios/UrbanKashmirRN.xcworkspace` in Xcode
+1. Open `ios/UrbanKashmir.xcworkspace` in Xcode
 2. Check that fonts are in "Copy Bundle Resources"
 3. Verify `Info.plist` contains font entries:
 
