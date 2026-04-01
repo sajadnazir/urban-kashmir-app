@@ -438,6 +438,7 @@ function App(): React.JSX.Element {
             onProductPress={handleProductPress}
             onTabPress={handleTabPress}
             onRequireAuth={handleRequireAuth}
+            onReelPress={() => navigate('reelsPlayer')}
           />
         );
       case 'reelsPlayer':

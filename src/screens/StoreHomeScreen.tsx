@@ -19,11 +19,44 @@ import {
   Product,
   BottomNavigation,
   TabName,
+  ReelCard,
+  Reel,
 } from '../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS, getFontFamily } from '../constants';
 import { vendorService, productService, cartService } from '../api';
 import type { ApiVendor } from '../api/services/vendorService';
 import { useAuthStore, useCartStore } from '../store';
+
+const STATIC_REELS: Reel[] = [
+  {
+    id: '1',
+    thumbnail: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
+    title: 'Autumn Collection Showcases',
+    views: '12K',
+    duration: '0:15',
+  },
+  {
+    id: '2',
+    thumbnail: 'https://images.unsplash.com/photo-1583071299210-c6c113f4cb91?w=400',
+    title: 'Behind the Scenes: Handcrafting',
+    views: '8.5K',
+    duration: '0:30',
+  },
+  {
+    id: '3',
+    thumbnail: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400',
+    title: 'New Arrivals: Winter Essentials',
+    views: '15K',
+    duration: '0:20',
+  },
+  {
+    id: '4',
+    thumbnail: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400',
+    title: 'Store Tour: Our Kashmir Outlet',
+    views: '5.2K',
+    duration: '0:45',
+  },
+];
 
 interface StoreHomeScreenProps {
   vendorSlug: string;
@@ -31,6 +64,7 @@ interface StoreHomeScreenProps {
   onProductPress?: (product: Product) => void;
   onTabPress?: (tab: TabName) => void;
   onRequireAuth?: () => void;
+  onReelPress?: (reel: Reel) => void;
 }
 
 export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
@@ -39,6 +73,7 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
   onProductPress,
   onTabPress,
   onRequireAuth,
+  onReelPress,
 }) => {
   const { isAuthenticated } = useAuthStore();
   const { fetchCartCount } = useCartStore();
@@ -136,6 +171,24 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
     }
   };
 
+  const renderReelsSection = () => (
+    <View style={styles.reelsSection}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Store Reels</Text>
+      </View>
+      <FlatList
+        data={STATIC_REELS}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.reelsList}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <ReelCard reel={item} onPress={onReelPress || (() => {})} />
+        )}
+      />
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.wrapper}>
       <StatusBar
@@ -200,6 +253,9 @@ export const StoreHomeScreen: React.FC<StoreHomeScreenProps> = ({
                     onSelectCategory={setSelectedCategory}
                   />
                 </View>
+
+                {/* Reels Section */}
+                {renderReelsSection()}
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Products</Text>
@@ -331,6 +387,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: FONT_SIZES.md,
     color: COLORS.gray,
+  },
+  reelsSection: {
+    marginBottom: SPACING.lg,
+  },
+  reelsList: {
+    paddingHorizontal: SPACING.md,
   },
   bottomSpacer: {
     height: 20,
