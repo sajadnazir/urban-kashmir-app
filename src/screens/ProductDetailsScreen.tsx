@@ -213,6 +213,50 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
     );
   }
 
+  const renderPolicySection = () => {
+    if (!product?.return_policy && !product?.cancellation_policy) return null;
+
+    return (
+      <View style={styles.policySection}>
+        <Text style={styles.policySectionTitle}>Shop with Confidence</Text>
+        
+        {product.return_policy && (
+          <View style={styles.policyCard}>
+            <View style={[styles.policyIconContainer, { backgroundColor: '#E8F5E9' }]}>
+              <Icon name="refresh-cw" size={18} color="#2E7D32" />
+            </View>
+            <View style={styles.policyTextContainer}>
+              <View style={styles.policyHeader}>
+                <Text style={styles.policyName}>{product.return_policy.name}</Text>
+                {product?.return_policy?.return_window_days > 0 && (
+                  <View style={styles.policyBadge}>
+                    <Text style={styles.policyBadgeText}>{product?.return_policy?.return_window_days} Days</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.policyDescription}>{product?.return_policy?.description}</Text>
+              {/* <Text style={styles.policyNote}>
+                Shipping paid by: <Text style={{ fontWeight: '600', textTransform: 'capitalize' }}>{product.return_policy.return_shipping_paid_by}</Text>
+              </Text> */}
+            </View>
+          </View>
+        )}
+
+        {product?.cancellation_policy && (
+          <View style={styles.policyCard}>
+            <View style={[styles.policyIconContainer, { backgroundColor: '#FFF3E0' }]}>
+              <Icon name="x-circle" size={18} color="#EF6C00" />
+            </View>
+            <View style={styles.policyTextContainer}>
+              <Text style={styles.policyName}>{product?.cancellation_policy?.name}</Text>
+              <Text style={styles.policyDescription}>{product?.cancellation_policy?.description}</Text>
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   const images = product.images && product.images.length > 0 ? product.images : [];
   const sizes = product.variants?.map(v => ({ id: v.name, label: v.name })) || [];
 
@@ -375,13 +419,16 @@ export const ProductDetailsScreen: React.FC<ProductDetailsScreenProps> = ({
                     <Text style={styles.shippingRowLabel}>Free Shipping</Text>
                   </View>
                   <View style={[styles.shippingBadge, styles.freeShippingBadge]}>
-                    <Text style={[styles.shippingBadgeText, styles.freeShippingText]}>
+                    <Text style={[styles.shippingBadgeText, styles.free_shipping_text]}>
                       On orders over ₹{product.shipping_info.free_shipping_threshold}
                     </Text>
                   </View>
                 </View>
               </View>
             )}
+
+            {/* Policies Section */}
+            {renderPolicySection()}
           </View>
         </ScrollView>
 
@@ -641,7 +688,71 @@ const styles = StyleSheet.create({
   freeShippingBadge: {
     backgroundColor: '#EDFFF5',
   },
-  freeShippingText: {
+  free_shipping_text: {
     color: '#1DB954',
+  },
+  policySection: {
+    marginTop: SPACING.lg,
+    padding: SPACING.md,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  policySectionTitle: {
+    fontSize: FONT_SIZES.md,
+    fontFamily: getFontFamily('bold'),
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  policyCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.md,
+  },
+  policyIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  policyTextContainer: {
+    flex: 1,
+  },
+  policyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: 2,
+  },
+  policyName: {
+    fontSize: FONT_SIZES.sm,
+    fontFamily: getFontFamily('bold'),
+    color: COLORS.text,
+  },
+  policyBadge: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  policyBadgeText: {
+    fontSize: 10,
+    color: '#2E7D32',
+    fontFamily: getFontFamily('bold'),
+  },
+  policyDescription: {
+    fontSize: FONT_SIZES.xs,
+    fontFamily: getFontFamily('regular'),
+    color: COLORS.textSecondary,
+    lineHeight: 16,
+  },
+  policyNote: {
+    fontSize: 10,
+    fontFamily: getFontFamily('medium'),
+    color: '#999',
+    marginTop: 4,
   },
 });

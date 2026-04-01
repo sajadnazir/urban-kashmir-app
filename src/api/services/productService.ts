@@ -46,6 +46,18 @@ export interface FullProduct extends Product {
     estimated_days: string;
     free_shipping_threshold: number;
   };
+  return_policy?: {
+    id: number;
+    name: string;
+    description: string;
+    return_window_days: number;
+    return_shipping_paid_by: string;
+  };
+  cancellation_policy?: {
+    id: number;
+    name: string;
+    description: string;
+  };
 }
 
 
@@ -212,6 +224,18 @@ export const productService = {
       category_id: apiProduct.category_id,
       slug: apiProduct.slug,
       shipping_info: response.shipping_info ?? undefined,
+      return_policy: apiProduct.return_policy ? {
+        id: apiProduct.return_policy.id,
+        name: apiProduct.return_policy.name,
+        description: apiProduct.return_policy.description,
+        return_window_days: apiProduct.return_policy.return_window_days,
+        return_shipping_paid_by: apiProduct.return_policy.return_shipping_paid_by,
+      } : undefined,
+      cancellation_policy: apiProduct.cancellation_policy ? {
+        id: apiProduct.cancellation_policy.id,
+        name: apiProduct.cancellation_policy.name,
+        description: apiProduct.cancellation_policy.description,
+      } : undefined,
     };
   },
 };
